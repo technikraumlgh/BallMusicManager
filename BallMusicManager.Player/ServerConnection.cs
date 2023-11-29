@@ -3,10 +3,11 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using BallMusicManager.Domain;
 
 namespace BallMusicManager.Player;
 internal static class ServerConnection {
-    private static readonly Song NoSong = new ("", MusicPlayer.Songs.Length, "Ende", "Niemand", "");
+    private static readonly Song NoSong = new ("", MusicPlayer.Playlist.Length, "Ende", "Niemand", "");
 
     static ServerConnection(){
         MusicPlayer.OnSongChanged += UpdateServer;

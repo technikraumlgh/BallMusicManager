@@ -79,7 +79,7 @@ public sealed partial class MainWindow : Window{
 
     private void UpdatePlaylistInfo()
     {
-        CurrentPlaylist.Text = $"{MusicPlayer.CurrentPlaylist} ({MusicPlayer.Songs.Length})";
+        CurrentPlaylist.Text = $"{MusicPlayer.CurrentPlaylist} ({MusicPlayer.Playlist.Length})";
     }
 
     private void Tick(object? sender, EventArgs args)
@@ -89,19 +89,19 @@ public sealed partial class MainWindow : Window{
 
     private void FixIndices(object sender, RoutedEventArgs args)
     {
-        for (var i = 0; i < MusicPlayer.Songs.Length; i++)
+        for (var i = 0; i < MusicPlayer.Playlist.Length; i++)
         {
-            var fileName = Path.GetFileName(MusicPlayer.Songs[i].Path);
+            var fileName = Path.GetFileName(MusicPlayer.Playlist[i].Path);
             var splitName = fileName.Split('_');
-            var directory = Path.GetDirectoryName(MusicPlayer.Songs[i].Path);
+            var directory = Path.GetDirectoryName(MusicPlayer.Playlist[i].Path);
             var idx = i + 1;
             if (!splitName[0].TryParse(out int idxFromFileName))
             {
                 if (splitName.Length < 3)
                 {
                     var targetPath = $"{directory}/{idx}_{fileName}";
-                    Trace.TraceInformation($"Moved {MusicPlayer.Songs[i].Path} to {targetPath}");
-                    File.Move(MusicPlayer.Songs[i].Path, targetPath);
+                    Trace.TraceInformation($"Moved {MusicPlayer.Playlist[i].Path} to {targetPath}");
+                    File.Move(MusicPlayer.Playlist[i].Path, targetPath);
                     continue;
                 }
             }
@@ -112,7 +112,7 @@ public sealed partial class MainWindow : Window{
                 fileName = splitName.Dump('_');
                 var targetPath = Path.Join(directory, fileName);
                 //Trace.TraceInformation($"Moved {MusicPlayer.Songs[i].Path} to {targetPath}");
-                File.Move(MusicPlayer.Songs[i].Path, targetPath);
+                File.Move(MusicPlayer.Playlist[i].Path, targetPath);
                 continue;
             }
         }
@@ -130,7 +130,7 @@ public sealed partial class MainWindow : Window{
         var row = (args.OriginalSource as DependencyObject)!.FindParent<DataGridRow>();
 
         if (row is null) return;
-        MusicPlayer.Set(Array.IndexOf(MusicPlayer.Songs, row.Item));
+        MusicPlayer.Set(Array.IndexOf(MusicPlayer.Playlist, row.Item));
     }
 
     private void OpenFromCSV(object sender, RoutedEventArgs e)

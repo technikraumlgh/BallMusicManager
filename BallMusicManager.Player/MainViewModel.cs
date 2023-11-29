@@ -1,5 +1,8 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
 using Ametrin.Utils.WPF;
+using BallMusicManager.Domain;
 
 namespace BallMusicManager.Player;
 
@@ -7,38 +10,32 @@ internal sealed class MainViewModel : ObservableObject{
     public static MainViewModel Instance = default!;
 
     private bool _HasPlaylist = false;
-    public bool HasPlaylist
-    {
+    public bool HasPlaylist{
         get => _HasPlaylist;
-        set
-        {
+        set{
             _HasPlaylist = value;
             OnPropertyChanged();
         }
     }
 
     private Visibility _ShowFixIndicesButton = Visibility.Collapsed;
-    public Visibility ShowFixIndicesButton
-    {
+    public Visibility ShowFixIndicesButton{
         get => _ShowFixIndicesButton;
-        set
-        {
+        set{
             _ShowFixIndicesButton = value;
             OnPropertyChanged();
         }
     }
 
-    public Song[] Songs => MusicPlayer.Songs;
+    public IEnumerable<Song> Songs => MusicPlayer.Playlist?.Songs ?? Enumerable.Empty<Song>();
 
-    public MainViewModel()
-    {
+    public MainViewModel(){
         Instance = this;
         MusicPlayer.OnPlaylistChanged += UpdateHasPlaylist;
     }
 
-    private void UpdateHasPlaylist()
-    {
-        HasPlaylist = MusicPlayer.CurrentPlaylist is not null;
+    private void UpdateHasPlaylist(){
+        HasPlaylist = MusicPlayer.Playlist is not null;
         OnPropertyChanged(nameof(Songs));
     }
 }
