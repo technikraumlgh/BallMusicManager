@@ -62,11 +62,11 @@
                     <TextBox x:Name="Host" HorizontalContentAlignment="Center">localhost</TextBox>
                     <PasswordBox x:Name="HostPW" HorizontalContentAlignment="Center"></PasswordBox>
                     <Button IsEnabled="{Binding HasPlaylist}" Click="UpdateServer">Update Server</Button>
-                    <Button Visibility="{Binding ShowFixIndicesButton}" Click="FixIndices">Fix Indices</Button>
+                    <!-- <Button Visibility="{Binding ShowFixIndicesButton}" Click="FixIndices">Fix Indices</Button> -->
                 </StackPanel>
             </DockPanel>
 
-            <DataGrid x:Name="SongsGrid" ItemsSource="{Binding Songs}" AutoGenerateColumns="False" Grid.Column="1"  Margin="5 0 0 0" PreviewMouseLeftButtonUp="SkipTo">
+            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" PreviewMouseLeftButtonUp="SkipTo">
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
