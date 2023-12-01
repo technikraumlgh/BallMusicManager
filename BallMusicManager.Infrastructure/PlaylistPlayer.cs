@@ -22,7 +22,7 @@ public sealed class PlaylistPlayer{
         Path = path;
         Songs = songs.ToImmutableArray();
         SetCurrent(0);
-        Player.OnSongFinished += Skip;
+        Player.OnSongFinished += AutoPlayNext;
     }
 
     public void SetCurrent(int idx){
@@ -41,5 +41,8 @@ public sealed class PlaylistPlayer{
         if (amount == 0) return;
         SetCurrent(CurrentIndex + amount);
     }
-    private void Skip() => Skip(1);
+    private void AutoPlayNext(){
+        Skip();
+        Play();
+    }
 }
