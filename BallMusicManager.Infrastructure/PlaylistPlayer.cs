@@ -16,7 +16,7 @@ public sealed class PlaylistPlayer{
     public bool IsEnd => IsEmpty || CurrentIndex == LastIndex;
 
     private int LastIndex => Length-1;
-    private int CurrentIndex = 0;
+    public int CurrentIndex { get; private set; } = 0;
 
     public PlaylistPlayer(string path, IEnumerable<Song> songs){
         Path = path;

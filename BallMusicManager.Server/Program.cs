@@ -21,7 +21,7 @@ app.UseCors();
 
 var signalService = app.Services.GetService<SignalService>()!;
 
-var playing = new SongDTO("Nothing", "Nobody", "Nothing");
+var playing = SongDTO.None;
 var next = playing;
 //var state = State.Welcome;
 

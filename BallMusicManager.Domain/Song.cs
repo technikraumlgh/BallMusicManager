@@ -7,4 +7,6 @@ public record Song(string Path, int Index, string Title, string Artist, string D
     }
 }
 
-public record SongDTO(string title, string artist, string dance);
+public record SongDTO(string title, string artist, string dance){
+    public static readonly SongDTO None = new("Nothing", "Nobody", "Nothing");
+};

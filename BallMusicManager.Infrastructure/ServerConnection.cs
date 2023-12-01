@@ -4,8 +4,7 @@ using BallMusicManager.Domain;
 
 namespace BallMusicManager.Infrastructure;
 public sealed class ServerConnection{
-    private static readonly SongDTO NoSong = new("Ende", "Niemand", "");
-    public PlaylistPlayer? PlaylistPlayer{
+    public PlaylistPlayer? Playlist{
         get => playlistPlayer;
         set{
             if(playlistPlayer is not null){
@@ -27,13 +26,13 @@ public sealed class ServerConnection{
     }
 
     public void UpdateServer() {
-        SendSongToServer(PlaylistPlayer?.Current ?? NoSong);
-        SendNextSongToServer(PlaylistPlayer?.Peek ?? NoSong);
+        SendSongToServer(Playlist?.Current ?? SongDTO.None);
+        SendNextSongToServer(Playlist?.Peek ?? SongDTO.None);
     }
 
     public void SendNothing(){
-        SendSongToServer(NoSong);
-        SendNextSongToServer(NoSong);
+        SendSongToServer(SongDTO.None);
+        SendNextSongToServer(SongDTO.None);
     }
 
     public void SendSongToServer(SongDTO song) {

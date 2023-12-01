@@ -33,6 +33,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
             playlist.Player.OnSongContinued += Timer.Start;
             playlist.Player.OnSongPaused += Timer.Stop;
             playlist.Player.OnSongChanged += UpdateInfo;
+            Server.Playlist = playlist;
             SongsGrid.ItemsSource = playlist.Songs;
             UpdatePlaylistInfo();
             UpdateInfo();
@@ -79,6 +80,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
     private void Skip(object sender, RoutedEventArgs args){
         if(Playlist is null) return;
         Playlist.Skip();
+        SongsGrid.SelectedIndex = Playlist.CurrentIndex;
     }
 
     private void OpenFromFolder(object sender, RoutedEventArgs args){
