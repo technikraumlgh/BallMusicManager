@@ -1,6 +1,6 @@
 ﻿namespace BallMusicManager.Domain;
 
-public record Song(string Path, int Index, string Title, string Artist, string Dance) {
+public record Song(string Path, int Index, string Title, string Artist, string Dance, TimeSpan Duration) {
 
     public static implicit operator SongDTO(Song song){
         return new(song.Title, song.Artist, song.Dance);

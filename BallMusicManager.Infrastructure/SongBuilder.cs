@@ -11,6 +11,7 @@ public sealed class SongBuilder{
     private string _Title = string.Empty;
     private string _Artist = string.Empty;
     private string _Dance = string.Empty;
+    private TimeSpan _Duration = TimeSpan.Zero;
 
     public SongBuilder File(FileInfo file){
         return Path(file.FullName);
@@ -38,16 +39,20 @@ public sealed class SongBuilder{
     public SongBuilder DanceFromKey(string key){
         return Dance(Domain.Dance.FromKey(key));
     }
+    public SongBuilder Duration(TimeSpan duration){
+        _Duration = duration;
+        return this;
+    }
 
     public SongBuilder FromFileName(string fileName){
-        var splited = fileName.Split("_");
-        if(splited.Length != 3) throw new InvalidDataException($"{fileName} violates naming conventions");
+        var split = fileName.Split("_");
+        if(split.Length != 3) throw new InvalidDataException($"{fileName} violates naming conventions");
         
-        return Index(splited[0].Parse<int>()).DanceFromKey(splited[1]).Title(splited[2]);
+        return Index(split[0].Parse<int>()).DanceFromKey(split[1]).Title(split[2]);
     }
 
     public Song Build(){
-        return new(_Path, _Index, _Title, _Artist, _Dance);
+        return new(_Path, _Index, _Title, _Artist, _Dance, _Duration);
     }
 
 
@@ -60,34 +65,10 @@ public sealed class SongBuilder{
             return new SongBuilder()
                 .File(fileInfo)
                 .Artist(file.Tag.FirstPerformer)
+                .Duration(file.Properties.Duration)
                 .FromFileName(fileName).Build();
         }catch{
             return Option<Song>.None();
         }
-
-
-        // ValueOption<(int idx, string title, string dance)> ParseFileName(string fileName){
-        //     var splited = fileName.Split("_");
-        //     if (splited.Length == 3){
-        //         return ParseInfos(splited[0], splited[2], splited[1]);
-        //     }
-
-        //     Trace.TraceWarning($"{fileName} violates naming conventions");
-
-        //     if (splited.Length > 3) return ParseInfos(splited[0], splited.Skip(2).Dump(' '), splited[1]);
-        //     if (splited.Length == 2) return ParseInfos(splited[0], splited[1]);
-        //     if (splited.Length == 1) return (shouldIdx, splited[0], "");
-
-        //     return ValueOption<(int, string, string)>.None();
-
-        //     (int idx, string title, string dance) ParseInfos(string? idx, string title, string dance = ""){
-        //         if (idx is null || !idx.TryParse(out int index)){
-        //             Trace.TraceError($"{fileName} does not have a valid Index");
-        //             return (index, title, Dance.FromKey(dance));
-        //         }
-
-        //         return (index, title, Dance.FromKey(dance));
-        //     }
-        // }
     }
 }

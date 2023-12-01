@@ -52,7 +52,7 @@
                     <TextBlock x:Name="CurrentTitle" HorizontalAlignment="Center" FontSize="14">Title</TextBlock>
                     <TextBlock x:Name="CurrentArtist" HorizontalAlignment="Center" FontSize="14">Artist</TextBlock>
                     <TextBlock x:Name="CurrentDance" HorizontalAlignment="Center" FontSize="14">Tanz</TextBlock>
-                    <TextBlock x:Name="RemaningTime" HorizontalAlignment="Center" FontSize="14">Time</TextBlock>
+                    <TextBlock x:Name="RemaningTime" HorizontalAlignment="Center" FontSize="14">Duration</TextBlock>
                     <!--<TextBlock x:Name="CurrentIndex" HorizontalAlignment="Center" FontSize="14">Index</TextBlock>-->
                 </StackPanel>
 
@@ -72,6 +72,7 @@
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

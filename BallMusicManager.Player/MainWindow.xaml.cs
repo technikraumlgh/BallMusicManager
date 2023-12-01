@@ -80,7 +80,6 @@ public sealed partial class MainWindow : Window, IHostProvider{
     private void Skip(object sender, RoutedEventArgs args){
         if(Playlist is null) return;
         Playlist.Skip();
-        SongsGrid.SelectedIndex = Playlist.CurrentIndex;
     }
 
     private void OpenFromFolder(object sender, RoutedEventArgs args){
@@ -96,9 +95,11 @@ public sealed partial class MainWindow : Window, IHostProvider{
     }
 
     private void UpdateInfo(){
+        if (Playlist is not null && !Playlist.IsEmpty) SongsGrid.SelectedIndex = Playlist.CurrentIndex; ;
         CurrentTitle.Text = Playlist?.Current?.Title ?? "Title";
         CurrentArtist.Text = Playlist?.Current?.Artist ?? "Artist";
         CurrentDance.Text = Playlist?.Current?.Dance ?? "Dance";
+        RemaningTime.Text = Playlist?.Current?.Duration.ToString("mm\\:ss") ?? "Duration";
         Server.UpdateServer();
     }
 
