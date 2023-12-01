@@ -20,5 +20,5 @@ public static class Dance{
         {"FS", "Freestyle" },
     }.ToRegistry();
 
-    public static string FromKey(string key) => DanceKeys.TryGet(key).Reduce("None");
+    public static string FromKey(string key) => DanceKeys.TryGet(key).Reduce(key);
 }

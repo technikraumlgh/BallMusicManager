@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Ametrin.Utils;
 using Ametrin.Utils.WPF;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
@@ -13,34 +14,36 @@ namespace BallMusicManager.Player;
 
 public sealed partial class MainWindow : Window, IHostProvider{
     private readonly DispatcherTimer Timer = new();
-    //public static MainWindow? Instance { get; private set; }
-    private PlaylistPlayer? PlaylistPlayer{
-        get => playlistPlayer;
+    private PlaylistPlayer? Playlist{
+        get => playlist;
         set{
             Timer.Stop();
             SongsGrid.ItemsSource = null;
-            if(playlistPlayer is not null){
-                playlistPlayer.Player.OnSongStarted -= Timer.Start;
-                playlistPlayer.Player.OnSongPaused -= Timer.Stop;
-                playlistPlayer.Player.OnSongChanged -= UpdateInfo;
+            if(playlist is not null){
+                playlist.Player.OnSongStarted -= Timer.Start;
+                playlist.Player.OnSongContinued -= Timer.Start;
+                playlist.Player.OnSongPaused -= Timer.Stop;
+                playlist.Player.OnSongChanged -= UpdateInfo;
             }
 
-            playlistPlayer = value;
+            playlist = value;
 
-            if(playlistPlayer is null) return;
-            playlistPlayer.Player.OnSongStarted += Timer.Start;
-            playlistPlayer.Player.OnSongPaused += Timer.Stop;
-            playlistPlayer.Player.OnSongChanged += UpdateInfo;
-            SongsGrid.ItemsSource = playlistPlayer.Playlist.Songs;
+            if(playlist is null) return;
+            playlist.Player.OnSongStarted += Timer.Start;
+            playlist.Player.OnSongContinued += Timer.Start;
+            playlist.Player.OnSongPaused += Timer.Stop;
+            playlist.Player.OnSongChanged += UpdateInfo;
+            SongsGrid.ItemsSource = playlist.Songs;
             UpdatePlaylistInfo();
+            UpdateInfo();
 
-            if(playlistPlayer.Playlist.IsEmpty) return;
+            if(playlist.IsEmpty) return;
             MainViewModel.Instance.HasPlaylist = true;
             SongsGrid.SelectedIndex = 0;
         }
     }
-    private ServerConnection Server;
-    private PlaylistPlayer? playlistPlayer;
+    private readonly ServerConnection Server;
+    private PlaylistPlayer? playlist;
 
     string IHostProvider.Host => Host.Text;
     string IHostProvider.Password => HostPW.Password;
@@ -62,20 +65,20 @@ public sealed partial class MainWindow : Window, IHostProvider{
     }
 
     private void PlayToggleClicked(object sender, RoutedEventArgs e){
-        if(PlaylistPlayer is null) return;
+        if(Playlist is null) return;
         
-        if(PlaylistPlayer.IsPlaying){
-            PlaylistPlayer.Pause();
+        if(Playlist.IsPlaying){
+            Playlist.Pause();
             PlayToggle.Content = "Play";
         }else{
-            PlaylistPlayer.Play();
+            Playlist.Play();
             PlayToggle.Content = "Pause";
         }
     }
 
     private void Skip(object sender, RoutedEventArgs args){
-        if(PlaylistPlayer is null) return;
-        PlaylistPlayer.Skip();
+        if(Playlist is null) return;
+        Playlist.Skip();
     }
 
     private void OpenFromFolder(object sender, RoutedEventArgs args){
@@ -83,7 +86,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
 
         if (dialog.ShowDialog() is not System.Windows.Forms.DialogResult.OK) return;
 
-        PlaylistPlayer = new(PlaylistBuilder.FromFolder(new(dialog.SelectedPath)));
+        Playlist = PlaylistBuilder.FromFolder(new(dialog.SelectedPath));
     }
 
     private void UpdateServer(object sender, RoutedEventArgs args){
@@ -91,22 +94,23 @@ public sealed partial class MainWindow : Window, IHostProvider{
     }
 
     private void UpdateInfo(){
-        Trace.TraceInformation("Song changed");
-        CurrentTitle.Text = PlaylistPlayer?.Current?.Title ?? "Title";
-        CurrentArtist.Text = PlaylistPlayer?.Current?.Artist ?? "Artist";
-        CurrentDance.Text = PlaylistPlayer?.Current?.Dance ?? "Dance";
+        CurrentTitle.Text = Playlist?.Current?.Title ?? "Title";
+        CurrentArtist.Text = Playlist?.Current?.Artist ?? "Artist";
+        CurrentDance.Text = Playlist?.Current?.Dance ?? "Dance";
+        Server.UpdateServer();
     }
 
     private void UpdatePlaylistInfo(){
-        CurrentPlaylist.Text = $"{PlaylistPlayer?.Playlist.Path} ({PlaylistPlayer?.Playlist.Length})";
+        CurrentPlaylist.Text = $"{Playlist?.Path} ({Playlist?.Length})";
     }
 
     private void Tick(object? sender, EventArgs args){
-        if(PlaylistPlayer is null){
+        if(Playlist is null){
             RemaningTime.Text = "Time";
+            Timer.Stop();
             return;
         }
-        RemaningTime.Text = (PlaylistPlayer.Player.CurrentSongLength - PlaylistPlayer.Player.CurrentTime).ToString(@"mm\:ss"); ;
+        RemaningTime.Text = (Playlist.Player.CurrentSongLength - Playlist.Player.CurrentTime).ToString(@"mm\:ss"); ;
     }
 
     // private void FixIndices(object sender, RoutedEventArgs args){
@@ -146,11 +150,10 @@ public sealed partial class MainWindow : Window, IHostProvider{
     }
 
     private void SkipTo(object sender, MouseButtonEventArgs args){
-        if(PlaylistPlayer is null) return;
+        if(Playlist is null) return;
         var row = (args.OriginalSource as DependencyObject)!.FindParent<DataGridRow>();
-
         if (row is null || row.Item is not Song song) return;
-        PlaylistPlayer.Playlist.SetCurrent(PlaylistPlayer.Playlist.Songs.IndexOf(song));
+        Playlist.SetCurrent(Playlist.Songs.IndexOf(song));
     }
 
     private void OpenFromCSV(object sender, RoutedEventArgs e){
@@ -158,20 +161,18 @@ public sealed partial class MainWindow : Window, IHostProvider{
 
         if (dialog.ShowDialog() is not true) return;
 
-        PlaylistPlayer = new(PlaylistBuilder.FromCSV(new(dialog.FileName)));
+        Playlist = PlaylistBuilder.FromCSV(new(dialog.FileName));
     }
 
     private void EnterPlaying(object sender, RoutedEventArgs e){
         Server.UpdateServer();
     }
 
-    private void EnterWelcome(object sender, RoutedEventArgs e)
-    {
+    private void EnterWelcome(object sender, RoutedEventArgs e){
         _ = Server.SendMessage("Willkommen");
     }
 
-    private void EnterEnd(object sender, RoutedEventArgs e)
-    {
+    private void EnterEnd(object sender, RoutedEventArgs e){
         _ = Server.SendMessage("Tschüss");
     }
 }

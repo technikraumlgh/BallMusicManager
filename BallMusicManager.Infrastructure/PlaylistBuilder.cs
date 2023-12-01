@@ -6,15 +6,15 @@ using BallMusicManager.Domain;
 namespace BallMusicManager.Infrastructure;
 
 public static class PlaylistBuilder{
-    private static readonly ImmutableArray<string> AllowedFileTypes = [".mp3", ".wav", ".mp4", ".acc", ".m4a"];
+    private static readonly IImmutableSet<string> AllowedFileTypes = [".mp3", ".wav", ".mp4", ".acc", ".m4a"];
 
-    public static Playlist FromFolder(DirectoryInfo folder){
+    public static PlaylistPlayer FromFolder(DirectoryInfo folder){
         var files = folder.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly).Where(ValidFile);
         //var files = Directory.GetFiles(path, , ).Where(path => Song.).ToArray();
         return new(folder.FullName, files.Select(SongBuilder.FromPath).ReduceFiltered());
     }
 
-    public static Playlist FromCSV(FileInfo file){
+    public static PlaylistPlayer FromCSV(FileInfo file){
         using var stream = file.OpenText();
         var songs = new List<Song>();
         

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Ametrin.Utils;
 using BallMusicManager.Domain;
 using NAudio.Wave;
 
@@ -7,9 +8,9 @@ namespace BallMusicManager.Infrastructure;
 public sealed class MusicPlayer{
     public event Action? OnSongChanged;
     public event Action? OnSongPaused;
-    public event Action? OnSongContined;
+    public event Action? OnSongContinued;
     public event Action? OnSongStarted;
-    public event Action? OnSongFinised;
+    public event Action? OnSongFinished;
 
     public TimeSpan CurrentSongLength => CurrentAudioWave?.TotalTime ?? TimeSpan.Zero;
     public TimeSpan CurrentTime => CurrentAudioWave?.CurrentTime ?? TimeSpan.Zero;
@@ -47,14 +48,14 @@ public sealed class MusicPlayer{
         if(CurrentTime == TimeSpan.Zero){
             OnSongStarted?.Invoke();
         }else{
-            OnSongContined?.Invoke();
+            OnSongContinued?.Invoke();
         }
     }
 
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e){
-        Trace.TraceInformation(e.Exception.Message);
-        Trace.TraceInformation(CurrentTime.ToString());
-        Trace.TraceInformation(CurrentSongLength.ToString());
+        if(CurrentTime.Approximately(CurrentSongLength, TimeSpan.FromSeconds(0.5))){
+            OnSongFinished?.Invoke();
+        }
     }
 
     ~MusicPlayer(){
