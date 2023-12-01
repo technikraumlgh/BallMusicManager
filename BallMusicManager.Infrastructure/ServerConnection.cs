@@ -8,13 +8,13 @@ public sealed class ServerConnection{
         get => playlistPlayer;
         set{
             if(playlistPlayer is not null){
-                playlistPlayer.Player.OnSongChanged -= UpdateServer;
+                playlistPlayer.Player.OnSongChanged -= Update;
             }
             playlistPlayer = value;
 
             if(playlistPlayer is null) return;
 
-            playlistPlayer.Player.OnSongChanged += UpdateServer;
+            playlistPlayer.Player.OnSongChanged += Update;
         }
     }
     private readonly IHostProvider HostProvider;
@@ -25,7 +25,7 @@ public sealed class ServerConnection{
         _ = Ping($"http://{HostProvider.Host}/current");
     }
 
-    public void UpdateServer() {
+    public void Update() {
         SendSongToServer(Playlist?.Current ?? SongDTO.None);
         SendNextSongToServer(Playlist?.Peek ?? SongDTO.None);
     }

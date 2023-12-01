@@ -74,6 +74,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
         }else{
             Playlist.Play();
             PlayToggle.Content = "Pause";
+            Server.Update();
         }
     }
 
@@ -91,7 +92,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
     }
 
     private void UpdateServer(object sender, RoutedEventArgs args){
-        Server.UpdateServer();
+        Server.Update();
     }
 
     private void UpdateInfo(){
@@ -100,7 +101,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
         CurrentArtist.Text = Playlist?.Current?.Artist ?? "Artist";
         CurrentDance.Text = Playlist?.Current?.Dance ?? "Dance";
         RemaningTime.Text = Playlist?.Current?.Duration.ToString("mm\\:ss") ?? "Duration";
-        Server.UpdateServer();
+        Server.Update();
     }
 
     private void UpdatePlaylistInfo(){
@@ -167,15 +168,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
         Playlist = PlaylistBuilder.FromCSV(new(dialog.FileName));
     }
 
-    private void EnterPlaying(object sender, RoutedEventArgs e){
-        Server.UpdateServer();
-    }
-
-    private void EnterWelcome(object sender, RoutedEventArgs e){
-        _ = Server.SendMessage("Willkommen");
-    }
-
-    private void EnterEnd(object sender, RoutedEventArgs e){
-        _ = Server.SendMessage("Tschüss");
+    private void SendMessage(object sender, RoutedEventArgs e){
+        _ = Server.SendMessage(MessageBox.Text);
     }
 }

@@ -44,9 +44,6 @@
 
             <DockPanel Grid.Row="1">
                 <StackPanel DockPanel.Dock="Top" VerticalAlignment="Bottom">
-                    <Button FontSize="14" Click="EnterWelcome">Welcome</Button>
-                    <Button FontSize="14" Click="EnterPlaying">Playing</Button>
-                    <Button FontSize="14" Click="EnterEnd">End</Button>
                     <Button x:Name="PlayToggle" FontSize="14" Click="PlayToggleClicked" IsEnabled="{Binding HasPlaylist}">Play</Button>
                     <Button FontSize="14" Click="Skip" IsEnabled="{Binding HasPlaylist}">Skip</Button>
                     <TextBlock x:Name="CurrentTitle" HorizontalAlignment="Center" FontSize="14">Title</TextBlock>
@@ -57,6 +54,9 @@
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
+                    <TextBox x:Name="MessageBox">Herzlich Willkommen zum Weihnachtsball 2023</TextBox>
+                    <Button FontSize="14" Click="SendMessage" Margin="0 0 0 15">Send</Button>
+
                     <TextBlock x:Name="MissingFiles" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Missing Files</TextBlock>
                     <TextBlock x:Name="ServerOffline" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Server Fail</TextBlock>
                     <TextBox x:Name="Host" HorizontalContentAlignment="Center">localhost</TextBox>
