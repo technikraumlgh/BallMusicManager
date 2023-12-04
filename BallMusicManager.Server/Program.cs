@@ -1,4 +1,5 @@
 ﻿using Ametrin.Utils;
+using BallMusicManager.Domain;
 using BallMusicManager.Server;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ app.UseCors();
 
 var signalService = app.Services.GetService<SignalService>()!;
 
-var playing = new Song("Nothing", "Nobody", "Nothing");
+var playing = SongDTO.None;
 var next = playing;
 //var state = State.Welcome;
 
@@ -64,6 +65,5 @@ app.MapGet("/", ()=> Results.Redirect("display"));
 
 app.Run();
 
-record Song(string title, string artist, string dance);
+//record Song(string title, string artist, string dance);
 //enum State { Welcome, Playing, End }
-record MessageDTO(string text);

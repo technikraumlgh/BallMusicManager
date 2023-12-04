@@ -61,10 +61,6 @@
         font-weight: normal;
       }
 
-      .d-none {
-        display: none !important;
-      }
-
       .ta-center {
         text-align: center;
       }
@@ -84,6 +80,7 @@
       .text-container {
         margin: 3em;
         position: fixed;
+        width: calc(100vw - 6em);
       }
 
       .small-text {
@@ -116,11 +113,11 @@
 
   <body>
     <!-- Welcome/Goodbye Screen -->
-    <div class="text-container ta-center d-none">
+    <div class="text-container ta-center">
       <h2 id="welcome-message">Herzlich Willkommen zum Weihnachtsball</h2>
     </div>
     <!-- Song Display Screen -->
-    <div class="text-container">
+    <div id="song-container" class="text-container">
       <p class="small-text">Now Playing</p>
       <h1 id="dance" class="mt-1">Loading dance failed</h1>
       <h2 id="title" class="mt-1">Loading title failed</h2>
@@ -133,6 +130,7 @@
 
     <!-- Show track -->
     <script defer>
+      const songContainer = document.getElementById("song-container");
       const title = document.getElementById("title");
       const dance = document.getElementById("dance");
       const artist = document.getElementById("artist");
@@ -168,6 +166,8 @@
         title.innerText = data.title;
         dance.innerText = data.dance;
         artist.innerText = `by ${data.artist}`;
+        songContainer.style.display = 'block';
+        message.style.display = 'none';
       }
 
       function setNext(data) {
@@ -176,13 +176,10 @@
       }
       
       function displayMessage(msg) {
-        title.innerText = "";
-        dance.innerText = "";
-        artist.innerText = "";
-        nextTitle.innerText = "";
-        nextDance.innerText = ""; 
         message.innerText = msg;
-        message.style.display = "flex";
+        songContainer.style.display = 'none';
+        message.style.display = 'block';
+        //message.style.textAlign = 'center';
       }
     </script>
 

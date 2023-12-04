@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BallMusicManager.Player"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Music Manager" Height="450" Width="800">
 
     <Window.DataContext>
         <local:MainViewModel/>
@@ -44,34 +44,35 @@
 
             <DockPanel Grid.Row="1">
                 <StackPanel DockPanel.Dock="Top" VerticalAlignment="Bottom">
-                    <Button FontSize="14" Click="EnterWelcome">Welcome</Button>
-                    <Button FontSize="14" Click="EnterPlaying">Playing</Button>
-                    <Button FontSize="14" Click="EnterEnd">End</Button>
                     <Button x:Name="PlayToggle" FontSize="14" Click="PlayToggleClicked" IsEnabled="{Binding HasPlaylist}">Play</Button>
                     <Button FontSize="14" Click="Skip" IsEnabled="{Binding HasPlaylist}">Skip</Button>
                     <TextBlock x:Name="CurrentTitle" HorizontalAlignment="Center" FontSize="14">Title</TextBlock>
                     <TextBlock x:Name="CurrentArtist" HorizontalAlignment="Center" FontSize="14">Artist</TextBlock>
                     <TextBlock x:Name="CurrentDance" HorizontalAlignment="Center" FontSize="14">Tanz</TextBlock>
-                    <TextBlock x:Name="RemaningTime" HorizontalAlignment="Center" FontSize="14">Time</TextBlock>
+                    <TextBlock x:Name="RemaningTime" HorizontalAlignment="Center" FontSize="14">Duration</TextBlock>
                     <!--<TextBlock x:Name="CurrentIndex" HorizontalAlignment="Center" FontSize="14">Index</TextBlock>-->
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
+                    <TextBox x:Name="MessageBox">Herzlich Willkommen zum Weihnachtsball 2023</TextBox>
+                    <Button FontSize="14" Click="SendMessage" Margin="0 0 0 15">Send</Button>
+
                     <TextBlock x:Name="MissingFiles" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Missing Files</TextBlock>
                     <TextBlock x:Name="ServerOffline" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Server Fail</TextBlock>
                     <TextBox x:Name="Host" HorizontalContentAlignment="Center">localhost</TextBox>
                     <PasswordBox x:Name="HostPW" HorizontalContentAlignment="Center"></PasswordBox>
                     <Button IsEnabled="{Binding HasPlaylist}" Click="UpdateServer">Update Server</Button>
-                    <Button Visibility="{Binding ShowFixIndicesButton}" Click="FixIndices">Fix Indices</Button>
+                    <!-- <Button Visibility="{Binding ShowFixIndicesButton}" Click="FixIndices">Fix Indices</Button> -->
                 </StackPanel>
             </DockPanel>
 
-            <DataGrid x:Name="SongsGrid" ItemsSource="{Binding Songs}" AutoGenerateColumns="False" Grid.Column="1"  Margin="5 0 0 0" PreviewMouseLeftButtonUp="SkipTo">
+            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" PreviewMouseLeftButtonUp="SkipTo">
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

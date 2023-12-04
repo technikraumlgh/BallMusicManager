@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BallMusicManager.Player", "BallMusicManager.Player\BallMusicManager.Player.csproj", "{E72F0A47-1A94-46BF-AB17-510023A417D6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BallMusicManager.Server", "BallMusicManager.Server\BallMusicManager.Server.csproj", "{67E5A064-F74B-4426-8496-CE4160A0D234}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ametrin.Utils", "..\..\Packages\Ametrin.Utils\Ametrin.Utils.csproj", "{C69E25F8-8746-4509-BB06-0A4C6541C654}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ametrin.Utils.WPF", "..\..\Packages\Ametrin.Utils.WPF\Ametrin.Utils.WPF.csproj", "{A1E232BE-33C7-4967-BBC2-530AB4D2F6E3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BallMusicManager.Infrastructure", "BallMusicManager.Infrastructure\BallMusicManager.Infrastructure.csproj", "{7BE53598-5640-4238-A8A2-B24CF542307C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BallMusicManager.Domain", "BallMusicManager.Domain\BallMusicManager.Domain.csproj", "{EB6AC95F-472E-4945-93E6-CEA9D5451E17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BallMusicManager.Creator", "BallMusicManager.Creator\BallMusicManager.Creator.csproj", "{4C1501F3-2752-436D-AD6B-2C87A65C5852}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E72F0A47-1A94-46BF-AB17-510023A417D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E72F0A47-1A94-46BF-AB17-510023A417D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E72F0A47-1A94-46BF-AB17-510023A417D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E72F0A47-1A94-46BF-AB17-510023A417D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67E5A064-F74B-4426-8496-CE4160A0D234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67E5A064-F74B-4426-8496-CE4160A0D234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67E5A064-F74B-4426-8496-CE4160A0D234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67E5A064-F74B-4426-8496-CE4160A0D234}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C69E25F8-8746-4509-BB06-0A4C6541C654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C69E25F8-8746-4509-BB06-0A4C6541C654}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C69E25F8-8746-4509-BB06-0A4C6541C654}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C69E25F8-8746-4509-BB06-0A4C6541C654}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1E232BE-33C7-4967-BBC2-530AB4D2F6E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1E232BE-33C7-4967-BBC2-530AB4D2F6E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1E232BE-33C7-4967-BBC2-530AB4D2F6E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1E232BE-33C7-4967-BBC2-530AB4D2F6E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BE53598-5640-4238-A8A2-B24CF542307C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BE53598-5640-4238-A8A2-B24CF542307C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BE53598-5640-4238-A8A2-B24CF542307C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BE53598-5640-4238-A8A2-B24CF542307C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB6AC95F-472E-4945-93E6-CEA9D5451E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB6AC95F-472E-4945-93E6-CEA9D5451E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB6AC95F-472E-4945-93E6-CEA9D5451E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB6AC95F-472E-4945-93E6-CEA9D5451E17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C1501F3-2752-436D-AD6B-2C87A65C5852}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C1501F3-2752-436D-AD6B-2C87A65C5852}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C1501F3-2752-436D-AD6B-2C87A65C5852}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C1501F3-2752-436D-AD6B-2C87A65C5852}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3E1B5025-4F0E-43C1-A251-AA441600B25A}
+	EndGlobalSection
+EndGlobal
