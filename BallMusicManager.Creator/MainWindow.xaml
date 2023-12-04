@@ -1,0 +1,28 @@
+﻿<Window x:Class="BallMusicManager.Creator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BallMusicManager.Creator"
+        mc:Ignorable="d"
+        Title="Playlist Creator" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" AllowDrop="True" Drop="Songs_Drop"
+                  PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
+                  PreviewMouseMove="SongsGrid_PreviewMouseMove"
+                  >
+            <DataGrid.Columns>
+                <!--<DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>-->
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

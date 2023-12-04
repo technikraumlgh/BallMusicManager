@@ -46,9 +46,16 @@ public sealed class SongBuilder{
 
     public SongBuilder FromFileName(string fileName){
         var split = fileName.Split("_");
-        if(split.Length != 3) throw new InvalidDataException($"{fileName} violates naming conventions");
-        
-        return Index(split[0].Parse<int>()).DanceFromKey(split[1]).Title(split[2]);
+        if(split.Length == 3) {
+            return Index(split[0].TryParse<int>().Reduce(-1)).DanceFromKey(split[1]).Title(split[2]);
+        }
+        if(split.Length == 1) {
+            return Index(-1).Title(fileName);
+        }
+        if(split.Length > 3) {
+            return Index(split[0].TryParse<int>().Reduce(-1)).DanceFromKey(split[1]).Title(split.Skip(2).Dump(' '));
+        }
+        throw new InvalidDataException($"{fileName} does not match naming conventions");
     }
 
     public Song Build(){
