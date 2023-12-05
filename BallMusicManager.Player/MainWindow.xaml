@@ -26,9 +26,9 @@
             </TextBlock>
 
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Width="120" Click="OpenFromFolder">Open From Folder</Button>
-                <Button Width="120" Click="OpenFromCSV">Open From CSV</Button>
-                <Button Width="120" Click="ReloadPlaylist">Reload</Button>
+                <!--<Button Width="120" Click="OpenFromFolder">Open From Folder</Button>-->
+                <Button Width="120" Click="OpenFromPlaylist">Open</Button>
+                <!--<Button Width="120" Click="ReloadPlaylist">Reload</Button>-->
             </StackPanel>
         </DockPanel>
 

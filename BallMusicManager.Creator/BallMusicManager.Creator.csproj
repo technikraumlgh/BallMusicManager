@@ -6,9 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	<PublishSingleFile>true</PublishSingleFile>
+	<SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Packages\Ametrin.Serialization\Ametrin.Serialization.csproj" />
     <ProjectReference Include="..\..\..\Packages\Ametrin.Utils.WPF\Ametrin.Utils.WPF.csproj" />
     <ProjectReference Include="..\..\..\Packages\Ametrin.Utils\Ametrin.Utils.csproj" />
     <ProjectReference Include="..\BallMusicManager.Domain\BallMusicManager.Domain.csproj" />

@@ -1,6 +1,10 @@
-﻿using BallMusicManager.Domain;
+﻿using Ametrin.Serialization;
+using Ametrin.Utils.WPF;
+using BallMusicManager.Domain;
+using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,7 +12,7 @@ using System.Windows.Media;
 
 namespace BallMusicManager.Creator; 
 public sealed partial class MainWindow : Window {
-    private readonly ObservableCollection<Song> Songs = [];
+    private ObservableCollection<Song> Songs = [];
     private Song? DraggedItem;
     public MainWindow() {
         InitializeComponent();
@@ -37,9 +41,12 @@ public sealed partial class MainWindow : Window {
             var files = e.Data.GetData(DataFormats.FileDrop) as string[] ?? [];
             foreach(var path in files) {
                 Trace.TraceInformation(path);
-                var window = new AddSongWindow(path);
+                var window = new AddSongWindow(path) {
+                    Owner = this,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
                 if(window.ShowDialog() is not true) continue;
-                Songs.Add(window.Song);
+                Songs.Add(window.Song.Build());
             }
         }
     }
@@ -59,10 +66,59 @@ public sealed partial class MainWindow : Window {
 
     private static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject {
         while(obj != null) {
-            if(obj is T objTyped)
-                return objTyped;
+            if(obj is T objTyped) return objTyped;
             obj = VisualTreeHelper.GetParent(obj);
         }
         return null;
+    }
+
+    private void Export(object sender, RoutedEventArgs e) {
+        var dialog = new SaveFileDialog() {
+            AddExtension = true,
+            DefaultExt = "playlist"
+        };
+        if(dialog.ShowDialog() is not true) return;
+
+        var temp = new List<Song>(Songs.Count);
+        var directory = new FileInfo(dialog.FileName).DirectoryName;
+        for(int i = 0; i < Songs.Count; i++) {
+            var fileName = Path.GetFileName(Songs[i].Path);
+            var target = Path.Join(directory, fileName);
+            if(target != Songs[i].Path) File.Copy(Songs[i].Path, target, true);
+            temp.Add(Songs[i] with {
+                Index = i + 1,
+                Path = fileName,
+            });
+        }
+        temp.WriteToJsonFile(dialog.FileName);
+    }
+
+    private void Save(object sender, RoutedEventArgs e) {
+        var dialog = new SaveFileDialog() {
+            AddExtension = true,
+            DefaultExt = "playlist"
+        };
+        if(dialog.ShowDialog() is not true) return;
+
+        Songs.WriteToJsonFile(dialog.FileName);
+    }
+
+    private void Open(object sender, RoutedEventArgs e) {
+        var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "playlist");
+        if(dialog.ShowDialog() is not true) return;
+
+        Songs = JsonExtensions.ReadFromJsonFile<ObservableCollection<Song>>(dialog.FileName).Reduce(Songs);
+        SongsGrid.ItemsSource = Songs;
+    }
+
+    private void DeleteSong(object sender, RoutedEventArgs e) {
+        Trace.TraceInformation(sender.ToString());
+        if((sender as MenuItem)!.Parent is not ContextMenu menu) return;
+        Trace.TraceInformation(menu.ToString());
+        if(menu.PlacementTarget is not DataGridRow row) return;
+
+        var song = row.Item as Song;
+
+        Songs.Remove(song!);
     }
 }

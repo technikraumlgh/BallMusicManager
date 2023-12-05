@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Ametrin.Utils;
+using Ametrin.Serialization;
 using Ametrin.Utils.WPF;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
@@ -170,5 +171,20 @@ public sealed partial class MainWindow : Window, IHostProvider{
 
     private void SendMessage(object sender, RoutedEventArgs e){
         _ = Server.SendMessage(MessageBox.Text);
+    }
+
+    private void OpenFromPlaylist(object sender, RoutedEventArgs e) {
+        var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "playlist");
+        if(dialog.ShowDialog() is not true) return;
+        var fileInto = new FileInfo(dialog.FileName);
+        JsonExtensions.ReadFromJsonFile<List<Song>>(fileInto).Resolve(songs => {
+            Playlist = new(fileInto.DirectoryName!, MapFrom(songs));
+        });
+
+        IEnumerable<Song> MapFrom(IEnumerable<Song> songs) {
+            foreach(Song song in songs) {
+                yield return song with { Path = Path.IsPathRooted(song.Path) ? song.Path : Path.Combine(fileInto.DirectoryName!, song.Path)};
+            }
+        }
     }
 }

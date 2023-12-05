@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using Ametrin.Utils;
 using Ametrin.Utils.Optional;
 using BallMusicManager.Domain;
@@ -6,12 +7,12 @@ using BallMusicManager.Domain;
 namespace BallMusicManager.Infrastructure;
 
 public sealed class SongBuilder{
-    private string _Path = string.Empty;
-    private int _Index = -1;
-    private string _Title = string.Empty;
-    private string _Artist = string.Empty;
-    private string _Dance = string.Empty;
-    private TimeSpan _Duration = TimeSpan.Zero;
+    public string _Path = string.Empty;
+    public int _Index = -1;
+    public string _Title = string.Empty;
+    public string _Artist = string.Empty;
+    public string _Dance = string.Empty;
+    public TimeSpan _Duration = TimeSpan.Zero;
 
     public SongBuilder File(FileInfo file){
         return Path(file.FullName);
@@ -43,6 +44,11 @@ public sealed class SongBuilder{
         _Duration = duration;
         return this;
     }
+    public SongBuilder FromMetaData(){
+        using var file = TagLib.File.Create(_Path);
+        if(file.Properties.Duration.TotalMinutes < 1.5) Trace.TraceWarning($"{_Path} is probably not a full song");
+        return Duration(file.Properties.Duration).Artist(file.Tag.FirstPerformer);
+    }
 
     public SongBuilder FromFileName(string fileName){
         var split = fileName.Split("_");
@@ -51,6 +57,9 @@ public sealed class SongBuilder{
         }
         if(split.Length == 1) {
             return Index(-1).Title(fileName);
+        }
+        if(split.Length == 2) {
+            return Index(-1).Title(split[1]).DanceFromKey(split[0]);
         }
         if(split.Length > 3) {
             return Index(split[0].TryParse<int>().Reduce(-1)).DanceFromKey(split[1]).Title(split.Skip(2).Dump(' '));
@@ -64,15 +73,12 @@ public sealed class SongBuilder{
 
 
     public static Option<Song> FromPath(FileInfo fileInfo){
-        using var file = TagLib.File.Create(fileInfo.FullName);
         var fileName = fileInfo.NameWithoutExtension();
-        if (file.Properties.Duration.TotalMinutes < 1.5) Trace.TraceWarning($"{fileName} is probably not a full song");
 
         try{
             return new SongBuilder()
                 .File(fileInfo)
-                .Artist(file.Tag.FirstPerformer)
-                .Duration(file.Properties.Duration)
+                .FromMetaData()
                 .FromFileName(fileName).Build();
         }catch{
             return Option<Song>.None();
