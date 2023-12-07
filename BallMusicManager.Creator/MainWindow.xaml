@@ -18,28 +18,32 @@
             <Button Content="O" Click="Open"/>
         </StackPanel>
 
-        <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" AllowDrop="True" Drop="Songs_Drop"
-                  PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
-                  PreviewMouseMove="SongsGrid_PreviewMouseMove">
-            <DataGrid.Columns>
-                <!--<DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>-->
-                <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
-            </DataGrid.Columns>
+        <StackPanel Grid.Column="1">
+            <TextBlock x:Name="LengthDisplay">Length: </TextBlock>
+            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" AllowDrop="True" 
+                      Height="400" Drop="Songs_Drop"
+                      PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
+                      PreviewMouseMove="SongsGrid_PreviewMouseMove">
+                <DataGrid.Columns>
+                    <!--<DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>-->
+                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+                </DataGrid.Columns>
 
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="ContextMenu">
-                        <Setter.Value>
-                            <ContextMenu>
-                                <MenuItem Header="Delete" Click="DeleteSong"/>
-                            </ContextMenu>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </DataGrid.RowStyle>
-        </DataGrid>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu>
+                                    <MenuItem Header="Delete" Click="DeleteSong"/>
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </DataGrid.RowStyle>
+            </DataGrid>
+        </StackPanel>
     </Grid>
 </Window>

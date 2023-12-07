@@ -1,5 +1,4 @@
-﻿using System.Collections.Frozen;
-using Ametrin.Utils.Registry;
+﻿using Ametrin.Utils.Registry;
 
 namespace BallMusicManager.Domain;
 

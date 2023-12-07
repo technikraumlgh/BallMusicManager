@@ -1,22 +1,27 @@
 ﻿using Ametrin.Serialization;
 using Ametrin.Utils.WPF;
 using BallMusicManager.Domain;
-using Microsoft.Win32;
+using BallMusicManager.Infrastructure;
 using System.Collections.ObjectModel;
+using Ametrin.Utils;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Collections.Specialized;
 
 namespace BallMusicManager.Creator; 
 public sealed partial class MainWindow : Window {
     private ObservableCollection<Song> Songs = [];
+    private TimeSpan Duration = TimeSpan.Zero;
     private Song? DraggedItem;
     public MainWindow() {
         InitializeComponent();
         SongsGrid.ItemsSource = Songs;
+        Songs.CollectionChanged += UpdateLengthDisplay;
+        UpdateLengthDisplay();
     }
 
     private void Songs_Drop(object sender, DragEventArgs e) {
@@ -27,8 +32,6 @@ public sealed partial class MainWindow : Window {
 
         var targetItem = FindAncestorOrSelf<DataGridRow>(e.OriginalSource as DependencyObject)?.Item as Song;
         if(targetItem is not null && !ReferenceEquals(DraggedItem, targetItem)) {
-            // Perform the swap or reorder in your data source here
-            // For example, using an ObservableCollection:
             var index = Songs.IndexOf(targetItem);
             Songs.Remove(DraggedItem);
             Songs.Insert(index, DraggedItem);
@@ -73,10 +76,7 @@ public sealed partial class MainWindow : Window {
     }
 
     private void Export(object sender, RoutedEventArgs e) {
-        var dialog = new SaveFileDialog() {
-            AddExtension = true,
-            DefaultExt = "playlist"
-        };
+        var dialog = DialogUtils.SaveFileDialog(filterDescription: "Playlist", extension: "playlist");
         if(dialog.ShowDialog() is not true) return;
 
         var temp = new List<Song>(Songs.Count);
@@ -94,10 +94,7 @@ public sealed partial class MainWindow : Window {
     }
 
     private void Save(object sender, RoutedEventArgs e) {
-        var dialog = new SaveFileDialog() {
-            AddExtension = true,
-            DefaultExt = "playlist"
-        };
+        var dialog = DialogUtils.SaveFileDialog(filterDescription: "Playlist", extension: "playlist");
         if(dialog.ShowDialog() is not true) return;
 
         Songs.WriteToJsonFile(dialog.FileName);
@@ -107,18 +104,23 @@ public sealed partial class MainWindow : Window {
         var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "playlist");
         if(dialog.ShowDialog() is not true) return;
 
-        Songs = JsonExtensions.ReadFromJsonFile<ObservableCollection<Song>>(dialog.FileName).Reduce(Songs);
+        Songs.CollectionChanged -= UpdateLengthDisplay;
+        Songs = new(PlaylistBuilder.EnumerateFile(new(dialog.FileName)));
         SongsGrid.ItemsSource = Songs;
+        Songs.CollectionChanged += UpdateLengthDisplay;
+        UpdateLengthDisplay();
     }
 
     private void DeleteSong(object sender, RoutedEventArgs e) {
-        Trace.TraceInformation(sender.ToString());
         if((sender as MenuItem)!.Parent is not ContextMenu menu) return;
-        Trace.TraceInformation(menu.ToString());
         if(menu.PlacementTarget is not DataGridRow row) return;
 
         var song = row.Item as Song;
-
         Songs.Remove(song!);
+    }
+
+    private void UpdateLengthDisplay(object? sender = null, NotifyCollectionChangedEventArgs? e = default) {
+        Duration = Songs.Sum(s => s.Duration);
+        LengthDisplay.Text = $"Duration: {Duration:hh\\:mm\\:ss}";
     }
 }

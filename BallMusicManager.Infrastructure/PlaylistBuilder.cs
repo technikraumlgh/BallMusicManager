@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
+using Ametrin.Serialization;
 using Ametrin.Utils.Optional;
 using BallMusicManager.Domain;
 
@@ -34,6 +35,22 @@ public static class PlaylistBuilder{
                     .Artist(values[1])
                     .DanceFromKey(values[2])
                     .Build();
+            }
+        }
+    }
+
+    public static PlaylistPlayer FromFile(FileInfo file) {
+        return new(file.DirectoryName!, EnumerateFile(file));
+
+        
+    }
+
+    public static IEnumerable<Song> EnumerateFile(FileInfo file) {
+        return JsonExtensions.ReadFromJsonFile<List<Song>>(file).Map(MapFrom).Reduce([]);
+
+        IEnumerable<Song> MapFrom(IEnumerable<Song> songs) {
+            foreach(Song song in songs) {
+                yield return Path.IsPathRooted(song.Path) ? song : song with { Path = Path.Combine(file.DirectoryName!, song.Path) };
             }
         }
     }

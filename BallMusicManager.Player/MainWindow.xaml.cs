@@ -176,15 +176,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
     private void OpenFromPlaylist(object sender, RoutedEventArgs e) {
         var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "playlist");
         if(dialog.ShowDialog() is not true) return;
-        var fileInto = new FileInfo(dialog.FileName);
-        JsonExtensions.ReadFromJsonFile<List<Song>>(fileInto).Resolve(songs => {
-            Playlist = new(fileInto.DirectoryName!, MapFrom(songs));
-        });
 
-        IEnumerable<Song> MapFrom(IEnumerable<Song> songs) {
-            foreach(Song song in songs) {
-                yield return song with { Path = Path.IsPathRooted(song.Path) ? song.Path : Path.Combine(fileInto.DirectoryName!, song.Path)};
-            }
-        }
+        Playlist = PlaylistBuilder.FromFile(new(dialog.FileName));
     }
 }
