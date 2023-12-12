@@ -25,10 +25,12 @@ public sealed partial class MainWindow : Window {
     }
 
     private void Songs_Drop(object sender, DragEventArgs e) {
-        if(DraggedItem is null) {
+        if(e.Data.GetDataPresent(DataFormats.FileDrop)) {
             FileDrop();
             return;
         }
+
+        if(DraggedItem is null) return;
 
         var targetItem = FindAncestorOrSelf<DataGridRow>(e.OriginalSource as DependencyObject)?.Item as Song;
         if(targetItem is not null && !ReferenceEquals(DraggedItem, targetItem)) {
