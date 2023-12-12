@@ -13,7 +13,14 @@ public sealed class MusicPlayer{
     public event Action? OnSongFinished;
 
     public TimeSpan CurrentSongLength => CurrentAudioWave?.TotalTime ?? TimeSpan.Zero;
-    public TimeSpan CurrentTime => CurrentAudioWave?.CurrentTime ?? TimeSpan.Zero;
+    public TimeSpan CurrentTime {
+        get => CurrentAudioWave?.CurrentTime ?? TimeSpan.Zero;
+        set {
+            if(CurrentAudioWave is null) return;
+            CurrentAudioWave.CurrentTime = value;
+        }
+    }
+
     public PlaybackState PlaybackState => Player.PlaybackState;
     public bool IsPlaying => PlaybackState is PlaybackState.Playing;
     private readonly WaveOutEvent Player = new();
