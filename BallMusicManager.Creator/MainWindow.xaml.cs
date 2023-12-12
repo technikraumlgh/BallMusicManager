@@ -125,4 +125,10 @@ public sealed partial class MainWindow : Window {
         Duration = Songs.Sum(s => s.Duration);
         LengthDisplay.Text = $"Duration: {Duration:hh\\:mm\\:ss}";
     }
+
+    private void Close(object sender, RoutedEventArgs e) {
+        if(Songs.Count == 0) return;
+
+        var shouldSave = MessageBox.Show("Save the current Playlist?", "Save", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+    }
 }

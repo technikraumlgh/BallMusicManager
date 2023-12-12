@@ -5,23 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BallMusicManager.Creator"
         mc:Ignorable="d"
-        Title="Playlist Creator" Height="450" Width="800">
+        Title="Playlist Creator" Height="900" Width="1600">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition MaxHeight="20"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="50"/>
+            <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel>
-            <Button Content="S" Click="Save"/>
-            <Button Content="E" Click="Export"/>
-            <Button Content="O" Click="Open"/>
-        </StackPanel>
+        <Menu Grid.ColumnSpan="2">
+            <MenuItem Header="_File">
+                <MenuItem Header="Save" Click="Save"/>
+                <MenuItem Header="Export" Click="Export"/>
+                <MenuItem Header="Open" Click="Open"/>
+                <MenuItem Header="Close" Click="Close"/>
+                <Separator/>
+                <MenuItem Header="Exit"/>
+            </MenuItem>
+        </Menu>
 
-        <StackPanel Grid.Column="1">
+        <StackPanel Grid.Row="1">
             <TextBlock x:Name="LengthDisplay">Length: </TextBlock>
             <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" AllowDrop="True" 
-                      Height="400" Drop="Songs_Drop"
+                      Drop="Songs_Drop"
                       PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
                       PreviewMouseMove="SongsGrid_PreviewMouseMove">
                 <DataGrid.Columns>
