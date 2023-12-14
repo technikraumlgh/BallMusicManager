@@ -53,7 +53,7 @@ public sealed partial class MainWindow : Window, IHostProvider{
     public MainWindow(){
         InitializeComponent();
         Server = new(this);
-        Timer.Interval = TimeSpan.FromMilliseconds(100);
+        Timer.Interval = TimeSpan.FromMilliseconds(250);
         //Closing += MusicPlayer.OnExit;
         Timer.Tick += Tick;
     }
@@ -84,14 +84,6 @@ public sealed partial class MainWindow : Window, IHostProvider{
         Playlist.Skip();
     }
 
-    private void OpenFromFolder(object sender, RoutedEventArgs args){
-        using var dialog = new FolderBrowserDialog();
-
-        if (dialog.ShowDialog() is not System.Windows.Forms.DialogResult.OK) return;
-
-        Playlist = PlaylistBuilder.FromFolder(new(dialog.SelectedPath));
-    }
-
     private void UpdateServer(object sender, RoutedEventArgs args){
         Server.Update();
     }
@@ -101,7 +93,8 @@ public sealed partial class MainWindow : Window, IHostProvider{
         CurrentTitle.Text = Playlist?.Current?.Title ?? "Title";
         CurrentArtist.Text = Playlist?.Current?.Artist ?? "Artist";
         CurrentDance.Text = Playlist?.Current?.Dance ?? "Dance";
-        RemaningTime.Text = Playlist?.Current?.Duration.ToString("mm\\:ss") ?? "Duration";
+        RemaningTime.Text = Playlist?.Player.CurrentSongLength.ToString("mm\\:ss") ?? "Duration";
+        PlaybackBar.Maximum = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         Server.Update();
     }
 
@@ -111,44 +104,13 @@ public sealed partial class MainWindow : Window, IHostProvider{
 
     private void Tick(object? sender, EventArgs args){
         if(Playlist is null){
-            RemaningTime.Text = "Time";
+            RemaningTime.Text = "Duration";
             Timer.Stop();
             return;
         }
         RemaningTime.Text = (Playlist.Player.CurrentSongLength - Playlist.Player.CurrentTime).ToString(@"mm\:ss"); ;
+        PlaybackBar.Value = Playlist.Player.CurrentTime.TotalSeconds;
     }
-
-    // private void FixIndices(object sender, RoutedEventArgs args){
-    //     for (var i = 0; i < MusicPlayer.Playlist.Length; i++)
-    //     {
-    //         var fileName = Path.GetFileName(MusicPlayer.Playlist[i].Path);
-    //         var splitName = fileName.Split('_');
-    //         var directory = Path.GetDirectoryName(MusicPlayer.Playlist[i].Path);
-    //         var idx = i + 1;
-    //         if (!splitName[0].TryParse(out int idxFromFileName))
-    //         {
-    //             if (splitName.Length < 3)
-    //             {
-    //                 var targetPath = $"{directory}/{idx}_{fileName}";
-    //                 Trace.TraceInformation($"Moved {MusicPlayer.Playlist[i].Path} to {targetPath}");
-    //                 File.Move(MusicPlayer.Playlist[i].Path, targetPath);
-    //                 continue;
-    //             }
-    //         }
-
-    //         if (idxFromFileName != idx)
-    //         {
-    //             splitName[0] = idx.ToString();
-    //             fileName = splitName.Dump('_');
-    //             var targetPath = Path.Join(directory, fileName);
-    //             //Trace.TraceInformation($"Moved {MusicPlayer.Songs[i].Path} to {targetPath}");
-    //             File.Move(MusicPlayer.Playlist[i].Path, targetPath);
-    //             continue;
-    //         }
-    //     }
-
-    //     MusicPlayer.ReloadPlaylist();
-    // }
 
     private void ReloadPlaylist(object sender, RoutedEventArgs args){
         //MusicPlayer.ReloadPlaylist();
@@ -161,14 +123,6 @@ public sealed partial class MainWindow : Window, IHostProvider{
         Playlist.SetCurrent(Playlist.Songs.IndexOf(song));
     }
 
-    private void OpenFromCSV(object sender, RoutedEventArgs e){
-        var dialog = DialogUtils.GetFileDialog(extension: "csv", filterDescription: "CSV");
-
-        if (dialog.ShowDialog() is not true) return;
-
-        Playlist = PlaylistBuilder.FromCSV(new(dialog.FileName));
-    }
-
     private void SendMessage(object sender, RoutedEventArgs e){
         _ = Server.SendMessage(MessageBox.Text);
     }
@@ -178,5 +132,12 @@ public sealed partial class MainWindow : Window, IHostProvider{
         if(dialog.ShowDialog() is not true) return;
 
         Playlist = PlaylistBuilder.FromFile(new(dialog.FileName));
+    }
+
+    private void OpenFromFolder(object sender, RoutedEventArgs args) {
+        using var dialog = new FolderBrowserDialog();
+        if(dialog.ShowDialog() is not System.Windows.Forms.DialogResult.OK) return;
+
+        Playlist = PlaylistBuilder.FromFolder(new(dialog.SelectedPath));
     }
 }

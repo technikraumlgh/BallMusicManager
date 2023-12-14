@@ -50,11 +50,12 @@
                     <TextBlock x:Name="CurrentArtist" HorizontalAlignment="Center" FontSize="14">Artist</TextBlock>
                     <TextBlock x:Name="CurrentDance" HorizontalAlignment="Center" FontSize="14">Tanz</TextBlock>
                     <TextBlock x:Name="RemaningTime" HorizontalAlignment="Center" FontSize="14">Duration</TextBlock>
+                    <ProgressBar x:Name="PlaybackBar" Height="15"/>
                     <!--<TextBlock x:Name="CurrentIndex" HorizontalAlignment="Center" FontSize="14">Index</TextBlock>-->
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
-                    <TextBox x:Name="MessageBox">Herzlich Willkommen zum Weihnachtsball 2023</TextBox>
+                    <TextBox x:Name="MessageBox" AcceptsReturn="True" TextWrapping="WrapWithOverflow">Herzlich Willkommen zum Weihnachtsball 2023</TextBox>
                     <Button FontSize="14" Click="SendMessage" Margin="0 0 0 15">Send</Button>
 
                     <TextBlock x:Name="MissingFiles" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Missing Files</TextBlock>
@@ -66,7 +67,7 @@
                 </StackPanel>
             </DockPanel>
 
-            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" PreviewMouseLeftButtonUp="SkipTo">
+            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" PreviewMouseLeftButtonUp="SkipTo" CanUserDeleteRows="False" CanUserSortColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
