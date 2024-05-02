@@ -150,9 +150,9 @@ public sealed partial class MainWindow : Window, IHostProvider{
     //     MusicPlayer.ReloadPlaylist();
     // }
 
-    private void ReloadPlaylist(object sender, RoutedEventArgs args){
+    //private void ReloadPlaylist(object sender, RoutedEventArgs args){
         //MusicPlayer.ReloadPlaylist();
-    }
+    //}
 
     private void SkipTo(object sender, MouseButtonEventArgs args){
         if(Playlist is null) return;

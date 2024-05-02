@@ -12,7 +12,7 @@ public static class PlaylistBuilder{
     public static PlaylistPlayer FromFolder(DirectoryInfo folder){
         var files = folder.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly).Where(ValidFile);
         //var files = Directory.GetFiles(path, , ).Where(path => Song.).ToArray();
-        return new(folder.FullName, files.Select(SongBuilder.FromPath).ReduceFiltered());
+        return new(folder.FullName, files.Select(SongBuilder.FromPath).ReduceSome());
     }
 
     public static PlaylistPlayer FromCSV(FileInfo file){
