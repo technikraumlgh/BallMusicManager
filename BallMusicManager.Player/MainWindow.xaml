@@ -27,7 +27,7 @@
 
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                 <!--<Button Width="120" Click="OpenFromFolder">Open From Folder</Button>-->
-                <Button Width="120" Click="OpenFromPlaylist">Open</Button>
+                <Button Width="120" Click="OpenFromPlaylist" Margin="0 4">Open</Button>
                 <!--<Button Width="120" Click="ReloadPlaylist">Reload</Button>-->
             </StackPanel>
         </DockPanel>
@@ -67,7 +67,7 @@
                 </StackPanel>
             </DockPanel>
 
-            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" PreviewMouseLeftButtonUp="SkipTo" CanUserDeleteRows="False" CanUserSortColumns="False">
+            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" MouseDoubleClick="SkipTo" CanUserDeleteRows="False" CanUserSortColumns="False" IsReadOnly="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>

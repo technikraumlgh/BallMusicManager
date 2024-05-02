@@ -1,115 +1,116 @@
 <!DOCTYPE html>
-<html data-theme="winter">
-  <head>
+<html data-theme="spring">
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ballplaylist</title>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" 
+            integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg==" 
+            crossorigin="anonymous" 
+            referrerpolicy="no-referrer">
+    </script>
 
     <style>
-      * {
-        margin: 0;
-      }
-
-      @media screen and (max-width: 620px) {
-        :root {
-          font-size: 8px;
+        * {
+            margin: 0;
         }
-      }
 
-      @media screen and (max-width: 1024px) and (min-width: 620px) {
-        :root {
-          font-size: 14px;
+        @media screen and (max-width: 620px) {
+            :root {
+                font-size: 8px;
+            }
         }
-      }
 
-      body {
-        font-family: sans-serif;
-        color: white;
-        /* cursor: none; */
-        height: 100vh;
-        width: 100vw;
-        padding: 0;
-      }
+        @media screen and (max-width: 1024px) and (min-width: 620px) {
+            :root {
+                font-size: 14px;
+            }
+        }
 
-      h1 {
-        font-size: 7rem;
-        font-weight: 600;
-      }
+        body {
+            font-family: Arial;
+            color: #000028FF;
+            /* cursor: none; */
+            height: 100vh;
+            width: 100vw;
+            padding: 0;
+        }
 
-      h2 {
-        font-size: 5rem;
-        font-weight: 400;
-      }
+        h1 {
+            font-size: 7rem;
+            font-weight: 600;
+        }
 
-      h3 {
-        font-size: 3rem;
-        font-weight: normal;
-      }
+        h2 {
+            font-size: 5rem;
+            font-weight: 400;
+        }
 
-      h4 {
-        font-size: 2.25rem;
-        font-weight: normal;
-      }
+        h3 {
+            font-size: 3rem;
+            font-weight: normal;
+        }
 
-      h5 {
-        font-size: 1.5rem;
-        font-weight: normal;
-      }
+        h4 {
+            font-size: 2.25rem;
+            font-weight: normal;
+        }
 
-      .ta-center {
-        text-align: center;
-      }
+        h5 {
+            font-size: 1.5rem;
+            font-weight: normal;
+        }
 
-      .mt-05 {
-        margin-top: 0.5rem;
-      }
+        .ta-center {
+            text-align: center;
+        }
 
-      .mt-1 {
-        margin-top: 1rem;
-      }
+        .mt-05 {
+            margin-top: 0.5rem;
+        }
 
-      .mb-4 {
-        margin-bottom: 4rem;
-      }
+        .mt-1 {
+            margin-top: 1rem;
+        }
 
-      .text-container {
-        margin: 3em;
-        position: fixed;
-        width: calc(100vw - 6em);
-      }
+        .mb-4 {
+            margin-bottom: 4rem;
+        }
 
-      .small-text {
-        font-size: 2rem;
-      }
+        .text-container {
+            margin: 3em;
+            position: fixed;
+            width: calc(100vw - 6em);
+        }
+
+        .small-text {
+            font-size: 2rem;
+        }
     </style>
 
     <!-- Winter-Theme -->
     <style>
-      :root[data-theme="winter"] {
-        background: #1a263e;
-      }
+        :root[data-theme="winter"] {
+            background: #1a263e;
+        }
 
-      .snow {
-        position: fixed;
-        height: 100%;
-        width: 100%;
-        z-index: -1;
-        /* margin: -2.9%; */
-      }
+        .snow {
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+            /* margin: -2.9%; */
+        }
     </style>
 
     <!-- Spring-Theme -->
     <style>
-      :root[data-theme="spring"] {
-        background: linear-gradient(to bottom, #ff0080, #fbceb1);
-      }
+        :root[data-theme="spring"] {
+            background: linear-gradient(to bottom, #9bf3f0, #daffed);
+        }
     </style>
-  </head>
+</head>
 
   <body>
     <!-- Welcome/Goodbye Screen -->

@@ -14,7 +14,8 @@ builder.Services.AddSingleton<SignalService>();
 
 var app = builder.Build();
 
-var url = $"http://{SystemExtensions.LocalIPAddress()}";
+var url = $"http://{SystemExtensions.LocalIPv4Address()}";
+app.Urls.Add("http://localhost");
 app.Urls.Add(url);
 app.UseRouting();
 app.UseCors();
