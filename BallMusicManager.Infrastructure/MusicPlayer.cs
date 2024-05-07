@@ -45,9 +45,8 @@ public sealed class MusicPlayer{
         OnSongPaused?.Invoke();
     }
     public void Stop() {
-        if(!IsPlaying) return;
-
-        _wasStopped = true;
+        if(!IsPlaying) _wasStopped = true;
+        
         _player.Stop();
     }
 
