@@ -3,7 +3,6 @@ using BallMusicManager.Domain;
 using BallMusicManager.Server;
 using Microsoft.AspNetCore.Mvc;
 
-
 const string KEY = "WB2023LGH";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +18,9 @@ app.Urls.Add("http://localhost");
 app.Urls.Add(url);
 app.UseRouting();
 app.UseCors();
+
+var logger = app.Services.GetService<ILogger<Program>>()!;
+logger.LogInformation(SystemExtensions.LocalIPv4Addresses().Dump('\n'));
 
 var signalService = app.Services.GetService<SignalService>()!;
 
