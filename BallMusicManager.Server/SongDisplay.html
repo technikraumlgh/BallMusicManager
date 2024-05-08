@@ -29,8 +29,8 @@
         }
 
         body {
-            font-family: Arial;
-            color: #000028FF;
+            font-family: Helvetica;
+            color: aliceblue;
             /* cursor: none; */
             height: 100vh;
             width: 100vw;
@@ -87,6 +87,17 @@
         .small-text {
             font-size: 2rem;
         }
+
+        #qr-code {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        #qr-code_image{
+            height: 20vh;
+        }
+
     </style>
 
     <!-- Winter-Theme -->
@@ -100,7 +111,6 @@
             height: 100%;
             width: 100%;
             z-index: -1;
-            /* margin: -2.9%; */
         }
     </style>
 
@@ -127,6 +137,10 @@
       <p class="small-text">Next Up</p>
       <h2 id="next-dance" class="mt-05">Loading next dance failed</h2>
       <h3 id="next-title" class="mt-1">Loading next title failed</h3>
+    </div>
+
+    <div id="qr-code">
+        <img src="qr-code" id="qr-code_image" />
     </div>
 
     <!-- Show track -->
@@ -172,8 +186,8 @@
       }
 
       function setNext(data) {
-        nextTitle.innerText = data.title;
         nextDance.innerText = data.dance;
+        nextTitle.innerText = `${data.title} by ${data.artist}`;
       }
       
       function displayMessage(msg) {

@@ -2,31 +2,39 @@
 using BallMusicManager.Domain;
 using BallMusicManager.Server;
 using Microsoft.AspNetCore.Mvc;
+using QRCoder;
 
-const string KEY = "WB2023LGH";
+const string KEY = "WB2023LGH"; //TODO: proper api keys
+const string QR_CODE_FILE = "qr.png";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
+//builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
+//builder.Services.AddCors();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<SignalService>();
+//builder.Services.AddAuthentication();
 
 var app = builder.Build();
 
-var url = $"http://{SystemExtensions.LocalIPv4Address()}";
-app.Urls.Add("http://localhost");
+var ip = SystemHelper.LocalIPAddress();
+var url = $"http://{ip}";
 app.Urls.Add(url);
-app.UseRouting();
-app.UseCors();
+OutputQRCode(url);
 
-var logger = app.Services.GetService<ILogger<Program>>()!;
-logger.LogInformation(SystemExtensions.LocalIPv4Addresses().Dump('\n'));
+app.Urls.Add("http://localhost");
+
+app.UseRouting();
+//app.UseCors();
 
 var signalService = app.Services.GetService<SignalService>()!;
+var logger = app.Services.GetService<ILogger<Program>>()!;
+
 
 var playing = SongDTO.None;
 var next = playing;
-//var state = State.Welcome;
+logger.LogInformation("Running on {url}", url);
+
 
 app.MapHub<SignalHub>("signal");
 
@@ -56,6 +64,10 @@ app.MapGet("snow.js", async (HttpResponse response, CancellationToken cancellati
     await response.SendFileAsync("snow.js", cancellationToken);
 });
 
+app.MapGet("qr-code", async (HttpResponse response, CancellationToken cancellationToken) => {
+    await response.SendFileAsync(QR_CODE_FILE, cancellationToken);
+});
+
 app.MapPost("message", async ([FromBody] MessageDTO msg, string? key) =>{
     if (key is null || key != KEY) return Results.Forbid();
 
@@ -68,5 +80,10 @@ app.MapGet("/", ()=> Results.Redirect("display"));
 
 app.Run();
 
-//record Song(string title, string artist, string dance);
-//enum State { Welcome, Playing, End }
+static void OutputQRCode(string url, int size = 20) {
+    using var qrGenerator = new QRCodeGenerator();
+    using var qrDataData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+    using var qrCode = new PngByteQRCode(qrDataData);
+    using var ms = File.Create(QR_CODE_FILE);
+    ms.Write(qrCode.GetGraphic(size));
+}
