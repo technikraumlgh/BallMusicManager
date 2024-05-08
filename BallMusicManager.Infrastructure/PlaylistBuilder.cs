@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
+using System.IO.Compression;
 using Ametrin.Serialization;
 using Ametrin.Utils.Optional;
 using BallMusicManager.Domain;
@@ -41,8 +42,12 @@ public static class PlaylistBuilder{
 
     public static PlaylistPlayer FromFile(FileInfo file) {
         return new(file.DirectoryName!, EnumerateFile(file));
+    }
 
-        
+    public static PlaylistBuilder FromArchive(FileInfo file) {
+        using var archive = new ZipArchive(file.OpenRead());
+        var songListEntry = archive.GetEntry("song_list.json");
+        return new(file.FullName, );
     }
 
     public static IEnumerable<Song> EnumerateFile(FileInfo file) {

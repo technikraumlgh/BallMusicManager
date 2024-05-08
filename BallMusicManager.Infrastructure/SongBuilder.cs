@@ -45,7 +45,7 @@ public sealed class SongBuilder{
     }
     public SongBuilder FromMetaData(){
         using var file = TagLib.File.Create(_Path);
-        if(file.Properties.Duration.TotalMinutes < 1.5) Trace.TraceWarning($"{_Path} is probably not a full song");
+        //if(file.Properties.Duration.TotalMinutes < 1.5) Trace.TraceWarning($"{_Path} is probably not a full song");
         return Duration(file.Properties.Duration).Artist(file.Tag.FirstPerformer);
     }
 

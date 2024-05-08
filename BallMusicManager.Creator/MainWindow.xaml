@@ -19,11 +19,15 @@
         </Grid.ColumnDefinitions>
 
         <Menu Grid.ColumnSpan="2">
-            <MenuItem Header="File">
+            <MenuItem Header="Playlist">
                 <MenuItem Header="Save" Click="Save"/>
                 <MenuItem Header="Export" Click="Export"/>
                 <MenuItem Header="Open" Click="Open"/>
                 <MenuItem Header="Close" Click="Close"/>
+            </MenuItem>
+            
+            <MenuItem Header="Library">
+
             </MenuItem>
         </Menu>
 

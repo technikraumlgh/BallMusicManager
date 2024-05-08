@@ -4,12 +4,10 @@ using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 using System.Collections.ObjectModel;
 using Ametrin.Utils;
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Collections.Specialized;
 using System.Windows.Data;
 using System.Windows.Threading;
@@ -17,7 +15,7 @@ using System.Windows.Threading;
 namespace BallMusicManager.Creator; 
 public sealed partial class MainWindow : Window {
     private ObservableCollection<Song> Playlist = [];
-    private ObservableCollection<Song> Library = [];
+    private readonly ObservableCollection<Song> Library = [];
     private TimeSpan Duration = TimeSpan.Zero;
     private Song? DraggedItem;
     private readonly MusicPlayer _player = new();
@@ -42,7 +40,7 @@ public sealed partial class MainWindow : Window {
 
         if(DraggedItem is null || e.OriginalSource is not DependencyObject obj) return;
 
-        var targetItem = FindAncestorOrSelf<DataGridRow>(obj)?.Item as Song;
+        var targetItem = obj.FindAncestorOrSelf<DataGridRow>()?.Item as Song;
         if(targetItem is not null && !ReferenceEquals(DraggedItem, targetItem)) {
             var index = Playlist.IndexOf(targetItem);
             Playlist.Remove(DraggedItem);
@@ -53,7 +51,7 @@ public sealed partial class MainWindow : Window {
 
     private void SongsGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
         if(e.OriginalSource is not DependencyObject obj) return;
-        var row = FindAncestorOrSelf<DataGridRow>(obj);
+        var row = obj.FindAncestorOrSelf<DataGridRow>();
         if(row != null) {
             DraggedItem = row.Item as Song;
         }
@@ -63,14 +61,6 @@ public sealed partial class MainWindow : Window {
         if(e.LeftButton == MouseButtonState.Pressed && DraggedItem != null) {
             DragDrop.DoDragDrop(SongsGrid, DraggedItem, DragDropEffects.Move);
         }
-    }
-
-    private static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject {
-        while(obj is not null) {
-            if(obj is T objTyped) return objTyped;
-            obj = VisualTreeHelper.GetParent(obj);
-        }
-        return null!;
     }
 
     private void Export(object sender, RoutedEventArgs e) {
