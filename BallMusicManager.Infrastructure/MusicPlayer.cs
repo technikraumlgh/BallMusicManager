@@ -50,7 +50,9 @@ public sealed class MusicPlayer{
         //OnStateChanged?.Invoke();
         OnSongPaused?.Invoke();
     }
+
     public void Stop() {
+        if(_player.PlaybackState is PlaybackState.Stopped) return;
         _wasStoppedManually = true;
         _player.Stop();
     }
@@ -74,9 +76,12 @@ public sealed class MusicPlayer{
 
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e){
         //OnStateChanged?.Invoke();
-        if(_wasStoppedManually) OnSongStopped?.Invoke();
-        else OnSongFinished?.Invoke();
-        
+        if(_wasStoppedManually) {
+            OnSongStopped?.Invoke();
+        } else {
+            OnSongFinished?.Invoke();
+        }
+
         _wasStoppedManually = false;
     }
 
