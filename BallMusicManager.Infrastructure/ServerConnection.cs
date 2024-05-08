@@ -23,7 +23,7 @@ public sealed class ServerConnection {
 
     public ServerConnection(IHostProvider hostProvider) {
         HostProvider = hostProvider;
-        _ = Ping($"http://{HostProvider.Host}/current");
+        _ = Ping($"http://{HostProvider.Host}/");
     }
 
     public void Update() {
@@ -58,6 +58,16 @@ public sealed class ServerConnection {
         using var httpClient = new HttpClient();
         try {
             var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/message?key={HostProvider.Password}", new MessageDTO(msg));
+            HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
+        } catch {
+            HostProvider.SetServerOnline(false);
+        }
+    }
+    
+    public async Task SendNews(string news) {
+        using var httpClient = new HttpClient();
+        try {
+            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/news?key={HostProvider.Password}", new MessageDTO(news));
             HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
         } catch {
             HostProvider.SetServerOnline(false);

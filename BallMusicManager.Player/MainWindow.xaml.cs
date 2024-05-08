@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Ametrin.Serialization;
 using Ametrin.Utils.WPF;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
@@ -119,11 +117,11 @@ public sealed partial class MainWindow : Window, IHostProvider {
         if(Playlist is null) return;
         var row = (args.OriginalSource as DependencyObject)!.FindParent<DataGridRow>();
         if (row is null || row.Item is not Song song) return;
-        Playlist.SetCurrent(Playlist.Songs.IndexOf(song));
-    }
-
-    private void SendMessage(object sender, RoutedEventArgs e) {
-        _ = Server.SendMessage(MessageBox.Text);
+        if(Playlist.Current == song) {
+            Playlist.Player.Restart();
+        } else {
+            Playlist.SetCurrent(Playlist.Songs.IndexOf(song));
+        }
     }
 
     private void OpenFromPlaylist(object sender, RoutedEventArgs e) {
@@ -138,5 +136,10 @@ public sealed partial class MainWindow : Window, IHostProvider {
         if(dialog.ShowDialog() is not System.Windows.Forms.DialogResult.OK) return;
 
         Playlist = PlaylistBuilder.FromFolder(new(dialog.SelectedPath));
+    }
+
+    private void OpenMessageWindow(object sender, RoutedEventArgs e) {
+        new MessageWindow(Server).Show();
+        //Task.Run(()=> );
     }
 }

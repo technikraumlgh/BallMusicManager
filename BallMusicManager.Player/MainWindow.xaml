@@ -55,8 +55,7 @@
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
-                    <TextBox x:Name="MessageBox" AcceptsReturn="True" TextWrapping="WrapWithOverflow">Herzlich Willkommen zum Weihnachtsball 2023</TextBox>
-                    <Button FontSize="14" Click="SendMessage" Margin="0 0 0 15">Send</Button>
+                    <Button FontSize="14" Click="OpenMessageWindow" Margin="0 0 0 15">Messages</Button>
 
                     <TextBlock x:Name="MissingFiles" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Missing Files</TextBlock>
                     <TextBlock x:Name="ServerOffline" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Server Fail</TextBlock>

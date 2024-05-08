@@ -39,7 +39,7 @@
 
         h1 {
             font-size: 7rem;
-            font-weight: 600;
+            font-weight: normal;
         }
 
         h2 {
@@ -90,12 +90,23 @@
 
         #qr-code {
             position: absolute;
-            bottom: 0;
-            right: 0;
+            bottom: 1vh;
+            right: 1vw;
         }
 
         #qr-code_image{
             height: 20vh;
+        }
+
+        #news{
+            position: absolute;
+            bottom: 1vh;
+            left: 1vw;
+        }
+
+        .italic {
+            font-style: italic;
+            font-weight: bold;
         }
 
     </style>
@@ -117,7 +128,7 @@
     <!-- Spring-Theme -->
     <style>
         :root[data-theme="spring"] {
-            background: linear-gradient(to bottom, #9bf3f0, #daffed);
+    background: linear-gradient(to bottom, #4b92db, #ffb870);
         }
     </style>
 </head>
@@ -131,17 +142,20 @@
     <div id="song-container" class="text-container">
       <p class="small-text">Now Playing</p>
       <h1 id="dance" class="mt-1">Loading dance failed</h1>
-      <h2 id="title" class="mt-1">Loading title failed</h2>
+      <h2 id="title" class="mt-1 italic">Loading title failed</h2>
       <h3 id="artist" class="mb-4">by Loading artist failed</h3>
 
       <p class="small-text">Next Up</p>
       <h2 id="next-dance" class="mt-05">Loading next dance failed</h2>
-      <h3 id="next-title" class="mt-1">Loading next title failed</h3>
+      <h3 id="next-title" class="mt-1 italic">Loading next title failed</h3>
+      <h4 id="next-artist" class="mt-1">Loading next artist failed</h4>
     </div>
 
     <div id="qr-code">
         <img src="qr-code" id="qr-code_image" />
     </div>
+
+    <p id="news" class="small-text">Failed loading news</p>
 
     <!-- Show track -->
     <script defer>
@@ -151,19 +165,21 @@
       const artist = document.getElementById("artist");
       const nextTitle = document.getElementById("next-title");
       const nextDance = document.getElementById("next-dance");
+      const nextArtist = document.getElementById("next-artist");
       const message = document.getElementById("welcome-message");
+      const news = document.getElementById("news");
 
       (async function readFromServer() {
-        try {
-          const [currentData, nextData] = await Promise.all([
-            fetch("playing").then((res) => res.json()),
-            fetch("nextup").then((res) => res.json()),
-          ]);
-          setCurrent(currentData);
-          setNext(nextData);
-        } catch (error) {
-          console.warn("Error fetching data:", error);
-        }
+        // try {
+        //   const [currentData, nextData] = await Promise.all([
+        //     fetch("playing").then((res) => res.json()),
+        //     fetch("nextup").then((res) => res.json()),
+        //   ]);
+        //   setCurrent(currentData);
+        //   setNext(nextData);
+        // } catch (error) {
+        //   console.warn("Error fetching data:", error);
+        // }
       })();
 
       const connection = new signalR.HubConnectionBuilder()
@@ -174,6 +190,7 @@
       connection.on("current", (message) => setCurrent(JSON.parse(message)));
       connection.on("next", (message) => setNext(JSON.parse(message)));
       connection.on("message", (message) => displayMessage(message));
+      connection.on("news", (message) => displayNews(message));
 
       connection.start();
 
@@ -187,7 +204,8 @@
 
       function setNext(data) {
         nextDance.innerText = data.dance;
-        nextTitle.innerText = `${data.title} by ${data.artist}`;
+        nextTitle.innerText = data.title;
+        nextArtist.innerText = `by ${data.artist}`;
       }
       
       function displayMessage(msg) {
@@ -195,7 +213,11 @@
         songContainer.style.display = 'none';
         message.style.display = 'block';
         //message.style.textAlign = 'center';
-      }
+        }
+
+        function displayNews(msg) {
+            news.innerText = msg;
+        }
     </script>
 
     <!-- Show Snow -->

@@ -1,5 +1,4 @@
-﻿using Ametrin.Utils;
-using BallMusicManager.Domain;
+﻿using BallMusicManager.Domain;
 using NAudio.Wave;
 
 namespace BallMusicManager.Infrastructure;
@@ -14,7 +13,14 @@ public sealed class MusicPlayer{
     //public event Action? OnStateChanged;
 
     public TimeSpan CurrentSongLength => _currentAudioWave?.TotalTime ?? TimeSpan.Zero;
-    public TimeSpan CurrentTime => _currentAudioWave?.CurrentTime ?? TimeSpan.Zero;
+    public TimeSpan CurrentTime {
+        get => _currentAudioWave?.CurrentTime ?? TimeSpan.Zero;
+        set {
+            if(_currentAudioWave is null) return;
+            _currentAudioWave.CurrentTime = value;
+        }
+    }
+
     public PlaybackState PlaybackState => _player.PlaybackState;
     public bool IsPlaying => PlaybackState is PlaybackState.Playing;
     private readonly WaveOutEvent _player = new();
@@ -58,6 +64,12 @@ public sealed class MusicPlayer{
         }else{
             OnSongContinued?.Invoke();
         }
+    }
+
+    public void Restart() {
+        Stop();
+        CurrentTime = TimeSpan.Zero;
+        Play();
     }
 
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e){

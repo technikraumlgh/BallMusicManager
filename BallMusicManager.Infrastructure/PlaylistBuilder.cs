@@ -41,8 +41,6 @@ public static class PlaylistBuilder{
 
     public static PlaylistPlayer FromFile(FileInfo file) {
         return new(file.DirectoryName!, EnumerateFile(file));
-
-        
     }
 
     public static IEnumerable<Song> EnumerateFile(FileInfo file) {
