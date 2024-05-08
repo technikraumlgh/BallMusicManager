@@ -27,7 +27,7 @@
 
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                 <!--<Button Width="120" Click="OpenFromFolder">Open From Folder</Button>-->
-                <Button Width="120" Click="OpenFromPlaylist">Open</Button>
+                <Button Width="120" Click="OpenFromPlaylist" Margin="0 4">Open</Button>
                 <!--<Button Width="120" Click="ReloadPlaylist">Reload</Button>-->
             </StackPanel>
         </DockPanel>
@@ -50,12 +50,12 @@
                     <TextBlock x:Name="CurrentArtist" HorizontalAlignment="Center" FontSize="14">Artist</TextBlock>
                     <TextBlock x:Name="CurrentDance" HorizontalAlignment="Center" FontSize="14">Tanz</TextBlock>
                     <TextBlock x:Name="RemaningTime" HorizontalAlignment="Center" FontSize="14">Duration</TextBlock>
+                    <ProgressBar x:Name="PlaybackBar" Height="15"/>
                     <!--<TextBlock x:Name="CurrentIndex" HorizontalAlignment="Center" FontSize="14">Index</TextBlock>-->
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
-                    <TextBox x:Name="MessageBox">Herzlich Willkommen zum Weihnachtsball 2023</TextBox>
-                    <Button FontSize="14" Click="SendMessage" Margin="0 0 0 15">Send</Button>
+                    <Button FontSize="14" Click="OpenMessageWindow" Margin="0 0 0 15">Messages</Button>
 
                     <TextBlock x:Name="MissingFiles" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Missing Files</TextBlock>
                     <TextBlock x:Name="ServerOffline" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Server Fail</TextBlock>
@@ -66,7 +66,7 @@
                 </StackPanel>
             </DockPanel>
 
-            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" PreviewMouseLeftButtonUp="SkipTo">
+            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" MouseDoubleClick="SkipTo" CanUserDeleteRows="False" CanUserSortColumns="False" IsReadOnly="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>

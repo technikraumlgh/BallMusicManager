@@ -1,132 +1,161 @@
 <!DOCTYPE html>
-<html data-theme="winter">
-  <head>
+<html data-theme="spring">
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ballplaylist</title>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" 
+            integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg==" 
+            crossorigin="anonymous" 
+            referrerpolicy="no-referrer">
+    </script>
 
     <style>
-      * {
-        margin: 0;
-      }
-
-      @media screen and (max-width: 620px) {
-        :root {
-          font-size: 8px;
+        * {
+            margin: 0;
         }
-      }
 
-      @media screen and (max-width: 1024px) and (min-width: 620px) {
-        :root {
-          font-size: 14px;
+        @media screen and (max-width: 620px) {
+            :root {
+                font-size: 8px;
+            }
         }
-      }
 
-      body {
-        font-family: sans-serif;
-        color: white;
-        /* cursor: none; */
-        height: 100vh;
-        width: 100vw;
-        padding: 0;
-      }
+        @media screen and (max-width: 1024px) and (min-width: 620px) {
+            :root {
+                font-size: 14px;
+            }
+        }
 
-      h1 {
-        font-size: 7rem;
-        font-weight: 600;
-      }
+        body {
+            font-family: Helvetica;
+            color: aliceblue;
+            /* cursor: none; */
+            height: 100vh;
+            width: 100vw;
+            padding: 0;
+        }
 
-      h2 {
-        font-size: 5rem;
-        font-weight: 400;
-      }
+        h1 {
+            font-size: 7rem;
+            font-weight: normal;
+        }
 
-      h3 {
-        font-size: 3rem;
-        font-weight: normal;
-      }
+        h2 {
+            font-size: 5rem;
+            font-weight: 400;
+        }
 
-      h4 {
-        font-size: 2.25rem;
-        font-weight: normal;
-      }
+        h3 {
+            font-size: 3rem;
+            font-weight: normal;
+        }
 
-      h5 {
-        font-size: 1.5rem;
-        font-weight: normal;
-      }
+        h4 {
+            font-size: 2.25rem;
+            font-weight: normal;
+        }
 
-      .ta-center {
-        text-align: center;
-      }
+        h5 {
+            font-size: 1.5rem;
+            font-weight: normal;
+        }
 
-      .mt-05 {
-        margin-top: 0.5rem;
-      }
+        .ta-center {
+            text-align: center;
+        }
 
-      .mt-1 {
-        margin-top: 1rem;
-      }
+        .mt-05 {
+            margin-top: 0.5rem;
+        }
 
-      .mb-4 {
-        margin-bottom: 4rem;
-      }
+        .mt-1 {
+            margin-top: 1rem;
+        }
 
-      .text-container {
-        margin: 3em;
-        position: fixed;
-        width: calc(100vw - 6em);
-      }
+        .mb-4 {
+            margin-bottom: 4rem;
+        }
 
-      .small-text {
-        font-size: 2rem;
-      }
+        .text-container {
+            margin: 3em;
+            position: fixed;
+            width: calc(100vw - 6em);
+        }
+
+        .small-text {
+            font-size: 2rem;
+        }
+
+        #qr-code {
+            position: absolute;
+            bottom: 1vh;
+            right: 1vw;
+        }
+
+        #qr-code_image{
+            height: 20vh;
+        }
+
+        #news{
+            position: absolute;
+            bottom: 1vh;
+            left: 1vw;
+        }
+
+        .italic {
+            font-style: italic;
+            font-weight: bold;
+        }
+
     </style>
 
     <!-- Winter-Theme -->
     <style>
-      :root[data-theme="winter"] {
-        background: #1a263e;
-      }
+        :root[data-theme="winter"] {
+            background: #1a263e;
+        }
 
-      .snow {
-        position: fixed;
-        height: 100%;
-        width: 100%;
-        z-index: -1;
-        /* margin: -2.9%; */
-      }
+        .snow {
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+        }
     </style>
 
     <!-- Spring-Theme -->
     <style>
-      :root[data-theme="spring"] {
-        background: linear-gradient(to bottom, #ff0080, #fbceb1);
-      }
+        :root[data-theme="spring"] {
+    background: linear-gradient(to bottom, #4b92db, #ffb870);
+        }
     </style>
-  </head>
+</head>
 
   <body>
     <!-- Welcome/Goodbye Screen -->
     <div class="text-container ta-center">
-      <h2 id="welcome-message">Herzlich Willkommen zum Weihnachtsball</h2>
+      <h2 id="welcome-message">Herzlich Willkommen zum Frühlingsball</h2>
     </div>
     <!-- Song Display Screen -->
     <div id="song-container" class="text-container">
       <p class="small-text">Now Playing</p>
       <h1 id="dance" class="mt-1">Loading dance failed</h1>
-      <h2 id="title" class="mt-1">Loading title failed</h2>
+      <h2 id="title" class="mt-1 italic">Loading title failed</h2>
       <h3 id="artist" class="mb-4">by Loading artist failed</h3>
 
       <p class="small-text">Next Up</p>
       <h2 id="next-dance" class="mt-05">Loading next dance failed</h2>
-      <h3 id="next-title" class="mt-1">Loading next title failed</h3>
+      <h3 id="next-title" class="mt-1 italic">Loading next title failed</h3>
+      <h4 id="next-artist" class="mt-1">Loading next artist failed</h4>
     </div>
+
+    <div id="qr-code">
+        <img src="qr-code" id="qr-code_image" />
+    </div>
+
+    <p id="news" class="small-text">Failed loading news</p>
 
     <!-- Show track -->
     <script defer>
@@ -136,19 +165,21 @@
       const artist = document.getElementById("artist");
       const nextTitle = document.getElementById("next-title");
       const nextDance = document.getElementById("next-dance");
+      const nextArtist = document.getElementById("next-artist");
       const message = document.getElementById("welcome-message");
+      const news = document.getElementById("news");
 
       (async function readFromServer() {
-        try {
-          const [currentData, nextData] = await Promise.all([
-            fetch("playing").then((res) => res.json()),
-            fetch("nextup").then((res) => res.json()),
-          ]);
-          setCurrent(currentData);
-          setNext(nextData);
-        } catch (error) {
-          console.warn("Error fetching data:", error);
-        }
+        // try {
+        //   const [currentData, nextData] = await Promise.all([
+        //     fetch("playing").then((res) => res.json()),
+        //     fetch("nextup").then((res) => res.json()),
+        //   ]);
+        //   setCurrent(currentData);
+        //   setNext(nextData);
+        // } catch (error) {
+        //   console.warn("Error fetching data:", error);
+        // }
       })();
 
       const connection = new signalR.HubConnectionBuilder()
@@ -159,6 +190,7 @@
       connection.on("current", (message) => setCurrent(JSON.parse(message)));
       connection.on("next", (message) => setNext(JSON.parse(message)));
       connection.on("message", (message) => displayMessage(message));
+      connection.on("news", (message) => displayNews(message));
 
       connection.start();
 
@@ -171,16 +203,21 @@
       }
 
       function setNext(data) {
-        nextTitle.innerText = data.title;
         nextDance.innerText = data.dance;
+        nextTitle.innerText = data.title;
+        nextArtist.innerText = `by ${data.artist}`;
       }
       
       function displayMessage(msg) {
-        message.innerText = msg;
+        message.innerHTML = msg;
         songContainer.style.display = 'none';
         message.style.display = 'block';
         //message.style.textAlign = 'center';
-      }
+        }
+
+        function displayNews(msg) {
+            news.innerText = msg;
+        }
     </script>
 
     <!-- Show Snow -->
