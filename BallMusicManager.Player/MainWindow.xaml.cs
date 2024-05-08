@@ -55,7 +55,7 @@ public sealed partial class MainWindow : Window, IHostProvider {
         Server = new(this);
         Timer.Interval = TimeSpan.FromMilliseconds(250);
         //Closing += MusicPlayer.OnExit;
-        Timer.Tick += Tick;
+        Timer.Tick += UpdateDuration;
     }
 
     public void SetServerOnline(bool value) {
@@ -95,6 +95,8 @@ public sealed partial class MainWindow : Window, IHostProvider {
         CurrentDance.Text = Playlist?.Current?.Dance ?? "Dance";
         RemaningTime.Text = Playlist?.Player.CurrentSongLength.ToString("mm\\:ss") ?? "Duration";
         PlaybackBar.Maximum = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
+        PlaybackBar.Value = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
+        UpdateDuration();
         Server.Update();
     }
 
@@ -102,9 +104,10 @@ public sealed partial class MainWindow : Window, IHostProvider {
         CurrentPlaylist.Text = $"{Playlist?.Path} ({Playlist?.Length})";
     }
 
-    private void Tick(object? sender, EventArgs args) {
+    private void UpdateDuration(object? sender = default, EventArgs? args = default) {
         if(Playlist is null){
             RemaningTime.Text = "Duration";
+            PlaybackBar.Value = 0;
             Timer.Stop();
             return;
         }

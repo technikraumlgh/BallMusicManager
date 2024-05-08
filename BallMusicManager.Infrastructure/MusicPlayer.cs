@@ -19,7 +19,7 @@ public sealed class MusicPlayer{
     public bool IsPlaying => PlaybackState is PlaybackState.Playing;
     private readonly WaveOutEvent _player = new();
     private AudioFileReader? _currentAudioWave;
-    private bool _wasStopped = false;
+    private bool _wasStoppedManually = false;
 
     public MusicPlayer(){
         _player.PlaybackStopped += OnPlaybackStopped;
@@ -45,8 +45,7 @@ public sealed class MusicPlayer{
         OnSongPaused?.Invoke();
     }
     public void Stop() {
-        if(!IsPlaying) _wasStopped = true;
-        
+        _wasStoppedManually = true;
         _player.Stop();
     }
 
@@ -63,10 +62,10 @@ public sealed class MusicPlayer{
 
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e){
         //OnStateChanged?.Invoke();
-        if(_wasStopped) OnSongStopped?.Invoke();
+        if(_wasStoppedManually) OnSongStopped?.Invoke();
         else OnSongFinished?.Invoke();
         
-        _wasStopped = false;
+        _wasStoppedManually = false;
     }
 
     ~MusicPlayer(){
