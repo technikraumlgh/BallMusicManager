@@ -17,5 +17,5 @@ public static class SongCache {
         return file;
     }
 
-    public static void Clear() => CacheDirectory.Delete();
+    public static void Clear() => CacheDirectory.Delete(true);
 }

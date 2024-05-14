@@ -19,37 +19,28 @@ public static class PlaylistBuilder{
         return new(file.DirectoryName!, EnumerateFile(file).Select(b=>b.Build()));
     }
 
+    const string SONG_LIST_ENTRY_NAME = "song_list.json";
     public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Map(songs => new PlaylistPlayer(file.FullName, songs));
     public static Result<IEnumerable<MutableSong>> EnumerateArchive(FileInfo file) {
         var archive = file.ToResultWhereExists()
             .Map(file => new ZipArchive(file.OpenRead()));
 
-        var songs = archive.Map(archive => archive.GetEntry("song_list.json"), ResultFlag.InvalidFile)
-            .Map(songListEntry => ParseSongList(songListEntry.Open())).WhereNotEmpty();
+        var songs = archive.Map(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME), ResultFlag.InvalidFile)
+            .Map(ParseSongList).WhereNotEmpty();
 
+        (archive, songs).Resolve((archive, songs) =>{
+            foreach(var song in songs) {
+                var songEntry = archive.GetEntry(song.Path)!;
+                using var songStream = songEntry.Open();
+                song.Path = SongCache.Cache(songStream, song.Path).FullName;
+            }
+        });
 
-        using var archive = new ZipArchive(file.OpenRead());
-        var songListEntry = archive.GetEntry("song_list.json");
-        if(songListEntry is null) {
-            return ResultFlag.InvalidFile;
-        }
-
-        using var songListStream = songListEntry.Open();
-        var songs = ParseSongList(songListStream);
-
-        if(!songs.Any()) {
-            return ResultFlag.Null;
-        }
-
-        foreach(var song in songs) {
-            var songEntry = archive.GetEntry(song.Path)!;
-            using var songStream = songEntry.Open();
-            song.Path = SongCache.Cache(songStream, song.Path).FullName;
-        }
 
         return Result<IEnumerable<MutableSong>>.Of(songs);
         
-        static IEnumerable<MutableSong> ParseSongList(Stream stream) {
+        static IEnumerable<MutableSong> ParseSongList(ZipArchiveEntry entry) {
+            using var stream = entry.Open();
             return JsonExtensions.Deserialize<MutableSong[]>(stream).Map<IEnumerable<MutableSong>>(songs => songs.OrderBy(s => s.Index)).Reduce([]);
         }
     }
@@ -72,7 +63,7 @@ public static class PlaylistBuilder{
             song.SetPath(entryName);
         }
 
-        var songListEntry = archive.CreateEntry("song_list.json")!;
+        var songListEntry = archive.CreateEntry(SONG_LIST_ENTRY_NAME)!;
 
         using var songListStream = songListEntry.Open();
         WriteSongList(songListStream, songsCopy);

@@ -16,7 +16,7 @@ using Ametrin.Utils.Optional;
 namespace BallMusicManager.Creator; 
 public sealed partial class MainWindow : Window {
     private ObservableCollection<MutableSong> Playlist = [];
-    private readonly SongLibrary Library = [];
+    private readonly SongLibrary Library = SongLibrary.LoadOrNew();
     private TimeSpan Duration = TimeSpan.Zero;
     private MutableSong? DraggedItem;
     private readonly MusicPlayer _player = new();
@@ -24,7 +24,7 @@ public sealed partial class MainWindow : Window {
     public MainWindow() {
         InitializeComponent();
         SongsGrid.ItemsSource = Playlist;
-        LibraryGrid.ItemsSource = Library;
+        LibraryGrid.ItemsSource = Library.Songs;
         Playlist.CollectionChanged += UpdateLengthDisplay;
         UpdateLengthDisplay();
         _timer.Interval = TimeSpan.FromSeconds(.5);
@@ -75,17 +75,19 @@ public sealed partial class MainWindow : Window {
         var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "plz");
         if(dialog.ShowDialog() is not true) return;
 
-        PlaylistBuilder.EnumerateArchive(new(dialog.FileName)).Resolve(playlist => {
+        PlaylistBuilder.EnumerateArchive(new(dialog.FileName)).Resolve(songs => {
             Playlist.CollectionChanged -= UpdateLengthDisplay;
-            Playlist = new(playlist);
+            Playlist = new(songs);
             SongsGrid.ItemsSource = Playlist;
             Playlist.CollectionChanged += UpdateLengthDisplay;
             UpdateLengthDisplay();
+            Library.AddAllIfNew(songs);
         }, flag => {
-            _ => Flag switch {
-                ResultFlag.PathNotFound => 
-                _ => MessageBox.Show("Failed opening Playlist")
-            }
+            _ = flag switch {
+                ResultFlag.PathNotFound => MessageBox.Show($"Could not find {dialog.FileName}"),
+                ResultFlag.InvalidFile => MessageBox.Show($"{dialog.FileName} is not a valid playlist"),
+                _ => MessageBox.Show("Failed opening Playlist"),
+            };
         });
     }
     
@@ -93,11 +95,13 @@ public sealed partial class MainWindow : Window {
         var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "playlist");
         if(dialog.ShowDialog() is not true) return;
 
+        var songs = PlaylistBuilder.EnumerateFile(new(dialog.FileName));
         Playlist.CollectionChanged -= UpdateLengthDisplay;
-        Playlist = new(PlaylistBuilder.EnumerateFile(new(dialog.FileName)));
+        Playlist = new(songs);
         SongsGrid.ItemsSource = Playlist;
         Playlist.CollectionChanged += UpdateLengthDisplay;
         UpdateLengthDisplay();
+        Library.AddAllIfNew(songs);
     }
 
     private void DeleteSong(object sender, RoutedEventArgs e) {
