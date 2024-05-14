@@ -32,7 +32,7 @@ public sealed class MusicPlayer {
         _player.PlaybackStopped += OnPlaybackStopped;
     }
 
-    public void PlaySong(Song song) {
+    public void PlaySong(ISong song) {
         SetSong(song);
         Play();
     }

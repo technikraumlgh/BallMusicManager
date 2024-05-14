@@ -4,7 +4,7 @@ using Ametrin.Utils.Registry;
 namespace BallMusicManager.Domain;
 
 public static class Dance{
-    private static readonly IRegistry<string, string> DanceKeys = new Dictionary<string, string>{
+    public static readonly IRegistry<string, string> DanceKeys = new Dictionary<string, string>{
         {"CCC", "ChaChaCha" },
         {"LW", "Langsamer Walzer" },
         {"JVE", "Jive" },
@@ -17,7 +17,7 @@ public static class Dance{
         {"SLS", "Salsa" },
         {"RNR", "Rock'n Roll" },
         {"PT", "Party" },
-        {"FS", "Freestyle" },
+        //{"FS", "Freestyle" }, // legacy
     }.ToRegistry();
 
     public static string FromKey(string key) => DanceKeys.TryGet(key).Reduce(key);

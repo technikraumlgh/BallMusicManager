@@ -1,12 +1,13 @@
 ﻿using System.Collections.Immutable;
 using System.IO.Compression;
 using Ametrin.Serialization;
+using Ametrin.Utils;
 using Ametrin.Utils.Optional;
 using BallMusicManager.Domain;
 
 namespace BallMusicManager.Infrastructure;
 
-public static class PlaylistBuilder{
+public static class PlaylistBuilder {
     private static readonly IImmutableSet<string> AllowedFileTypes = [".mp3", ".wav", ".mp4", ".acc", ".m4a"];
 
     public static PlaylistPlayer FromFolder(DirectoryInfo folder){
@@ -28,7 +29,7 @@ public static class PlaylistBuilder{
         var songs = archive.Map(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME), ResultFlag.InvalidFile)
             .Map(ParseSongList).WhereNotEmpty();
 
-        (archive, songs).Resolve((archive, songs) =>{
+        (archive, songs).Resolve((archive, songs) => {
             foreach(var song in songs) {
                 var songEntry = archive.GetEntry(song.Path)!;
                 using var songStream = songEntry.Open();
@@ -50,16 +51,18 @@ public static class PlaylistBuilder{
             return ResultFlag.Null;
         }
 
-        using var archive = new ZipArchive(file.Create(), ZipArchiveMode.Create);
+        using var archive = file.Exists ? new ZipArchive(file.Open(FileMode.Open), ZipArchiveMode.Update) : new ZipArchive(file.Create(), ZipArchiveMode.Update);
 
         var songsCopy = songs.Select((song, index) => new MutableSong(song, index)).ToArray();
 
         foreach(var song in songsCopy) {
-            var entryName = Path.GetFileName(song.Path);
-            var songEntry = archive.CreateEntry(entryName)!;
-            using var songStream = songEntry.Open();
-            using var fileStream = File.OpenRead(song.Path);
-            fileStream.CopyTo(songStream);
+            var fileInfo = new FileInfo(song.Path);
+
+            // filename becomes it's hash to prevent saving the same file twice...
+            var entryName = fileInfo.ComputeMd5Hash();
+            if(archive.GetEntry(entryName) is not null) continue;
+
+            var songEntry = archive.CreateEntryFromFile(song.Path, entryName)!;
             song.SetPath(entryName);
         }
 

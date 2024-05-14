@@ -1,5 +1,4 @@
-﻿using Ametrin.Serialization;
-using Ametrin.Utils.WPF;
+﻿using Ametrin.Utils.WPF;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 using System.Collections.ObjectModel;
@@ -21,6 +20,8 @@ public sealed partial class MainWindow : Window {
     private MutableSong? DraggedItem;
     private readonly MusicPlayer _player = new();
     private readonly DispatcherTimer _timer = new();
+    private MutableSong? _lastPlayed;
+    private MutableSong? _selectedSong;
     public MainWindow() {
         InitializeComponent();
         SongsGrid.ItemsSource = Playlist;
@@ -29,39 +30,7 @@ public sealed partial class MainWindow : Window {
         UpdateLengthDisplay();
         _timer.Interval = TimeSpan.FromSeconds(.5);
         _timer.Tick += UpdatePlaybackSliderValue;
-    }
-
-    private void Songs_Drop(object sender, DragEventArgs e) {
-        if(e.Data.GetDataPresent(DataFormats.FileDrop)) {
-            foreach(var song in FileDrop(e)) {
-                Playlist.Add(song);
-            }
-            return;
-        }
-
-        if(DraggedItem is null || e.OriginalSource is not DependencyObject obj) return;
-
-        var targetItem = obj.FindAncestorOrSelf<DataGridRow>()?.Item as MutableSong;
-        if(targetItem is not null && !ReferenceEquals(DraggedItem, targetItem)) {
-            var index = Playlist.IndexOf(targetItem);
-            Playlist.Remove(DraggedItem);
-            Playlist.Insert(index, DraggedItem);
-        }
-        DraggedItem = null;
-    }
-
-    private void SongsGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-        if(e.OriginalSource is not DependencyObject obj) return;
-        var row = obj.FindAncestorOrSelf<DataGridRow>();
-        if(row != null) {
-            DraggedItem = row.Item as MutableSong;
-        }
-    }
-
-    private void SongsGrid_PreviewMouseMove(object sender, MouseEventArgs e) {
-        if(e.LeftButton == MouseButtonState.Pressed && DraggedItem != null) {
-            DragDrop.DoDragDrop(SongsGrid, DraggedItem, DragDropEffects.Move);
-        }
+        App.OnAppExit += Library.Save;
     }
 
     private void Save(object sender, RoutedEventArgs e) {
@@ -131,7 +100,6 @@ public sealed partial class MainWindow : Window {
         }
 
         Playlist.Clear();
-        SongCache.Clear();
     }
 
     private void UnsortPlaylist(object sender, RoutedEventArgs e) {
@@ -139,19 +107,19 @@ public sealed partial class MainWindow : Window {
     }
 
     private void PlayKeyPressed(object sender, KeyEventArgs e) {
-        if(e.Key is not Key.Space) return;
+        if(e.Key is not Key.Space || _selectedSong is null) return;
 
         if(_player.IsPlaying) {
             _player.Pause();
             _timer.Stop();
-            return;
         }
 
-        var song = (sender as DependencyObject)?.FindChild<DataGrid>()?.SelectedItem as MutableSong;
+        if(_selectedSong == _lastPlayed) return;
 
-        UpdatePlayback(song);
-        song?.SetDuration(_player.CurrentSongLength);
+        UpdatePlayback(_selectedSong);
+        _selectedSong?.SetDuration(_player.CurrentSongLength);
         _timer.Start();
+        _lastPlayed = _selectedSong;
     }
 
     private void PlaybackSelectionChanged(object sender, SelectionChangedEventArgs e) {
@@ -178,28 +146,82 @@ public sealed partial class MainWindow : Window {
         PlaybackSlider.ValueChanged += PlaybackSlider_ValueChanged;
     }
 
-    private void LibraryDrop(object sender, DragEventArgs e) {
-        if(!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
-        foreach(var _ in FileDrop(e)) { }
+
+    #region Playlist Drag&Drop
+    private void Songs_Drop(object sender, DragEventArgs e) {
+        if(e.Data.GetDataPresent(DataFormats.FileDrop)) {
+            foreach(var song in FileDrop(e)) {
+                Playlist.Add(song);
+            }
+            return;
+        }
+
+        if(DraggedItem is null || e.OriginalSource is not DependencyObject obj)
+            return;
+
+        var targetItem = obj.FindParentOrSelf<DataGridRow>()?.Item as MutableSong;
+        if(targetItem is null) {
+            Playlist.Remove(DraggedItem);
+            Playlist.Add(DraggedItem);
+        }else if(!ReferenceEquals(DraggedItem, targetItem)){
+            var index = Playlist.IndexOf(targetItem);
+            Playlist.Remove(DraggedItem);
+            Playlist.Insert(index, DraggedItem);
+        }
+        DraggedItem = null;
     }
 
+    private void SongsGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+        if(e.OriginalSource is not DependencyObject obj) return;
+
+        var row = obj.FindParentOrSelf<DataGridRow>();
+        if(row?.Item is MutableSong song) {
+            DraggedItem = song;
+            _selectedSong = song;
+        }
+    }
+
+    private void SongsGrid_PreviewMouseMove(object sender, MouseEventArgs e) {
+        if(e.LeftButton == MouseButtonState.Pressed && DraggedItem != null) {
+            DragDrop.DoDragDrop(SongsGrid, DraggedItem, DragDropEffects.Move);
+        }
+    }
+    #endregion
+
+    #region Library Drag&Drop
+    private void LibraryDrop(object sender, DragEventArgs e) {
+        if(e.Data.GetDataPresent(DataFormats.FileDrop)) {
+            foreach(var _ in FileDrop(e)) { }
+            return;
+        }
+    }
+
+    private void LibraryGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) => SongsGrid_MouseLeftButtonDown(sender, e);
+
+    private void LibraryGrid_PreviewMouseMove(object sender, MouseEventArgs e) => SongsGrid_PreviewMouseMove(sender, e);
+    #endregion
 
     private IEnumerable<MutableSong> FileDrop(DragEventArgs e) {
         if(!e.Data.GetDataPresent(DataFormats.FileDrop)) yield break;
 
-        var files = (e.Data.GetData(DataFormats.FileDrop) as string[] ?? []).Select(path=> new FileInfo(path));
-        foreach(var path in files) {
-            var window = new AddSongWindow(path) {
+        var paths = (e.Data.GetData(DataFormats.FileDrop) as string[] ?? []);
+
+        var files = paths.SelectMany(path => Directory.Exists(path)
+            ? Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
+            : [path]).Where(File.Exists)
+            .Select(file => new FileInfo(file));
+
+
+        foreach(var file in files.Where(file => file.Exists)) {
+
+            var window = new AddSongWindow(file) {
                 Owner = this,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            if(window.ShowDialog() is not true) continue;
-            AddSongToLib(window.Song);
+            if(window.ShowDialog() is not true)
+                continue;
+            Library.AddIfNew(window.Song);
             yield return window.Song;
         }
-    }
-
-    private void AddSongToLib(MutableSong song) {
-        Library.AddIfNew(song);
     }
 }

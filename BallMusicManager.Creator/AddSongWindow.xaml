@@ -11,15 +11,15 @@
         <StackPanel Orientation="Horizontal">
             <StackPanel Margin="0 0 5 0">
                 <TextBlock>Title</TextBlock>
-                <TextBox x:Name="TitleField"/>
+                <TextBox x:Name="TitleField"  MinWidth="50"/>
             </StackPanel>
             <StackPanel Margin="0 0 5 0">
                 <TextBlock>Artist</TextBlock>
-                <TextBox x:Name="ArtistField"/>
+                <TextBox x:Name="ArtistField" MinWidth="50"/>
             </StackPanel>
             <StackPanel Margin="0 0 5 0">
                 <TextBlock>Dance</TextBlock>
-                <TextBox x:Name="DanceField" LostFocus="DanceField_LostFocus"/>
+                <ComboBox x:Name="DanceField" IsEditable="True" LostFocus="DanceField_LostFocus"  MinWidth="50"/>
             </StackPanel>
         </StackPanel>
         <Button x:Name="AddButton" Margin="0 5 0 0" Click="AddSong">Add</Button>

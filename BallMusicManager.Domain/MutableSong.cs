@@ -37,12 +37,10 @@ public sealed record MutableSong() : ISong {
         Artist = artist;
         return this;
     }
+    public MutableSong SetDanceFromKey(string key) => SetDance(Domain.Dance.FromKey(key));
     public MutableSong SetDance(string dance) {
         Dance = dance;
         return this;
-    }
-    public MutableSong SetDanceFromKey(string key) {
-        return SetDance(Domain.Dance.FromKey(key));
     }
     public MutableSong SetDuration(TimeSpan duration) {
         Duration = duration;
@@ -66,7 +64,5 @@ public sealed record MutableSong() : ISong {
         throw new InvalidDataException($"{fileName} does not match naming conventions");
     }
 
-    public Song Build() {
-        return new(Path, Index, Title, Artist, Dance, Duration);
-    }
+    public Song Build() => new(Path, Index, Title, Artist, Dance, Duration);
 }

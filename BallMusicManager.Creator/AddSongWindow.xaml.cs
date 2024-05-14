@@ -11,11 +11,13 @@ public sealed partial class AddSongWindow : Window {
     public MutableSong Song { get; private set; }
     public AddSongWindow(FileInfo fileInfo) {
         InitializeComponent();
+        DanceField.ItemsSource = Dance.DanceKeys;
         AddButton.Focus();
         PathText.Text = fileInfo.FullName;
         Song = new MutableSong()
             .SetPath(fileInfo)
             .FromMetaData();
+
 
         try {
             Song.FromFileName(fileInfo.NameWithoutExtension());

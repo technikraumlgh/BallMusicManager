@@ -4,16 +4,19 @@ using BallMusicManager.Infrastructure;
 namespace BallMusicManager.Creator; 
 
 public partial class App : Application {
+    public static event Action? OnAppExit;
     protected override void OnStartup(StartupEventArgs e) {
         base.OnStartup(e);
 
-        AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
     }
 
-    private void OnProcessExit(object? sender, EventArgs e) {
+    protected override void OnExit(ExitEventArgs e) {
+        OnAppExit?.Invoke();
+        base.OnExit(e);
         PerformCleanup();
     }
+
 
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e) {
         PerformCleanup();

@@ -9,6 +9,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -31,52 +32,43 @@
             </MenuItem>
         </Menu>
 
-        <StackPanel Grid.Row="1" KeyUp="PlayKeyPressed" AllowDrop="True" Drop="Songs_Drop"
-                    PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
-                    PreviewMouseMove="SongsGrid_PreviewMouseMove">
-            <Label x:Name="LengthDisplay">Length: </Label>
-            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" 
-                      SelectionChanged="PlaybackSelectionChanged" Height="800">
-                <DataGrid.Columns>
-                    <!--<DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>-->
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
-                </DataGrid.Columns>
+        <Label x:Name="LengthDisplay" Grid.Row="1">Length: </Label>
+        <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
+                  Grid.Row="2" KeyUp="PlayKeyPressed" 
+                  AllowDrop="True" Drop="Songs_Drop"
+                  PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
+                  PreviewMouseMove="SongsGrid_PreviewMouseMove"
+                  Margin="8">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+            </DataGrid.Columns>
 
-                <!--<DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <Setter Property="ContextMenu">
-                            <Setter.Value>
-                                <ContextMenu>
-                                    <MenuItem Header="Delete" Click="DeleteSong"/>
-                                </ContextMenu>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </DataGrid.RowStyle>-->
-                <DataGrid.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Unsort" Click="UnsortPlaylist"/>
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
-            </DataGrid>
-        </StackPanel>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Unsort" Click="UnsortPlaylist"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
 
-        <StackPanel Grid.Column="1" Grid.Row="1" KeyUp="PlayKeyPressed"
-                    AllowDrop="True" Drop="LibraryDrop">
-            <Label>Library</Label>
-            <DataGrid x:Name="LibraryGrid" AutoGenerateColumns="False" Height="800" SelectionChanged="PlaybackSelectionChanged">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </StackPanel>
 
-        <Slider x:Name="PlaybackSlider" Grid.ColumnSpan="2" Grid.Row="2" Margin="2" ValueChanged="PlaybackSlider_ValueChanged"/>
+        <Label Grid.Row="1" Grid.Column="1">Library</Label>
+        <DataGrid x:Name="LibraryGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
+                  Grid.Row="2" Grid.Column="1" KeyUp="PlayKeyPressed"
+                  AllowDrop="True" Drop="LibraryDrop"
+                  PreviewMouseLeftButtonDown="LibraryGrid_PreviewMouseLeftButtonDown"
+                  PreviewMouseMove="LibraryGrid_PreviewMouseMove"
+                  Margin="8">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Slider x:Name="PlaybackSlider" Grid.ColumnSpan="2" Grid.Row="3" Margin="2" ValueChanged="PlaybackSlider_ValueChanged"/>
     </Grid>
 </Window>
