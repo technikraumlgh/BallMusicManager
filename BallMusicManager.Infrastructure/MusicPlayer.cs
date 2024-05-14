@@ -3,7 +3,7 @@ using NAudio.Wave;
 
 namespace BallMusicManager.Infrastructure;
 
-public sealed class MusicPlayer{
+public sealed class MusicPlayer {
     public event Action? OnSongChanged;
     public event Action? OnSongPaused;
     public event Action? OnSongContinued;
@@ -25,27 +25,28 @@ public sealed class MusicPlayer{
 
     public bool IsPlaying => PlaybackState is PlaybackState.Playing;
     private readonly WaveOutEvent _player = new();
-    private AudioFileReader? _currentAudioWave;
+    private WaveStream? _currentAudioWave;
     private bool _wasStoppedManually = false;
 
     public MusicPlayer(){
         _player.PlaybackStopped += OnPlaybackStopped;
     }
 
-    public void PlaySong(Song song){
+    public void PlaySong(Song song) {
         SetSong(song);
         Play();
     }
 
-    public void SetSong(Song song){
+    public void SetSong(ISong song) => SetAudioFile(song.Path);
+    public void SetAudioFile(string path) {
         Stop();
         _currentAudioWave?.Dispose();
-        _currentAudioWave = new(song.Path);
+        _currentAudioWave = new AudioFileReader(path);
         _player.Init(_currentAudioWave);
         OnSongChanged?.Invoke();
     }
 
-    public void Pause(){
+    public void Pause() {
         if(_player.PlaybackState is not PlaybackState.Playing || _currentAudioWave is null) return;
         _player.Pause();
         //OnStateChanged?.Invoke();
@@ -56,7 +57,7 @@ public sealed class MusicPlayer{
         _player.Stop();
     }
 
-    public void Play(){
+    public void Play() {
         if(_player.PlaybackState is PlaybackState.Playing || _currentAudioWave is null) return;
         _player.Play();
         //OnStateChanged?.Invoke();
@@ -73,7 +74,7 @@ public sealed class MusicPlayer{
         Play();
     }
 
-    private void OnPlaybackStopped(object? sender, StoppedEventArgs e){
+    private void OnPlaybackStopped(object? sender, StoppedEventArgs e) {
         //OnStateChanged?.Invoke();
         if(_wasStoppedManually) OnSongStopped?.Invoke();
         else OnSongFinished?.Invoke();
@@ -81,7 +82,7 @@ public sealed class MusicPlayer{
         _wasStoppedManually = false;
     }
 
-    ~MusicPlayer(){
+    ~MusicPlayer() {
         _player.Dispose();
     }
 }

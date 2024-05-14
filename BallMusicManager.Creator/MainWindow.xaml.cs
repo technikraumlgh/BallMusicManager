@@ -11,13 +11,14 @@ using System.Windows.Input;
 using System.Collections.Specialized;
 using System.Windows.Data;
 using System.Windows.Threading;
+using Ametrin.Utils.Optional;
 
 namespace BallMusicManager.Creator; 
 public sealed partial class MainWindow : Window {
-    private ObservableCollection<Song> Playlist = [];
-    private readonly ObservableCollection<Song> Library = [];
+    private ObservableCollection<MutableSong> Playlist = [];
+    private readonly SongLibrary Library = [];
     private TimeSpan Duration = TimeSpan.Zero;
-    private Song? DraggedItem;
+    private MutableSong? DraggedItem;
     private readonly MusicPlayer _player = new();
     private readonly DispatcherTimer _timer = new();
     public MainWindow() {
@@ -40,7 +41,7 @@ public sealed partial class MainWindow : Window {
 
         if(DraggedItem is null || e.OriginalSource is not DependencyObject obj) return;
 
-        var targetItem = obj.FindAncestorOrSelf<DataGridRow>()?.Item as Song;
+        var targetItem = obj.FindAncestorOrSelf<DataGridRow>()?.Item as MutableSong;
         if(targetItem is not null && !ReferenceEquals(DraggedItem, targetItem)) {
             var index = Playlist.IndexOf(targetItem);
             Playlist.Remove(DraggedItem);
@@ -53,7 +54,7 @@ public sealed partial class MainWindow : Window {
         if(e.OriginalSource is not DependencyObject obj) return;
         var row = obj.FindAncestorOrSelf<DataGridRow>();
         if(row != null) {
-            DraggedItem = row.Item as Song;
+            DraggedItem = row.Item as MutableSong;
         }
     }
 
@@ -63,32 +64,32 @@ public sealed partial class MainWindow : Window {
         }
     }
 
-    private void Export(object sender, RoutedEventArgs e) {
-        var dialog = DialogUtils.SaveFileDialog(filterDescription: "Playlist", extension: "playlist");
-        if(dialog.ShowDialog() is not true) return;
-
-        var temp = new List<Song>(Playlist.Count);
-        var directory = new FileInfo(dialog.FileName).DirectoryName;
-        for(int i = 0; i < Playlist.Count; i++) {
-            var fileName = Path.GetFileName(Playlist[i].Path);
-            var target = Path.Join(directory, fileName);
-            if(target != Playlist[i].Path) File.Copy(Playlist[i].Path, target, true);
-            temp.Add(Playlist[i] with {
-                Index = i + 1,
-                Path = fileName,
-            });
-        }
-        temp.WriteToJsonFile(dialog.FileName);
-    }
-
     private void Save(object sender, RoutedEventArgs e) {
-        var dialog = DialogUtils.SaveFileDialog(filterDescription: "Playlist", extension: "playlist");
+        var dialog = DialogUtils.SaveFileDialog(filterDescription: "Playlist", extension: "plz");
         if(dialog.ShowDialog() is not true) return;
 
-        Playlist.WriteToJsonFile(dialog.FileName);
+        PlaylistBuilder.ToArchive(new(dialog.FileName), Playlist);
     }
 
     private void Open(object sender, RoutedEventArgs e) {
+        var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "plz");
+        if(dialog.ShowDialog() is not true) return;
+
+        PlaylistBuilder.EnumerateArchive(new(dialog.FileName)).Resolve(playlist => {
+            Playlist.CollectionChanged -= UpdateLengthDisplay;
+            Playlist = new(playlist);
+            SongsGrid.ItemsSource = Playlist;
+            Playlist.CollectionChanged += UpdateLengthDisplay;
+            UpdateLengthDisplay();
+        }, flag => {
+            _ => Flag switch {
+                ResultFlag.PathNotFound => 
+                _ => MessageBox.Show("Failed opening Playlist")
+            }
+        });
+    }
+    
+    private void OpenLegacy(object sender, RoutedEventArgs e) {
         var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "playlist");
         if(dialog.ShowDialog() is not true) return;
 
@@ -103,7 +104,7 @@ public sealed partial class MainWindow : Window {
         if((sender as MenuItem)!.Parent is not ContextMenu menu) return;
         if(menu.PlacementTarget is not DataGridRow row) return;
 
-        var song = row.Item as Song;
+        var song = row.Item as MutableSong;
         Playlist.Remove(song!);
     }
 
@@ -126,6 +127,7 @@ public sealed partial class MainWindow : Window {
         }
 
         Playlist.Clear();
+        SongCache.Clear();
     }
 
     private void UnsortPlaylist(object sender, RoutedEventArgs e) {
@@ -141,9 +143,10 @@ public sealed partial class MainWindow : Window {
             return;
         }
 
-        var song = (sender as DependencyObject)?.FindChild<DataGrid>()?.SelectedItem as Song;
+        var song = (sender as DependencyObject)?.FindChild<DataGrid>()?.SelectedItem as MutableSong;
 
         UpdatePlayback(song);
+        song?.SetDuration(_player.CurrentSongLength);
         _timer.Start();
     }
 
@@ -157,7 +160,7 @@ public sealed partial class MainWindow : Window {
         _player.CurrentTime = TimeSpan.FromSeconds(e.NewValue);
     }
 
-    private void UpdatePlayback(Song? song) {
+    private void UpdatePlayback(ISong? song) {
         if(song is null) return;
         
         _player.SetSong(song);
@@ -177,23 +180,22 @@ public sealed partial class MainWindow : Window {
     }
 
 
-    private IEnumerable<Song> FileDrop(DragEventArgs e) {
+    private IEnumerable<MutableSong> FileDrop(DragEventArgs e) {
         if(!e.Data.GetDataPresent(DataFormats.FileDrop)) yield break;
 
-        var files = e.Data.GetData(DataFormats.FileDrop) as string[] ?? [];
+        var files = (e.Data.GetData(DataFormats.FileDrop) as string[] ?? []).Select(path=> new FileInfo(path));
         foreach(var path in files) {
             var window = new AddSongWindow(path) {
                 Owner = this,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             if(window.ShowDialog() is not true) continue;
-            var song = window.Song.Build();
-            AddSongToLib(song);
-            yield return song;
+            AddSongToLib(window.Song);
+            yield return window.Song;
         }
     }
 
-    private void AddSongToLib(Song song) {
-        Library.Add(song);
+    private void AddSongToLib(MutableSong song) {
+        Library.AddIfNew(song);
     }
 }

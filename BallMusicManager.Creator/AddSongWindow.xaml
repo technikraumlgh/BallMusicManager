@@ -19,7 +19,7 @@
             </StackPanel>
             <StackPanel Margin="0 0 5 0">
                 <TextBlock>Dance</TextBlock>
-                <TextBox x:Name="DanceField"/>
+                <TextBox x:Name="DanceField" LostFocus="DanceField_LostFocus"/>
             </StackPanel>
         </StackPanel>
         <Button x:Name="AddButton" Margin="0 5 0 0" Click="AddSong">Add</Button>
