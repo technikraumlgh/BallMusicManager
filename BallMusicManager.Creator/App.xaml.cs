@@ -13,8 +13,8 @@ public partial class App : Application {
 
     protected override void OnExit(ExitEventArgs e) {
         OnAppExit?.Invoke();
-        base.OnExit(e);
         PerformCleanup();
+        base.OnExit(e);
     }
 
 

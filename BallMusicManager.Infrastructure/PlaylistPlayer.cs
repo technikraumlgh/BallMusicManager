@@ -6,7 +6,7 @@ namespace BallMusicManager.Infrastructure;
 public sealed class PlaylistPlayer {
     public readonly MusicPlayer Player = new();
     public readonly string Path;
-    public readonly ImmutableArray<ISong> Songs;
+    public readonly ImmutableArray<Song> Songs;
 
     public bool IsPlaying => Player.IsPlaying;
     public ISong? Current => IsEmpty ? null : Songs[CurrentIndex];
@@ -18,7 +18,7 @@ public sealed class PlaylistPlayer {
     private int LastIndex => Length-1;
     public int CurrentIndex { get; private set; } = -1;
 
-    public PlaylistPlayer(string path, IEnumerable<ISong> songs){
+    public PlaylistPlayer(string path, IEnumerable<Song> songs){
         Path = path;
         Songs = songs.ToImmutableArray();
         SetCurrent(0);

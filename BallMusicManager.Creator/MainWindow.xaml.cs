@@ -15,23 +15,37 @@ using Ametrin.Utils.Optional;
 namespace BallMusicManager.Creator; 
 public sealed partial class MainWindow : Window {
     private ObservableCollection<MutableSong> Playlist = [];
-    private readonly SongLibrary Library = SongLibrary.LoadOrNew();
+    private SongLibrary Library;
     private TimeSpan Duration = TimeSpan.Zero;
-    private MutableSong? DraggedItem;
     private readonly MusicPlayer _player = new();
     private readonly DispatcherTimer _timer = new();
+    private MutableSong? _draggedSong;
     private MutableSong? _lastPlayed;
     private MutableSong? _selectedSong;
     public MainWindow() {
         InitializeComponent();
         SongsGrid.ItemsSource = Playlist;
-        LibraryGrid.ItemsSource = Library.Songs;
         Playlist.CollectionChanged += UpdateLengthDisplay;
         UpdateLengthDisplay();
         _timer.Interval = TimeSpan.FromSeconds(.5);
         _timer.Tick += UpdatePlaybackSliderValue;
-        App.OnAppExit += Library.Save;
+
+        Loaded += async (sender, e) => {
+
+            var bar = new LoadingBar(true) {
+                Owner = this,
+            };
+            bar.LabelProgress.Report("Loading Library...");
+            bar.Show();
+            
+            Library = await Task.Run(SongLibrary.LoadOrNew);
+            App.OnAppExit += Library.Save;
+            LibraryGrid.ItemsSource = Library.Songs;
+            
+            bar.Close();
+        };
     }
+
 
     private void Save(object sender, RoutedEventArgs e) {
         var dialog = DialogUtils.SaveFileDialog(filterDescription: "Playlist", extension: "plz");
@@ -40,11 +54,19 @@ public sealed partial class MainWindow : Window {
         PlaylistBuilder.ToArchive(new(dialog.FileName), Playlist);
     }
 
-    private void Open(object sender, RoutedEventArgs e) {
+    private async void Open(object sender, RoutedEventArgs e) {
         var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "plz");
         if(dialog.ShowDialog() is not true) return;
 
-        PlaylistBuilder.EnumerateArchive(new(dialog.FileName)).Resolve(songs => {
+        var bar = new LoadingBar(true) {
+            Owner = this,
+        };
+        bar.LabelProgress.Report("Loading Playlist...");
+        bar.Show();
+
+        var songs = await Task.Run(() => PlaylistBuilder.EnumerateArchive(new(dialog.FileName)));
+
+        songs.Resolve(songs => {
             Playlist.CollectionChanged -= UpdateLengthDisplay;
             Playlist = new(songs);
             SongsGrid.ItemsSource = Playlist;
@@ -58,6 +80,8 @@ public sealed partial class MainWindow : Window {
                 _ => MessageBox.Show("Failed opening Playlist"),
             };
         });
+
+        bar.Close();
     }
     
     private void OpenLegacy(object sender, RoutedEventArgs e) {
@@ -156,19 +180,19 @@ public sealed partial class MainWindow : Window {
             return;
         }
 
-        if(DraggedItem is null || e.OriginalSource is not DependencyObject obj)
+        if(_draggedSong is null || e.OriginalSource is not DependencyObject obj)
             return;
 
         var targetItem = obj.FindParentOrSelf<DataGridRow>()?.Item as MutableSong;
         if(targetItem is null) {
-            Playlist.Remove(DraggedItem);
-            Playlist.Add(DraggedItem);
-        }else if(!ReferenceEquals(DraggedItem, targetItem)){
+            Playlist.Remove(_draggedSong);
+            Playlist.Add(_draggedSong);
+        }else if(!ReferenceEquals(_draggedSong, targetItem)){
             var index = Playlist.IndexOf(targetItem);
-            Playlist.Remove(DraggedItem);
-            Playlist.Insert(index, DraggedItem);
+            Playlist.Remove(_draggedSong);
+            Playlist.Insert(index, _draggedSong);
         }
-        DraggedItem = null;
+        _draggedSong = null;
     }
 
     private void SongsGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
@@ -176,14 +200,14 @@ public sealed partial class MainWindow : Window {
 
         var row = obj.FindParentOrSelf<DataGridRow>();
         if(row?.Item is MutableSong song) {
-            DraggedItem = song;
+            _draggedSong = song;
             _selectedSong = song;
         }
     }
 
     private void SongsGrid_PreviewMouseMove(object sender, MouseEventArgs e) {
-        if(e.LeftButton == MouseButtonState.Pressed && DraggedItem != null) {
-            DragDrop.DoDragDrop(SongsGrid, DraggedItem, DragDropEffects.Move);
+        if(e.LeftButton == MouseButtonState.Pressed && _draggedSong != null) {
+            DragDrop.DoDragDrop(SongsGrid, _draggedSong, DragDropEffects.Move);
         }
     }
     #endregion
@@ -212,13 +236,12 @@ public sealed partial class MainWindow : Window {
             .Select(file => new FileInfo(file));
 
 
-        foreach(var file in files.Where(file => file.Exists)) {
-
+        foreach(var file in files.Where(file => file.Exists).Where(PlaylistBuilder.ValidFile)) {
             var window = new AddSongWindow(file) {
                 Owner = this,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            if(window.ShowDialog() is not true)
+            if(window.ShowDialog() is not true) 
                 continue;
             Library.AddIfNew(window.Song);
             yield return window.Song;

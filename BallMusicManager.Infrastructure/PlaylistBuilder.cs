@@ -21,7 +21,7 @@ public static class PlaylistBuilder {
     }
 
     const string SONG_LIST_ENTRY_NAME = "song_list.json";
-    public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Map(songs => new PlaylistPlayer(file.FullName, songs));
+    public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Map(songs => new PlaylistPlayer(file.FullName, songs.Select(s=>s.Build())));
     public static Result<IEnumerable<MutableSong>> EnumerateArchive(FileInfo file) {
         var archive = file.ToResultWhereExists()
             .Map(file => new ZipArchive(file.OpenRead()));
@@ -38,7 +38,7 @@ public static class PlaylistBuilder {
         });
 
 
-        return Result<IEnumerable<MutableSong>>.Of(songs);
+        return songs;
         
         static IEnumerable<MutableSong> ParseSongList(ZipArchiveEntry entry) {
             using var stream = entry.Open();
@@ -66,6 +66,7 @@ public static class PlaylistBuilder {
             song.SetPath(entryName);
         }
 
+        archive.GetEntry(SONG_LIST_ENTRY_NAME)?.Delete();
         var songListEntry = archive.CreateEntry(SONG_LIST_ENTRY_NAME)!;
 
         using var songListStream = songListEntry.Open();

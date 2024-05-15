@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Ametrin.Utils.Optional;
 using Ametrin.Utils.WPF;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
@@ -125,17 +124,10 @@ public sealed partial class MainWindow : Window, IHostProvider {
     }
 
     private void OpenFromPlaylist(object sender, RoutedEventArgs e) {
-        var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "playlist");
+        var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "plz");
         if(dialog.ShowDialog() is not true) return;
 
-        Playlist = PlaylistBuilder.FromFile(new(dialog.FileName));
-    }
-
-    private void OpenFromFolder(object sender, RoutedEventArgs args) {
-        using var dialog = new FolderBrowserDialog();
-        if(dialog.ShowDialog() is not System.Windows.Forms.DialogResult.OK) return;
-
-        Playlist = PlaylistBuilder.FromFolder(new(dialog.SelectedPath));
+        PlaylistBuilder.FromArchive(new(dialog.FileName)).Resolve(playlist => Playlist = playlist);
     }
 
     private void OpenMessageWindow(object sender, RoutedEventArgs e) {

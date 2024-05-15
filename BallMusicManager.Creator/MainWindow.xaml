@@ -34,11 +34,11 @@
 
         <Label x:Name="LengthDisplay" Grid.Row="1">Length: </Label>
         <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
-                  Grid.Row="2" KeyUp="PlayKeyPressed" 
+                  Grid.Row="2" KeyUp="PlayKeyPressed"  CanUserSortColumns="False"
                   AllowDrop="True" Drop="Songs_Drop"
                   PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
                   PreviewMouseMove="SongsGrid_PreviewMouseMove"
-                  Margin="8">
+                  Margin="8 0 4 8">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
@@ -60,7 +60,7 @@
                   AllowDrop="True" Drop="LibraryDrop"
                   PreviewMouseLeftButtonDown="LibraryGrid_PreviewMouseLeftButtonDown"
                   PreviewMouseMove="LibraryGrid_PreviewMouseMove"
-                  Margin="8">
+                  Margin="4 0 8 8">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>

@@ -12,8 +12,10 @@ public static class SongCache {
     public static FileInfo Cache(Stream stream, string name) {
         if(!CacheDirectory.Exists) CacheDirectory.Create();
         var file = CacheDirectory.File(name);
-        using var fileStream = file.Create();
-        stream.CopyTo(fileStream);
+        if(!file.Exists) {
+            using var fileStream = file.Create();
+            stream.CopyTo(fileStream);
+        }
         return file;
     }
 
