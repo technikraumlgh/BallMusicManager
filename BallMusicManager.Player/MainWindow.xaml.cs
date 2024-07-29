@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Ametrin.Utils.Optional;
 using Ametrin.Utils.WPF;
+using Ametrin.Utils.WPF.FileDialogs;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 
@@ -124,10 +125,11 @@ public sealed partial class MainWindow : Window, IHostProvider {
     }
 
     private void OpenFromPlaylist(object sender, RoutedEventArgs e) {
-        var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "plz");
-        if(dialog.ShowDialog() is not true) return;
-
-        PlaylistBuilder.FromArchive(new(dialog.FileName)).Resolve(playlist => Playlist = playlist);
+        var dialog = new OpenFileDialog().AddExtensionFilter("Playlist", "plz");
+     
+        dialog.GetFileInfo()
+            .Map(PlaylistBuilder.FromArchive)
+            .Resolve(playlist => Playlist = playlist);
     }
 
     private void OpenMessageWindow(object sender, RoutedEventArgs e) {
