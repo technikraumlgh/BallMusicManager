@@ -117,7 +117,7 @@ public sealed partial class MainWindow : Window, IHostProvider {
         if(Playlist is null) return;
         var row = (args.OriginalSource as DependencyObject)!.FindParent<DataGridRow>();
         if (row is null || row.Item is not Song song) return;
-        if(Playlist.Current == song) {
+        if(Playlist.Current as Song == song) {
             Playlist.Player.Restart();
         } else {
             Playlist.SetCurrent(Playlist.Songs.IndexOf(song));
