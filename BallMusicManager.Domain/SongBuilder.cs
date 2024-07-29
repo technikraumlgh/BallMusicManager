@@ -10,6 +10,7 @@ public sealed record SongBuilder() {
     public string Artist { get; set; } = string.Empty;
     public string Dance { get; set; } = string.Empty;
     public TimeSpan Duration { get; set; } = TimeSpan.Zero;
+    public string FileHash { get; set; } = string.Empty;
 
     public SongBuilder(Song song) : this() {
         Path = song.Path;

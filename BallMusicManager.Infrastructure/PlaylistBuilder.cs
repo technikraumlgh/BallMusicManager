@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO.Compression;
 using Ametrin.Serialization;
 using Ametrin.Utils;
@@ -21,6 +22,7 @@ public static class PlaylistBuilder {
     }
 
     const string SONG_LIST_ENTRY_NAME = "song_list.json";
+    const string MANIFEST_ENTRY_NAME = "manifest.json";
     public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Map(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
     public static Result<IEnumerable<SongBuilder>> EnumerateArchive(FileInfo file) {
         var archive = file.ToResultWhereExists()
@@ -62,37 +64,52 @@ public static class PlaylistBuilder {
         return ToArchiveImpl(file, songs.Select((song, index) => song.Copy().SetIndex(index)).ToArray());
     }
 
+    private const int ARCHIVE_VERSION = 1;
     private static ResultFlag ToArchiveImpl(FileInfo file, SongBuilder[] songs)
     {
-        using var archive = file.Exists ? new ZipArchive(file.Open(FileMode.Open), ZipArchiveMode.Update) : new ZipArchive(file.Create(), ZipArchiveMode.Update);
+        var hashes = new HashSet<string>();
+        using var archive = file.Exists 
+            ? new ZipArchive(file.Open(FileMode.Open), ZipArchiveMode.Update) 
+            : new ZipArchive(file.Create(), ZipArchiveMode.Update);
+
 
         foreach(var song in songs)
         {
             var fileInfo = new FileInfo(song.Path);
 
             // filename becomes it's hash to prevent saving the same file twice...
-            var entryName = fileInfo.ComputeMd5Hash();
-            if(archive.GetEntry(entryName) is null)
+            song.FileHash = fileInfo.ComputeSha256Hash();
+            if(hashes.Contains(song.FileHash)) //TODO: properly handle this case
+                throw new UnreachableException($"{song.Path} produced an already existing hash!");
+
+            if(archive.GetEntry(song.FileHash) is null)
             {
-                var songEntry = archive.CreateEntryFromFile(song.Path, entryName)!;
+                archive.CreateEntryFromFile(song.Path, song.FileHash);
             }
 
-            song.SetPath(entryName);
-
-            //TODO: prevent hash collisions
+            hashes.Add(song.FileHash);
+            song.SetPath(song.FileHash);
         }
 
-        archive.GetEntry(SONG_LIST_ENTRY_NAME)?.Delete();
-        var songListEntry = archive.CreateEntry(SONG_LIST_ENTRY_NAME)!;
+        WriteSongList();
 
-        using var songListStream = songListEntry.Open();
-        WriteSongList(songListStream, songs);
+        WriteManifest();
 
         return ResultFlag.Succeeded;
 
-        static void WriteSongList(Stream stream, IEnumerable<SongBuilder> data)
+        void WriteSongList()
         {
-            data.WriteToStream(stream);
+            var entry = archive.OverwriteEntry(SONG_LIST_ENTRY_NAME);
+            using var stream = entry.Open();
+            songs.WriteToStream(stream);
+        }
+
+        void WriteManifest()
+        {
+            var manifest = new ArchiveManifest(ARCHIVE_VERSION, songs.Length, DateTime.Now);
+            var entry = archive.OverwriteEntry(MANIFEST_ENTRY_NAME);
+            using var stream = entry.Open();
+            manifest.WriteToStream(stream);
         }
     }
 
@@ -107,4 +124,6 @@ public static class PlaylistBuilder {
     }
 
     public static bool ValidFile(FileInfo path) => AllowedFileTypes.Contains(path.Extension);
+    
+    private record ArchiveManifest(int Version, int SongCount, DateTime SavedAt);
 }

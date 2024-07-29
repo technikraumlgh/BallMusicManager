@@ -23,8 +23,9 @@
             <MenuItem Header="Playlist">
                 <MenuItem Header="Save" Click="Save"/>
                 <MenuItem Header="Open" Click="Open"/>
-                <MenuItem Header="Open Legacy" Click="OpenLegacy"/>
                 <MenuItem Header="Close" Click="ClosePlaylist"/>
+                <Separator/>
+                <MenuItem Header="Open Legacy" Click="OpenLegacy"/>
             </MenuItem>
             
             <MenuItem Header="Library">
@@ -34,10 +35,11 @@
 
         <Label x:Name="LengthDisplay" Grid.Row="1">Length: </Label>
         <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
-                  Grid.Row="2" KeyUp="PlayKeyPressed"  CanUserSortColumns="False"
-                  AllowDrop="True" Drop="Songs_Drop"
+                  Grid.Row="2" CanUserSortColumns="False"
+                  AllowDrop="True" Drop="Songs_Drop" SelectionMode="Single"
                   PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
                   PreviewMouseMove="SongsGrid_PreviewMouseMove"
+                  MouseDoubleClick="SongsGrid_MouseDoubleClick"
                   Margin="8 0 4 8">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
@@ -56,15 +58,15 @@
 
         <Label Grid.Row="1" Grid.Column="1">Library</Label>
         <DataGrid x:Name="LibraryGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
-                  Grid.Row="2" Grid.Column="1" KeyUp="PlayKeyPressed"
                   AllowDrop="True" Drop="LibraryDrop"
                   PreviewMouseLeftButtonDown="LibraryGrid_PreviewMouseLeftButtonDown"
                   PreviewMouseMove="LibraryGrid_PreviewMouseMove"
-                  Margin="4 0 8 8">
+                  MouseDoubleClick="SongsGrid_MouseDoubleClick"
+                  Grid.Row="2" Grid.Column="1" Margin="4 0 8 8">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}"/>
+                <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}"/>
+                <DataGridTextColumn Header="Artist" Binding="{Binding Artist}"/>
                 <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>

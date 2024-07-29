@@ -16,10 +16,10 @@ using Ametrin.Utils.WPF.FileDialogs;
 namespace BallMusicManager.Creator; 
 public sealed partial class MainWindow : Window {
     private ObservableCollection<SongBuilder> Playlist = [];
-    private SongLibrary Library;
+    private SongLibrary Library = default!;
     private TimeSpan Duration = TimeSpan.Zero;
     private readonly MusicPlayer _player = new();
-    private readonly DispatcherTimer _timer = new();
+    private readonly DispatcherTimer _playbackProgressUpdater = new();
     private SongBuilder? _draggedSong;
     private SongBuilder? _lastPlayed;
     private SongBuilder? _selectedSong;
@@ -28,8 +28,8 @@ public sealed partial class MainWindow : Window {
         SongsGrid.ItemsSource = Playlist;
         Playlist.CollectionChanged += UpdateLengthDisplay;
         UpdateLengthDisplay();
-        _timer.Interval = TimeSpan.FromSeconds(.5);
-        _timer.Tick += UpdatePlaybackSliderValue;
+        _playbackProgressUpdater.Interval = TimeSpan.FromSeconds(.5);
+        _playbackProgressUpdater.Tick += UpdatePlaybackSliderValue;
 
         Loaded += async (sender, e) => {
 
@@ -94,7 +94,8 @@ public sealed partial class MainWindow : Window {
         });
     }
     
-    private void OpenLegacy(object sender, RoutedEventArgs e) {
+    private void OpenLegacy(object sender, RoutedEventArgs e) 
+    {
         new OpenFileDialog().AddExtensionFilter("Playlist", "playlist").GetFileInfo().Resolve(file =>
         {
             var songs = PlaylistBuilder.EnumerateFile(file);
@@ -107,7 +108,8 @@ public sealed partial class MainWindow : Window {
         });
     }
 
-    private void DeleteSong(object sender, RoutedEventArgs e) {
+    private void DeleteSong(object sender, RoutedEventArgs e) 
+    {
         if((sender as MenuItem)!.Parent is not ContextMenu menu) return;
         if(menu.PlacementTarget is not DataGridRow row) return;
 
@@ -115,7 +117,8 @@ public sealed partial class MainWindow : Window {
         Playlist.Remove(song!);
     }
 
-    private void UpdateLengthDisplay(object? sender = null, NotifyCollectionChangedEventArgs? e = default) {
+    private void UpdateLengthDisplay(object? sender = null, NotifyCollectionChangedEventArgs? e = default) 
+    {
         Duration = Playlist.Sum(s => s.Duration);
         LengthDisplay.Content = $"Duration: {Duration:hh\\:mm\\:ss}";
     }
@@ -143,22 +146,16 @@ public sealed partial class MainWindow : Window {
     private void PlayKeyPressed(object sender, KeyEventArgs e) {
         if(e.Key is not Key.Space || _selectedSong is null) return;
 
-        if(_player.IsPlaying) {
-            _player.Pause();
-            _timer.Stop();
-        }
-
-        if(_selectedSong == _lastPlayed) return;
-
-        UpdatePlayback(_selectedSong);
-        _selectedSong?.SetDuration(_player.CurrentSongLength);
-        _timer.Start();
-        _lastPlayed = _selectedSong;
+       
     }
 
     private void PlaybackSelectionChanged(object sender, SelectionChangedEventArgs e) {
         if(!_player.IsPlaying) return;
-        UpdatePlayback(_selectedSong);
+
+        if(_selectedSong != _lastPlayed)
+        {
+            _player.Stop();
+        }
     }
 
 
@@ -170,6 +167,7 @@ public sealed partial class MainWindow : Window {
         if(song is null) return;
         
         _player.SetSong(song.Build());
+        _lastPlayed = song;
         PlaybackSlider.Maximum = _player.CurrentSongLength.TotalSeconds;
         _player.Play();
     }
@@ -205,19 +203,35 @@ public sealed partial class MainWindow : Window {
         _draggedSong = null;
     }
 
-    private void SongsGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-        if(e.OriginalSource is not DependencyObject obj) return;
+    private void SongsGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if(e.OriginalSource is not DependencyObject obj)
+        {
+            return;
+        }
 
         var row = obj.FindParentOrSelf<DataGridRow>();
-        if(row?.Item is SongBuilder song) {
-            _draggedSong = song;
-            _selectedSong = song;
+        if(row?.Item is not SongBuilder song)
+        {
+            return;
         }
+
+        _draggedSong = song;
+        _selectedSong = song;
+        LibraryGrid.SelectedItem = song;
+        SongsGrid.SelectedItem = song;
     }
 
     private void SongsGrid_PreviewMouseMove(object sender, MouseEventArgs e) {
         if(e.LeftButton == MouseButtonState.Pressed && _draggedSong != null) {
-            DragDrop.DoDragDrop(SongsGrid, _draggedSong, DragDropEffects.Move);
+            try
+            {
+                DragDrop.DoDragDrop(SongsGrid, _draggedSong, DragDropEffects.Move);
+            }
+            catch
+            {
+
+            }
         }
     }
     #endregion
@@ -235,7 +249,8 @@ public sealed partial class MainWindow : Window {
     private void LibraryGrid_PreviewMouseMove(object sender, MouseEventArgs e) => SongsGrid_PreviewMouseMove(sender, e);
     #endregion
 
-    private IEnumerable<SongBuilder> FileDrop(DragEventArgs e) {
+    private IEnumerable<SongBuilder> FileDrop(DragEventArgs e) 
+    {
         if(!e.Data.GetDataPresent(DataFormats.FileDrop)) yield break;
 
         var paths = (e.Data.GetData(DataFormats.FileDrop) as string[] ?? []);
@@ -246,15 +261,35 @@ public sealed partial class MainWindow : Window {
             .Select(file => new FileInfo(file));
 
 
-        foreach(var file in files.Where(file => file.Exists).Where(PlaylistBuilder.ValidFile)) {
-            var window = new AddSongWindow(file) {
+        foreach(var file in files.Where(file => file.Exists).Where(PlaylistBuilder.ValidFile)) 
+        {
+            var window = new AddSongWindow(file) 
+            {
                 Owner = this,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            if(window.ShowDialog() is not true) 
+            if(window.ShowDialog() is not true)
+            {
                 continue;
+            }
+
             Library.AddIfNew(window.Song);
             yield return window.Song;
         }
+    }
+
+    private void SongsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if(_player.IsPlaying)
+        {
+            _player.Pause();
+            _playbackProgressUpdater.Stop();
+        }
+
+        if(_selectedSong == _lastPlayed) return;
+
+        UpdatePlayback(_selectedSong);
+        _selectedSong?.SetDuration(_player.CurrentSongLength);
+        _playbackProgressUpdater.Start();
     }
 }
