@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using BallMusicManager.Infrastructure;
+﻿using BallMusicManager.Infrastructure;
+using System.Windows;
 
 namespace BallMusicManager.Creator; 
 

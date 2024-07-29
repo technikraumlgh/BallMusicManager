@@ -7,11 +7,11 @@ using System.IO;
 
 namespace BallMusicManager.Creator;
 
-public sealed class SongLibrary(ObservableCollection<MutableSong> songs) : IEnumerable<MutableSong> {
-    public readonly ObservableCollection<MutableSong> Songs = songs;
-    public bool ContainsSong(MutableSong song) => Songs.Contains(song, SongEqualityComparer.Instance);
+public sealed class SongLibrary(ObservableCollection<SongBuilder> songs) : IEnumerable<SongBuilder> {
+    public readonly ObservableCollection<SongBuilder> Songs = songs;
+    public bool ContainsSong(SongBuilder song) => Songs.Contains(song, SongEqualityComparer.Instance);
 
-    public bool AddIfNew(MutableSong song) {
+    public bool AddIfNew(SongBuilder song) {
         if(ContainsSong(song)) {
             return false;
         }
@@ -19,7 +19,7 @@ public sealed class SongLibrary(ObservableCollection<MutableSong> songs) : IEnum
 
         return true;
     }
-    public void AddAllIfNew(IEnumerable<MutableSong> songs) {
+    public void AddAllIfNew(IEnumerable<SongBuilder> songs) {
         foreach (var song in songs) {
             AddIfNew(song);
         }
@@ -33,6 +33,6 @@ public sealed class SongLibrary(ObservableCollection<MutableSong> songs) : IEnum
         return new(new(PlaylistBuilder.EnumerateArchive(LibFile).Reduce([])));
     }
 
-    public IEnumerator<MutableSong> GetEnumerator() => Songs.GetEnumerator();
+    public IEnumerator<SongBuilder> GetEnumerator() => Songs.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

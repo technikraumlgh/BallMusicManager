@@ -32,12 +32,12 @@ public sealed class MusicPlayer {
         _player.PlaybackStopped += OnPlaybackStopped;
     }
 
-    public void PlaySong(ISong song) {
+    public void PlaySong(Song song) {
         SetSong(song);
         Play();
     }
 
-    public void SetSong(ISong song) => SetAudioFile(song.Path);
+    public void SetSong(Song song) => SetAudioFile(song.Path);
     public void SetAudioFile(string path) {
         Stop();
         _currentAudioWave?.Dispose();

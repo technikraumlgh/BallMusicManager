@@ -2,7 +2,7 @@
 
 namespace BallMusicManager.Domain;
 
-public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityComparer<MutableSong>{
+public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityComparer<SongBuilder>{
     public static readonly SongEqualityComparer Instance = new ();
 
     public bool Equals(Song? x, Song? y) {
@@ -16,7 +16,7 @@ public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityCom
             && x.Dance == y.Dance;
     }
 
-    public bool Equals(MutableSong? x, MutableSong? y) {
+    public bool Equals(SongBuilder? x, SongBuilder? y) {
         if(x is null) {
             return y is null;
         }
@@ -28,5 +28,5 @@ public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityCom
     }
 
     public int GetHashCode([DisallowNull] Song obj) => HashCode.Combine(obj.Title.GetHashCode(), obj.Artist.GetHashCode(), obj.Dance.GetHashCode());
-    public int GetHashCode([DisallowNull] MutableSong obj) => HashCode.Combine(obj.Title.GetHashCode(), obj.Artist.GetHashCode(), obj.Dance.GetHashCode());
+    public int GetHashCode([DisallowNull] SongBuilder obj) => HashCode.Combine(obj.Title.GetHashCode(), obj.Artist.GetHashCode(), obj.Dance.GetHashCode());
 }

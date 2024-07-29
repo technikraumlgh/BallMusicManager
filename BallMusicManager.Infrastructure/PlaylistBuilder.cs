@@ -8,21 +8,21 @@ using BallMusicManager.Domain;
 namespace BallMusicManager.Infrastructure;
 
 public static class PlaylistBuilder {
-    private static readonly IImmutableSet<string> AllowedFileTypes = [".mp3", ".wav", ".mp4", ".acc", ".m4a"];
+    private static readonly ImmutableHashSet<string> AllowedFileTypes = [".mp3", ".wav", ".mp4", ".acc", ".m4a"];
 
-    public static PlaylistPlayer FromFolder(DirectoryInfo folder){
+    public static PlaylistPlayer FromFolder(DirectoryInfo folder) {
         var files = folder.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly).Where(ValidFile);
         //var files = Directory.GetFiles(path, , ).Where(path => Song.).ToArray();
         return new(folder.FullName, files.Select(SongBuilderExtensions.FromPath).ReduceSome());
     }
 
     public static PlaylistPlayer FromFile(FileInfo file) {
-        return new(file.DirectoryName!, EnumerateFile(file).Select(b=>b.Build()));
+        return new(file.DirectoryName!, EnumerateFile(file).Select(b => b.Build()));
     }
 
     const string SONG_LIST_ENTRY_NAME = "song_list.json";
-    public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Map(songs => new PlaylistPlayer(file.FullName, songs.Select(s=>s.Build())));
-    public static Result<IEnumerable<MutableSong>> EnumerateArchive(FileInfo file) {
+    public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Map(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
+    public static Result<IEnumerable<SongBuilder>> EnumerateArchive(FileInfo file) {
         var archive = file.ToResultWhereExists()
             .Map(file => new ZipArchive(file.OpenRead()));
 
@@ -39,50 +39,67 @@ public static class PlaylistBuilder {
 
 
         return songs;
-        
-        static IEnumerable<MutableSong> ParseSongList(ZipArchiveEntry entry) {
+
+        static IEnumerable<SongBuilder> ParseSongList(ZipArchiveEntry entry) {
             using var stream = entry.Open();
-            return JsonExtensions.Deserialize<MutableSong[]>(stream).Map<IEnumerable<MutableSong>>(songs => songs.OrderBy(s => s.Index)).Reduce([]);
+            return JsonExtensions.Deserialize<SongBuilder[]>(stream).Map<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Reduce([]);
         }
     }
-    
-    public static ResultFlag ToArchive(FileInfo file, IEnumerable<ISong> songs) {
+
+    public static ResultFlag ToArchive(FileInfo file, IEnumerable<Song> songs) {
         if(!songs.Any()) {
             return ResultFlag.Null;
         }
 
+        return ToArchiveImpl(file, songs.Select((song, index) => new SongBuilder(song).SetIndex(index)).ToArray());
+    }
+    
+    public static ResultFlag ToArchive(FileInfo file, IEnumerable<SongBuilder> songs) {
+        if(!songs.Any()) {
+            return ResultFlag.Null;
+        }
+
+        return ToArchiveImpl(file, songs.Select((song, index) => song.Copy().SetIndex(index)).ToArray());
+    }
+
+    private static ResultFlag ToArchiveImpl(FileInfo file, SongBuilder[] songs)
+    {
         using var archive = file.Exists ? new ZipArchive(file.Open(FileMode.Open), ZipArchiveMode.Update) : new ZipArchive(file.Create(), ZipArchiveMode.Update);
 
-        var songsCopy = songs.Select((song, index) => new MutableSong(song, index)).ToArray();
-
-        foreach(var song in songsCopy) {
+        foreach(var song in songs)
+        {
             var fileInfo = new FileInfo(song.Path);
 
             // filename becomes it's hash to prevent saving the same file twice...
             var entryName = fileInfo.ComputeMd5Hash();
-            if(archive.GetEntry(entryName) is not null) continue;
+            if(archive.GetEntry(entryName) is null)
+            {
+                var songEntry = archive.CreateEntryFromFile(song.Path, entryName)!;
+            }
 
-            var songEntry = archive.CreateEntryFromFile(song.Path, entryName)!;
             song.SetPath(entryName);
+
+            //TODO: prevent hash collisions
         }
 
         archive.GetEntry(SONG_LIST_ENTRY_NAME)?.Delete();
         var songListEntry = archive.CreateEntry(SONG_LIST_ENTRY_NAME)!;
 
         using var songListStream = songListEntry.Open();
-        WriteSongList(songListStream, songsCopy);
+        WriteSongList(songListStream, songs);
 
         return ResultFlag.Succeeded;
-        
-        static void WriteSongList(Stream stream, IEnumerable<MutableSong> data) {
+
+        static void WriteSongList(Stream stream, IEnumerable<SongBuilder> data)
+        {
             data.WriteToStream(stream);
         }
     }
 
-    public static IEnumerable<MutableSong> EnumerateFile(FileInfo file) {
-        return JsonExtensions.ReadFromJsonFile<List<MutableSong>>(file).Map(MapFrom).Reduce([]);
+    public static IEnumerable<SongBuilder> EnumerateFile(FileInfo file) {
+        return JsonExtensions.ReadFromJsonFile<List<SongBuilder>>(file).Map(MapFrom).Reduce([]);
 
-        IEnumerable<MutableSong> MapFrom(IEnumerable<MutableSong> songs) {
+        IEnumerable<SongBuilder> MapFrom(IEnumerable<SongBuilder> songs) {
             foreach(var song in songs) {
                 yield return Path.IsPathRooted(song.Path) ? song : song with { Path = Path.Combine(file.DirectoryName!, song.Path) };
             }

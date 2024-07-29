@@ -5,7 +5,7 @@ namespace BallMusicManager.Infrastructure;
 
 public static class SongCache {
     public static readonly DirectoryInfo CacheDirectory = new("$cache");
-    public static FileInfo Cache(MutableSong song) {
+    public static FileInfo Cache(SongBuilder song) {
         using var stream = File.OpenRead(song.Path);
         return Cache(stream, Path.GetFileName(song.Path));
     }

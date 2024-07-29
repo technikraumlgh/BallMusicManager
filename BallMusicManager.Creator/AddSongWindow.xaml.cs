@@ -8,13 +8,13 @@ using System.Windows.Input;
 namespace BallMusicManager.Creator;
 
 public sealed partial class AddSongWindow : Window {
-    public MutableSong Song { get; private set; }
+    public SongBuilder Song { get; private set; }
     public AddSongWindow(FileInfo fileInfo) {
         InitializeComponent();
         DanceField.ItemsSource = Dance.DanceKeys;
         AddButton.Focus();
         PathText.Text = fileInfo.FullName;
-        Song = new MutableSong()
+        Song = new SongBuilder()
             .SetPath(fileInfo)
             .FromMetaData();
 

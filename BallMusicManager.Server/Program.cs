@@ -12,20 +12,21 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
 //builder.Services.AddCors();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<SignalService>();
 builder.Services.AddSingleton<DisplayService>();
-builder.Services.AddAuthentication();
+builder.Services.AddAuthentication(); //properly set up
 
 var app = builder.Build();
+app.Urls.Add("http://localhost");
 
 var ip = SystemHelper.LocalIPAddress();
 var url = $"http://{ip}";
 app.Urls.Add(url);
+
 OutputQRCode(url);
 
-app.Urls.Add("http://localhost");
 
 app.UseRouting();
+app.UseAuthorization();
 //app.UseCors();
 
 var displayService = app.Services.GetService<DisplayService>()!;
@@ -41,13 +42,13 @@ app.MapHub<SignalHub>("signal");
 
 //app.MapGet("nextup", () => Results.Json(next));
 
-app.MapPost("playing", ([FromBody] Song song, string? key) => {
+app.MapPost("playing", ([FromBody] SongDTO song, string? key) => {
     if(key is null || key != KEY) return Results.NotFound();
     displayService.SetCurrent(song);
     return Results.Ok();
 });
 
-app.MapPost("nextup", ([FromBody] Song song, string? key) => {
+app.MapPost("nextup", ([FromBody] SongDTO song, string? key) => {
     if(key is null || key != KEY) return Results.NotFound();
     displayService.SetNext(song);
     return Results.Ok();

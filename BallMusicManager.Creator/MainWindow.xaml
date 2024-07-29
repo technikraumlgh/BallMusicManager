@@ -24,7 +24,7 @@
                 <MenuItem Header="Save" Click="Save"/>
                 <MenuItem Header="Open" Click="Open"/>
                 <MenuItem Header="Open Legacy" Click="OpenLegacy"/>
-                <MenuItem Header="Close" Click="Close"/>
+                <MenuItem Header="Close" Click="ClosePlaylist"/>
             </MenuItem>
             
             <MenuItem Header="Library">

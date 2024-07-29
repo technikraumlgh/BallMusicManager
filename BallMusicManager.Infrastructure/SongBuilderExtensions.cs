@@ -5,7 +5,7 @@ using BallMusicManager.Domain;
 namespace BallMusicManager.Infrastructure; 
 
 public static class SongBuilderExtensions {
-    public static MutableSong FromMetaData(this MutableSong songBuilder) {
+    public static SongBuilder FromMetaData(this SongBuilder songBuilder) {
         using var file = TagLib.File.Create(songBuilder.Path);
         //if(file.Properties.Duration.TotalMinutes < 1.5) Trace.TraceWarning($"{_Path} is probably not a full song");
         return songBuilder.SetDuration(file.Properties.Duration).SetArtist(file.Tag.FirstPerformer);
@@ -15,7 +15,7 @@ public static class SongBuilderExtensions {
         var fileName = fileInfo.NameWithoutExtension();
 
         try {
-            return new MutableSong()
+            return new SongBuilder()
                 .SetPath(fileInfo)
                 .FromMetaData()
                 .FromFileName(fileName).Build();

@@ -1,10 +1,11 @@
-﻿using Ametrin.Utils.Optional;
-using Ametrin.Utils.Registry;
+﻿using Ametrin.Utils;
+using Ametrin.Utils.Optional;
+using System.Collections.Frozen;
 
 namespace BallMusicManager.Domain;
 
 public static class Dance{
-    public static readonly IRegistry<string, string> DanceKeys = new Dictionary<string, string>{
+    public static readonly FrozenDictionary<string, string> DanceKeys = new Dictionary<string, string>{
         {"CCC", "ChaChaCha" },
         {"LW", "Langsamer Walzer" },
         {"JVE", "Jive" },
@@ -18,7 +19,7 @@ public static class Dance{
         {"RNR", "Rock'n Roll" },
         {"PT", "Party" },
         //{"FS", "Freestyle" }, // legacy
-    }.ToRegistry();
+    }.ToFrozenDictionary();
 
-    public static string FromKey(string key) => DanceKeys.TryGet(key).Reduce(key);
+    public static string FromKey(string key) => DanceKeys.Get(key).Reduce(key);
 }

@@ -7,8 +7,9 @@ public record SongDTO(string title, string artist, string dance) {
 
     public string ToJson() => JsonSerializer.Serialize(this);
 
-    public static SongDTO From(ISong? song) {
+    public static SongDTO From(Song? song) {
         if(song is null) return None;
+
         return new(song.Title, song.Artist, song.Dance);
     }
 };

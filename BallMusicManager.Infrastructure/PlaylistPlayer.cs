@@ -9,8 +9,8 @@ public sealed class PlaylistPlayer {
     public readonly ImmutableArray<Song> Songs;
 
     public bool IsPlaying => Player.IsPlaying;
-    public ISong? Current => IsEmpty ? null : Songs[CurrentIndex];
-    public ISong? Peek => IsEnd || IsEmpty ? null : Songs[CurrentIndex + 1];
+    public Song? Current => IsEmpty ? null : Songs[CurrentIndex];
+    public Song? Peek => IsEnd || IsEmpty ? null : Songs[CurrentIndex + 1];
     public int Length => Songs.Length;
     public bool IsEmpty => Length == 0;
     public bool IsEnd => IsEmpty || CurrentIndex == LastIndex;
@@ -18,14 +18,14 @@ public sealed class PlaylistPlayer {
     private int LastIndex => Length-1;
     public int CurrentIndex { get; private set; } = -1;
 
-    public PlaylistPlayer(string path, IEnumerable<Song> songs){
+    public PlaylistPlayer(string path, IEnumerable<Song> songs) {
         Path = path;
         Songs = songs.ToImmutableArray();
         SetCurrent(0);
         Player.OnSongFinished += AutoPlayNext;
     }
 
-    public void SetCurrent(int idx){
+    public void SetCurrent(int idx) {
         if(IsEmpty) return;
         var old = CurrentIndex;
         var wasPlaying = IsPlaying;
@@ -39,9 +39,10 @@ public sealed class PlaylistPlayer {
     public void Skip(int amount = 1){
         if(IsEmpty) return;
         if (amount == 0) return;
+        
         SetCurrent(CurrentIndex + amount);
     }
-    private void AutoPlayNext(){
+    private void AutoPlayNext() {
         Skip();
         Play();
     }
