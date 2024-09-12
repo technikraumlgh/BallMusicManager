@@ -88,10 +88,10 @@ public sealed partial class MainWindow : Window, IHostProvider {
 
     private void UpdateInfo() {
         if (Playlist is not null && !Playlist.IsEmpty) SongsGrid.SelectedIndex = Playlist.CurrentIndex;
-        CurrentTitle.Text = Playlist?.Current?.Title ?? "Title";
-        CurrentArtist.Text = Playlist?.Current?.Artist ?? "Artist";
-        CurrentDance.Text = Playlist?.Current?.Dance ?? "Dance";
-        RemaningTime.Text = Playlist?.Player.CurrentSongLength.ToString("mm\\:ss") ?? "Duration";
+        CurrentTitle.Content = Playlist?.Current?.Title ?? "Title";
+        CurrentArtist.Content = Playlist?.Current?.Artist ?? "Artist";
+        CurrentDance.Content = Playlist?.Current?.Dance ?? "Dance";
+        RemaningTime.Content = Playlist?.Player.CurrentSongLength.ToString("mm\\:ss") ?? "Duration";
         PlaybackBar.Maximum = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         PlaybackBar.Value = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         UpdateDuration();
@@ -104,12 +104,12 @@ public sealed partial class MainWindow : Window, IHostProvider {
 
     private void UpdateDuration(object? sender = default, EventArgs? args = default) {
         if(Playlist is null){
-            RemaningTime.Text = "Duration";
+            RemaningTime.Content = "Duration";
             PlaybackBar.Value = 0;
             Timer.Stop();
             return;
         }
-        RemaningTime.Text = (Playlist.Player.CurrentSongLength - Playlist.Player.CurrentTime).ToString(@"mm\:ss"); ;
+        RemaningTime.Content = (Playlist.Player.CurrentSongLength - Playlist.Player.CurrentTime).ToString(@"mm\:ss"); ;
         PlaybackBar.Value = Playlist.Player.CurrentTime.TotalSeconds;
     }
 

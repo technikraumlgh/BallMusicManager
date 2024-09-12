@@ -4,6 +4,7 @@ namespace BallMusicManager.Domain;
 
 public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityComparer<SongBuilder>{
     public static readonly SongEqualityComparer Instance = new ();
+    public static readonly FileHashComparer FileHash = new();
 
     public bool Equals(Song? x, Song? y) {
         if(x is null) {
@@ -29,4 +30,20 @@ public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityCom
 
     public int GetHashCode([DisallowNull] Song obj) => HashCode.Combine(obj.Title.GetHashCode(), obj.Artist.GetHashCode(), obj.Dance.GetHashCode());
     public int GetHashCode([DisallowNull] SongBuilder obj) => HashCode.Combine(obj.Title.GetHashCode(), obj.Artist.GetHashCode(), obj.Dance.GetHashCode());
+
+    public sealed class FileHashComparer : IEqualityComparer<SongBuilder>
+    {
+        public bool Equals(SongBuilder? x, SongBuilder? y)
+        {
+            if(x is null)
+            {
+                return y is null;
+            }
+            if(y is null) return false;
+
+            return x.FileHash == y.FileHash;
+        }
+
+        public int GetHashCode([DisallowNull] SongBuilder obj) => obj.FileHash.GetHashCode();
+    }
 }

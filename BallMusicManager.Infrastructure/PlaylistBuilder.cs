@@ -39,7 +39,7 @@ public static class PlaylistBuilder {
             }
         });
 
-
+        // don't yield return to allow multi-threading
         return songs;
 
         static IEnumerable<SongBuilder> ParseSongList(ZipArchiveEntry entry) {
@@ -75,19 +75,19 @@ public static class PlaylistBuilder {
 
         foreach(var song in songs)
         {
-            var fileInfo = new FileInfo(song.Path);
-
-            // filename becomes it's hash to prevent saving the same file twice...
-            song.FileHash = fileInfo.ComputeSha256Hash();
             if(hashes.Contains(song.FileHash)) //TODO: properly handle this case
-                throw new UnreachableException($"{song.Path} produced an already existing hash!");
+            {
+                var other = songs.Where(other => song.FileHash == other.FileHash).FirstOrDefault();
+                //throw new UnreachableException($"{song.Path} produced an already existing hash!");
+            }
 
             if(archive.GetEntry(song.FileHash) is null)
             {
                 archive.CreateEntryFromFile(song.Path, song.FileHash);
+                hashes.Add(song.FileHash);
             }
 
-            hashes.Add(song.FileHash);
+            // filename becomes it's hash to prevent saving the same file twice...
             song.SetPath(song.FileHash);
         }
 
