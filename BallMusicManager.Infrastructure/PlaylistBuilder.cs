@@ -50,7 +50,7 @@ public static class PlaylistBuilder {
 
     public static ResultFlag ToArchive(FileInfo file, IEnumerable<Song> songs) {
         if(!songs.Any()) {
-            return ResultFlag.Null;
+            return ResultFlag.NullOrEmpty;
         }
 
         return ToArchiveImpl(file, songs.Select((song, index) => new SongBuilder(song).SetIndex(index)).ToArray());
@@ -58,7 +58,7 @@ public static class PlaylistBuilder {
     
     public static ResultFlag ToArchive(FileInfo file, IEnumerable<SongBuilder> songs) {
         if(!songs.Any()) {
-            return ResultFlag.Null;
+            return ResultFlag.NullOrEmpty;
         }
 
         return ToArchiveImpl(file, songs.Select((song, index) => song.Copy().SetIndex(index)).ToArray());
