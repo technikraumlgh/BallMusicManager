@@ -7,11 +7,13 @@ using System.Windows.Input;
 
 namespace BallMusicManager.Creator;
 
-public sealed partial class AddSongWindow : Window {
+public sealed partial class AddSongWindow : Window
+{
     public SongBuilder Song { get; private set; }
-    public AddSongWindow(FileInfo fileInfo) {
+    public AddSongWindow(FileInfo fileInfo)
+    {
         InitializeComponent();
-        DanceField.ItemsSource = Dance.DanceKeys;
+        DanceField.ItemsSource = Dance.DanceKeys.Values;
         AddButton.Focus();
         PathText.Text = fileInfo.FullName;
         Song = new SongBuilder()
@@ -19,28 +21,34 @@ public sealed partial class AddSongWindow : Window {
             .FromMetaData();
 
 
-        try {
+        try
+        {
             Song.FromFileName(fileInfo.NameWithoutExtension());
             TitleField.Text = Song.Title;
             ArtistField.Text = Song.Artist;
             DanceField.Text = Song.Dance;
-        } catch { }
+        }
+        catch { }
     }
 
-    private void AddSong(object sender, RoutedEventArgs? e = default) {
+    private void AddSong(object sender, RoutedEventArgs? e = default)
+    {
         Song.SetTitle(TitleField.Text.Trim())
             .SetArtist(ArtistField.Text.Trim())
             .SetDanceFromKey(DanceField.Text.Trim());
         DialogResult = true;
     }
 
-    private void StackPanel_KeyDown(object sender, KeyEventArgs e) {
-        if(e.Key is not Key.Enter) return;
+    private void StackPanel_KeyDown(object sender, KeyEventArgs e)
+    {
+        if(e.Key is not Key.Enter)
+            return;
 
         AddSong(sender);
     }
 
-    private void DanceField_LostFocus(object sender, RoutedEventArgs e) {
+    private void DanceField_LostFocus(object sender, RoutedEventArgs e)
+    {
         DanceField.Text = Dance.FromKey(DanceField.Text);
     }
 }

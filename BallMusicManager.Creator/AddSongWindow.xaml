@@ -5,21 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BallMusicManager.Creator"
         mc:Ignorable="d"
-        Title="Add Song" Height="130" Width="400">
-    <StackPanel Margin="5" KeyDown="StackPanel_KeyDown">
+        Title="Add Song" Height="170" Width="400">
+    <StackPanel Margin="8 4" KeyDown="StackPanel_KeyDown">
         <TextBlock x:Name="PathText" TextAlignment="Center" FontSize="14">Title</TextBlock>
-        <StackPanel Orientation="Horizontal">
-            <StackPanel Margin="0 0 5 0">
+        <StackPanel Orientation="Horizontal" Margin="0 4">
+            <StackPanel Margin="0 0 4 0">
                 <TextBlock>Title</TextBlock>
-                <TextBox x:Name="TitleField"  MinWidth="50"/>
+                <TextBox x:Name="TitleField"  MinWidth="96"/>
             </StackPanel>
-            <StackPanel Margin="0 0 5 0">
+            <StackPanel Margin="0 0 4 0">
                 <TextBlock>Artist</TextBlock>
-                <TextBox x:Name="ArtistField" MinWidth="50"/>
+                <TextBox x:Name="ArtistField" MinWidth="96"/>
             </StackPanel>
-            <StackPanel Margin="0 0 5 0">
+            <StackPanel Margin="0 0 4 0">
                 <TextBlock>Dance</TextBlock>
-                <ComboBox x:Name="DanceField" IsEditable="True" LostFocus="DanceField_LostFocus"  MinWidth="50"/>
+                <ComboBox x:Name="DanceField" IsEditable="True" LostFocus="DanceField_LostFocus"  MinWidth="96"/>
             </StackPanel>
         </StackPanel>
         <Button x:Name="AddButton" Margin="0 5 0 0" Click="AddSong">Add</Button>
