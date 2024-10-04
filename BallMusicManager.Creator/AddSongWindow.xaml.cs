@@ -42,7 +42,9 @@ public sealed partial class AddSongWindow : Window
     private void StackPanel_KeyDown(object sender, KeyEventArgs e)
     {
         if(e.Key is not Key.Enter)
+        {
             return;
+        }
 
         AddSong(sender);
     }
