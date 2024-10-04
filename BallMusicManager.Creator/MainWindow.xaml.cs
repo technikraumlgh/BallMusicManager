@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -402,5 +403,29 @@ public sealed partial class MainWindow : Window
     private void LibraryReloadClick(object sender, RoutedEventArgs e)
     {
         _ = LoadLibrary();
+    }
+
+    private void Search_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        var view = CollectionViewSource.GetDefaultView(LibraryGrid.ItemsSource);
+        if(string.IsNullOrWhiteSpace(SearchBox.Text))
+        {
+            SearchLabel.Visibility =  Visibility.Visible;
+            view.Filter = null;
+        }
+        else
+        {
+            SearchLabel.Visibility =  Visibility.Collapsed;
+            view.Filter = (obj) =>
+            {
+                if(obj is SongBuilder song)
+                {
+                    return song.Title.Contains(SearchBox.Text, StringComparison.OrdinalIgnoreCase) ||
+                           song.Artist.Contains(SearchBox.Text, StringComparison.OrdinalIgnoreCase);
+                }
+
+                return false;
+            };
+        }
     }
 }

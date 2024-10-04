@@ -51,7 +51,8 @@
             </DataGrid.Columns>
         </DataGrid>
 
-
+        <Label x:Name="SearchLabel" Grid.Column="1" FontSize="16" VerticalAlignment="Center" Margin="16 8 0 4">Search</Label>
+        <TextBox x:Name="SearchBox" Grid.Column="1" Margin="4 8 0 4" TextChanged="Search_TextChanged"/>
         <Label Grid.Row="1" Grid.Column="1">Library</Label>
         <DataGrid x:Name="LibraryGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
                   AllowDrop="True" Drop="LibraryDrop" CanUserDeleteRows="False" SelectionMode="Single"
