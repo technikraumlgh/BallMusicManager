@@ -7,7 +7,7 @@ public class SongBuilderCollection(ObservableCollection<SongBuilder> songs) : Ob
 {
     public SongBuilderCollection(IEnumerable<SongBuilder> songs) : this(new(songs)) { }
 
-    public bool ContainsSong(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null) => this.Contains(song, equalityComparer ?? SongEqualityComparer.FileHash);
+    public bool ContainsSong(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null) => this.Contains(song, equalityComparer ?? SongEqualityComparer.ByFileHash);
 
     public bool AddIfNew(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null)
     {
@@ -22,7 +22,7 @@ public class SongBuilderCollection(ObservableCollection<SongBuilder> songs) : Ob
 
     public SongBuilder AddOrGetExisting(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null)
     {
-        equalityComparer ??= SongEqualityComparer.FileHash;
+        equalityComparer ??= SongEqualityComparer.ByFileHash;
         var match = this.FirstOrDefault(other => equalityComparer.Equals(song, other));
         if (match is null)
         {
