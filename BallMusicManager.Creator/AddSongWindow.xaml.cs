@@ -1,43 +1,56 @@
-﻿using BallMusicManager.Domain;
+﻿using Ametrin.Utils;
+using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
-namespace BallMusicManager.Creator {
-    /// <summary>
-    /// Interaction logic for AddSongWindow.xaml
-    /// </summary>
-    public sealed partial class AddSongWindow : Window {
-        public SongBuilder Song { get; private set; }
-        private readonly string Path;
-        public AddSongWindow(string path) {
-            InitializeComponent();
-            AddButton.Focus();
-            Path = path;
-            PathText.Text = System.IO.Path.GetFileName(path);
-            Song = new SongBuilder()
-                .Path(path)
-                .FromMetaData();
-            try {
-                Song.FromFileName(System.IO.Path.GetFileNameWithoutExtension(path));
-                TitleField.Text = Song._Title;
-                ArtistField.Text = Song._Artist;
-                DanceField.Text = Song._Dance;
-            } catch { }
+namespace BallMusicManager.Creator;
 
+public sealed partial class AddSongWindow : Window
+{
+    public SongBuilder Song { get; private set; }
+    public AddSongWindow(FileInfo fileInfo)
+    {
+        InitializeComponent();
+        DanceField.ItemsSource = Dance.DanceKeys.Values;
+        AddButton.Focus();
+        PathText.Text = fileInfo.FullName;
+        Song = new SongBuilder()
+            .SetPath(fileInfo)
+            .FromMetaData();
+
+
+        try
+        {
+            Song.FromFileName(fileInfo.NameWithoutExtension());
+            TitleField.Text = Song.Title;
+            ArtistField.Text = Song.Artist;
+            DanceField.Text = Song.Dance;
+        }
+        catch { }
+    }
+
+    private void AddSong(object sender, RoutedEventArgs? e = default)
+    {
+        Song.SetTitle(TitleField.Text.Trim())
+            .SetArtist(ArtistField.Text.Trim())
+            .SetDanceFromKey(DanceField.Text.Trim());
+        DialogResult = true;
+    }
+
+    private void StackPanel_KeyDown(object sender, KeyEventArgs e)
+    {
+        if(e.Key is not Key.Enter)
+        {
+            return;
         }
 
-        private void AddSong(object sender, RoutedEventArgs? e = default) {
-            Song.Title(TitleField.Text.Trim())
-                .Artist(ArtistField.Text.Trim())
-                .DanceFromKey(Dance.FromKey(DanceField.Text.Trim()));
-            DialogResult = true;
-        }
+        AddSong(sender);
+    }
 
-        private void StackPanel_KeyDown(object sender, KeyEventArgs e) {
-            if(e.Key is not Key.Enter) return;
-
-            AddSong(sender);
-        }
+    private void DanceField_LostFocus(object sender, RoutedEventArgs e)
+    {
+        DanceField.Text = Dance.FromKey(DanceField.Text);
     }
 }

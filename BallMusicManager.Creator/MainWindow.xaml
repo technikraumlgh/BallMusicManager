@@ -5,45 +5,72 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BallMusicManager.Creator"
         mc:Ignorable="d"
-        Title="Playlist Creator" Height="450" Width="800">
-    <Grid>
+        Title="Playlist Creator" Height="900" Width="1600">
+    <Grid Margin="16 0 16 8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="50"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel>
-            <Button Content="S" Click="Save"/>
-            <Button Content="E" Click="Export"/>
-            <Button Content="O" Click="Open"/>
-        </StackPanel>
+        <Menu Grid.ColumnSpan="2">
+            <MenuItem Header="Playlist" FontSize="16">
+                <MenuItem Header="Save" Click="SavePlaylist"/>
+                <MenuItem Header="Open" Click="OpenPlaylist"/>
+                <MenuItem Header="Close" Click="ClosePlaylist"/>
+                <Separator/>
+                <MenuItem Header="Open Legacy" Click="OpenPlaylistLegacy"/>
+            </MenuItem>
 
-        <StackPanel Grid.Column="1">
-            <TextBlock x:Name="LengthDisplay">Length: </TextBlock>
-            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" AllowDrop="True" 
-                      Height="400" Drop="Songs_Drop"
-                      PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
-                      PreviewMouseMove="SongsGrid_PreviewMouseMove">
-                <DataGrid.Columns>
-                    <!--<DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>-->
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
-                </DataGrid.Columns>
+            <MenuItem Header="Library" FontSize="16">
+                <MenuItem Header="Reload" Click="LibraryReloadClick"/>
+                <MenuItem Header="Save" Click="LibrarySaveClick"/>
+            </MenuItem>
+        </Menu>
 
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <Setter Property="ContextMenu">
-                            <Setter.Value>
-                                <ContextMenu>
-                                    <MenuItem Header="Delete" Click="DeleteSong"/>
-                                </ContextMenu>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </DataGrid.RowStyle>
-            </DataGrid>
-        </StackPanel>
+        <Label x:Name="LengthDisplay" Grid.Row="1">Length: </Label>
+        <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
+                  CanUserAddRows="False" CanUserSortColumns="False" CanUserDeleteRows="False"
+                  AllowDrop="True" Drop="Songs_Drop" SelectionMode="Single"
+                  PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
+                  PreviewMouseMove="SongsGrid_PreviewMouseMove"
+                  MouseDoubleClick="SongsGrid_MouseDoubleClick"
+                  KeyUp="SongsGrid_KeyUp"
+                  Grid.Row="2" Margin="0 0 4 8">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Tanz" FontSize="15" Binding="{Binding Dance}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Artist" FontSize="15" Binding="{Binding Artist}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Länge" FontSize="15" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Label x:Name="SearchLabel" Grid.Column="1" FontSize="16" VerticalAlignment="Center" Margin="16 8 0 4">Search</Label>
+        <TextBox x:Name="SearchBox" Grid.Column="1" Margin="4 8 0 4" TextChanged="Search_TextChanged"/>
+        <Label Grid.Row="1" Grid.Column="1">Library</Label>
+        <DataGrid x:Name="LibraryGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
+                  AllowDrop="True" Drop="LibraryDrop" CanUserDeleteRows="False" SelectionMode="Single"
+                  CanUserAddRows="False" CanUserSortColumns="True"
+                  PreviewMouseLeftButtonDown="LibraryGrid_PreviewMouseLeftButtonDown"
+                  PreviewMouseMove="LibraryGrid_PreviewMouseMove"
+                  MouseDoubleClick="SongsGrid_MouseDoubleClick"
+                  KeyUp="LibraryGrid_KeyUp"
+                  Grid.Row="2" Grid.Column="1" Margin="4 0 0 8">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}"/>
+                <DataGridTextColumn Header="Tanz" FontSize="15" Binding="{Binding Dance}"/>
+                <DataGridTextColumn Header="Artist" FontSize="15" Binding="{Binding Artist}"/>
+                <DataGridTextColumn Header="Länge" FontSize="15" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Button x:Name="PlayButton" Click="Play_Click" Grid.Row="3" FontFamily="Segoe MDL2 Assets" Content="&#xE768;" FontSize="20"/>
+        <Slider x:Name="PlaybackSlider" Grid.ColumnSpan="2" Grid.Row="3" Margin="52 2 2 2" ValueChanged="PlaybackSlider_ValueChanged"/>
     </Grid>
 </Window>

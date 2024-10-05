@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Ametrin.Utils.Optional;
 using Ametrin.Utils.WPF;
+using Ametrin.Utils.WPF.FileDialogs;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 
@@ -88,10 +88,10 @@ public sealed partial class MainWindow : Window, IHostProvider {
 
     private void UpdateInfo() {
         if (Playlist is not null && !Playlist.IsEmpty) SongsGrid.SelectedIndex = Playlist.CurrentIndex;
-        CurrentTitle.Text = Playlist?.Current?.Title ?? "Title";
-        CurrentArtist.Text = Playlist?.Current?.Artist ?? "Artist";
-        CurrentDance.Text = Playlist?.Current?.Dance ?? "Dance";
-        RemaningTime.Text = Playlist?.Player.CurrentSongLength.ToString("mm\\:ss") ?? "Duration";
+        CurrentTitle.Content = Playlist?.Current?.Title ?? "Title";
+        CurrentArtist.Content = Playlist?.Current?.Artist ?? "Artist";
+        CurrentDance.Content = Playlist?.Current?.Dance ?? "Dance";
+        RemaningTime.Content = Playlist?.Player.CurrentSongLength.ToString("mm\\:ss") ?? "Duration";
         PlaybackBar.Maximum = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         PlaybackBar.Value = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         UpdateDuration();
@@ -104,12 +104,12 @@ public sealed partial class MainWindow : Window, IHostProvider {
 
     private void UpdateDuration(object? sender = default, EventArgs? args = default) {
         if(Playlist is null){
-            RemaningTime.Text = "Duration";
+            RemaningTime.Content = "Duration";
             PlaybackBar.Value = 0;
             Timer.Stop();
             return;
         }
-        RemaningTime.Text = (Playlist.Player.CurrentSongLength - Playlist.Player.CurrentTime).ToString(@"mm\:ss"); ;
+        RemaningTime.Content = (Playlist.Player.CurrentSongLength - Playlist.Player.CurrentTime).ToString(@"mm\:ss"); ;
         PlaybackBar.Value = Playlist.Player.CurrentTime.TotalSeconds;
     }
 
@@ -117,7 +117,7 @@ public sealed partial class MainWindow : Window, IHostProvider {
         if(Playlist is null) return;
         var row = (args.OriginalSource as DependencyObject)!.FindParent<DataGridRow>();
         if (row is null || row.Item is not Song song) return;
-        if(Playlist.Current == song) {
+        if(Playlist.Current as Song == song) {
             Playlist.Player.Restart();
         } else {
             Playlist.SetCurrent(Playlist.Songs.IndexOf(song));
@@ -125,17 +125,11 @@ public sealed partial class MainWindow : Window, IHostProvider {
     }
 
     private void OpenFromPlaylist(object sender, RoutedEventArgs e) {
-        var dialog = DialogUtils.GetFileDialog(filterDescription: "Playlists", extension: "playlist");
-        if(dialog.ShowDialog() is not true) return;
-
-        Playlist = PlaylistBuilder.FromFile(new(dialog.FileName));
-    }
-
-    private void OpenFromFolder(object sender, RoutedEventArgs args) {
-        using var dialog = new FolderBrowserDialog();
-        if(dialog.ShowDialog() is not System.Windows.Forms.DialogResult.OK) return;
-
-        Playlist = PlaylistBuilder.FromFolder(new(dialog.SelectedPath));
+        var dialog = new OpenFileDialog().AddExtensionFilter("Playlist", "plz");
+     
+        dialog.GetFileInfo()
+            .Map(PlaylistBuilder.FromArchive)
+            .Resolve(playlist => Playlist = playlist);
     }
 
     private void OpenMessageWindow(object sender, RoutedEventArgs e) {

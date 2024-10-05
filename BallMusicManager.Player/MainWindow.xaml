@@ -11,71 +11,67 @@
         <local:MainViewModel/>
     </Window.DataContext>
 
-    <Grid Margin="5">
+    <Grid Margin="8">
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        
-        <DockPanel HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" MaxWidth="256"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <DockPanel HorizontalAlignment="Stretch" Grid.ColumnSpan="2" Margin="0 0 0 8">
             <TextBlock x:Name="CurrentPlaylist" 
                        VerticalAlignment="Center" 
-                       FontSize="15"
+                       FontSize="16"
                        DockPanel.Dock="Left">
                 Current:
             </TextBlock>
 
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                 <!--<Button Width="120" Click="OpenFromFolder">Open From Folder</Button>-->
-                <Button Width="120" Click="OpenFromPlaylist" Margin="0 4">Open</Button>
+                <Button Width="120" Click="OpenFromPlaylist">Open</Button>
                 <!--<Button Width="120" Click="ReloadPlaylist">Reload</Button>-->
             </StackPanel>
         </DockPanel>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-            </Grid.RowDefinitions>
 
+        <DockPanel Grid.Row="1">
+            <StackPanel DockPanel.Dock="Top">
+                <Button x:Name="PlayToggle" FontSize="16" Click="PlayToggleClicked" IsEnabled="{Binding HasPlaylist}" Margin="0 0 0 8" HorizontalAlignment="Stretch">Play</Button>
+                <Button FontSize="16" Click="Skip" IsEnabled="{Binding HasPlaylist}" Margin="0 0 0 8" HorizontalAlignment="Stretch">Skip</Button>
+                <Label>Now Playing</Label>
+                <Label x:Name="CurrentTitle" HorizontalAlignment="Center" FontSize="16">Title</Label>
+                <Label x:Name="CurrentArtist" HorizontalAlignment="Center" FontSize="16">Artist</Label>
+                <Label x:Name="CurrentDance" HorizontalAlignment="Center" FontSize="16">Tanz</Label>
+                <Label x:Name="RemaningTime" HorizontalAlignment="Center" FontSize="16">Duration</Label>
+                <ProgressBar x:Name="PlaybackBar" Height="16" Margin="0 8 0 0"/>
+                <!--<TextBlock x:Name="CurrentIndex" HorizontalAlignment="Center" FontSize="14">Index</TextBlock>-->
+            </StackPanel>
 
-            <DockPanel Grid.Row="1">
-                <StackPanel DockPanel.Dock="Top" VerticalAlignment="Bottom">
-                    <Button x:Name="PlayToggle" FontSize="14" Click="PlayToggleClicked" IsEnabled="{Binding HasPlaylist}">Play</Button>
-                    <Button FontSize="14" Click="Skip" IsEnabled="{Binding HasPlaylist}">Skip</Button>
-                    <TextBlock x:Name="CurrentTitle" HorizontalAlignment="Center" FontSize="14">Title</TextBlock>
-                    <TextBlock x:Name="CurrentArtist" HorizontalAlignment="Center" FontSize="14">Artist</TextBlock>
-                    <TextBlock x:Name="CurrentDance" HorizontalAlignment="Center" FontSize="14">Tanz</TextBlock>
-                    <TextBlock x:Name="RemaningTime" HorizontalAlignment="Center" FontSize="14">Duration</TextBlock>
-                    <ProgressBar x:Name="PlaybackBar" Height="15"/>
-                    <!--<TextBlock x:Name="CurrentIndex" HorizontalAlignment="Center" FontSize="14">Index</TextBlock>-->
-                </StackPanel>
+            <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
+                <Label x:Name="MissingFiles" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Missing Files</Label>
+                <Label>Server</Label>
+                <Button FontSize="16" Click="OpenMessageWindow" HorizontalAlignment="Stretch" Margin="0 0 0 8">Messages</Button>
 
-                <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
-                    <Button FontSize="14" Click="OpenMessageWindow" Margin="0 0 0 15">Messages</Button>
+                <TextBox x:Name="Host" HorizontalContentAlignment="Center" Margin="0 0 0 8">localhost</TextBox>
+                <PasswordBox x:Name="HostPW" HorizontalContentAlignment="Center" Margin="0 0 0 8"></PasswordBox>
+                <Button IsEnabled="{Binding HasPlaylist}" HorizontalAlignment="Stretch" Click="UpdateServer">Update Server</Button>
+                <Label x:Name="ServerOffline" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Server Fail</Label>
+                <!-- <Button Visibility="{Binding ShowFixIndicesButton}" Click="FixIndices">Fix Indices</Button> -->
+            </StackPanel>
+        </DockPanel>
 
-                    <TextBlock x:Name="MissingFiles" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Missing Files</TextBlock>
-                    <TextBlock x:Name="ServerOffline" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Server Fail</TextBlock>
-                    <TextBox x:Name="Host" HorizontalContentAlignment="Center">localhost</TextBox>
-                    <PasswordBox x:Name="HostPW" HorizontalContentAlignment="Center"></PasswordBox>
-                    <Button IsEnabled="{Binding HasPlaylist}" Click="UpdateServer">Update Server</Button>
-                    <!-- <Button Visibility="{Binding ShowFixIndicesButton}" Click="FixIndices">Fix Indices</Button> -->
-                </StackPanel>
-            </DockPanel>
-
-            <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Column="1" Margin="5 0 0 0" MouseDoubleClick="SkipTo" CanUserDeleteRows="False" CanUserSortColumns="False" IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
+        <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" Grid.Row="1" Grid.Column="1" Margin="5 0 0 0" MouseDoubleClick="SkipTo" CanUserDeleteRows="False" CanUserSortColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Index}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" MinWidth="128" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Tanz" Binding="{Binding Dance}" MinWidth="128" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" MinWidth="128" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Länge" Binding="{Binding Duration,StringFormat=mm\\:ss}" MinWidth="128" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
     </Grid>
 </Window>

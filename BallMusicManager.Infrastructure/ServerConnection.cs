@@ -27,8 +27,8 @@ public sealed class ServerConnection {
     }
 
     public void Update() {
-        SendSongToServer(Playlist?.Current ?? SongDTO.None);
-        SendNextSongToServer(Playlist?.Peek ?? SongDTO.None);
+        SendSongToServer(SongDTO.From(Playlist?.Current));
+        SendNextSongToServer(SongDTO.From(Playlist?.Peek));
     }
 
     public void SendNothing() {

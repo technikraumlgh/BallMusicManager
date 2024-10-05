@@ -9,9 +9,9 @@
     <StackPanel Margin="16">
         <Label>News</Label>
         <TextBox x:Name="NewsBox" DockPanel.Dock="Left" MaxLines="1"/>
-        <Button x:Name="SendNews" Click="SendNews_Click" Margin="0 0 0 16">Send</Button>
+        <Button x:Name="SendNews" HorizontalAlignment="Center" Click="SendNews_Click" MinWidth="128" Margin="0 8 0 16">Send</Button>
         <Label>Message</Label>
         <TextBox x:Name="MessageBox" AcceptsReturn="True" TextWrapping="WrapWithOverflow"/>
-        <Button x:Name="SendMessage" Click="SendMessage_Click">Send</Button>
+        <Button x:Name="SendMessage" HorizontalAlignment="Center" Click="SendMessage_Click" MinWidth="128" Margin="0 8 0 16">Send</Button>
     </StackPanel>
 </Window>
