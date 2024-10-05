@@ -1,36 +1,13 @@
 using BallMusicManager.Domain;
-using System.Collections;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 
 namespace BallMusicManager.Creator;
 
-public class SongBuilderCollection(ObservableCollection<SongBuilder> songs) : IEnumerable<SongBuilder>, INotifyCollectionChanged, INotifyPropertyChanged
+public class SongBuilderCollection(ObservableCollection<SongBuilder> songs) : ObservableCollection<SongBuilder>(songs)
 {
-    internal ObservableCollection<SongBuilder> Songs { get; } = songs;
-    public event NotifyCollectionChangedEventHandler? CollectionChanged
-    {
-        add => Songs.CollectionChanged += value; 
-        remove => Songs.CollectionChanged -= value;
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged
-    {
-        add => ((INotifyPropertyChanged)Songs).PropertyChanged += value;
-        remove => ((INotifyPropertyChanged)Songs).PropertyChanged -= value;
-    }
-
-    public int Count => Songs.Count;
-    public void Clear() => Songs.Clear();
-    public bool Remove(SongBuilder builder) => Songs.Remove(builder);
-    public int IndexOf(SongBuilder builder) => Songs.IndexOf(builder);
-    public bool Contains(SongBuilder builder) => Songs.Contains(builder);
-    public void Insert(int index, SongBuilder builder) => Songs.Insert(index, builder);
-
     public SongBuilderCollection(IEnumerable<SongBuilder> songs) : this(new(songs)) { }
 
-    public bool ContainsSong(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null) => Songs.Contains(song, equalityComparer ?? SongEqualityComparer.FileHash);
+    public bool ContainsSong(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null) => this.Contains(song, equalityComparer ?? SongEqualityComparer.FileHash);
 
     public bool AddIfNew(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null)
     {
@@ -38,7 +15,7 @@ public class SongBuilderCollection(ObservableCollection<SongBuilder> songs) : IE
         {
             return false;
         }
-        Songs.Add(song);
+        Add(song);
 
         return true;
     }
@@ -46,10 +23,10 @@ public class SongBuilderCollection(ObservableCollection<SongBuilder> songs) : IE
     public SongBuilder AddOrGetExisting(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null)
     {
         equalityComparer ??= SongEqualityComparer.FileHash;
-        var match = Songs.FirstOrDefault(other => equalityComparer.Equals(song, other));
+        var match = this.FirstOrDefault(other => equalityComparer.Equals(song, other));
         if (match is null)
         {
-            Songs.Add(song);
+            Add(song);
             match = song;
         }
 
@@ -71,7 +48,4 @@ public class SongBuilderCollection(ObservableCollection<SongBuilder> songs) : IE
             yield return AddOrGetExisting(song, equalityComparer);
         }
     }
-
-    public IEnumerator<SongBuilder> GetEnumerator() => Songs.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

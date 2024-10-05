@@ -11,7 +11,7 @@ public sealed class SongLibrary(ObservableCollection<SongBuilder> songs) : SongB
     static readonly FileInfo LibFile = new("Library/lib.plibz");
     public void Save()
     {
-        PlaylistBuilder.ToArchive(LibFile, Songs);
+        PlaylistBuilder.ToArchive(LibFile, this);
     }
 
     public static SongLibrary LoadOrNew()
