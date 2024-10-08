@@ -6,6 +6,7 @@ using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -373,8 +374,9 @@ public sealed partial class MainWindow : Window
             {
                 if (obj is SongBuilder song)
                 {
-                    return song.Title.Contains(SearchBox.Text, StringComparison.OrdinalIgnoreCase) ||
-                           song.Artist.Contains(SearchBox.Text, StringComparison.OrdinalIgnoreCase);
+                    var compareInfo = CultureInfo.CurrentCulture.CompareInfo;
+                    return compareInfo.IndexOf(song.Title, SearchBox.Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0 ||
+                           compareInfo.IndexOf(song.Artist, SearchBox.Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0;
                 }
 
                 return false;
