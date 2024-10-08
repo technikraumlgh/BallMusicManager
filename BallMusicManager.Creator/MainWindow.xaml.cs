@@ -17,8 +17,8 @@ namespace BallMusicManager.Creator;
 
 public sealed partial class MainWindow : Window
 {
-    private SongBuilderCollection Playlist = new([]);
-    private SongLibrary Library = default!;
+    private SongBuilderCollection Playlist = [];
+    private SongLibrary Library = [];
     private TimeSpan Duration = TimeSpan.Zero;
     private readonly MusicPlayer _player = new();
     private readonly DispatcherTimer _playbackProgressUpdater = new();
@@ -361,17 +361,17 @@ public sealed partial class MainWindow : Window
     private void Search_TextChanged(object sender, TextChangedEventArgs e)
     {
         var view = CollectionViewSource.GetDefaultView(LibraryGrid.ItemsSource);
-        if(string.IsNullOrWhiteSpace(SearchBox.Text))
+        if (string.IsNullOrWhiteSpace(SearchBox.Text))
         {
-            SearchLabel.Visibility =  Visibility.Visible;
+            SearchLabel.Visibility = Visibility.Visible;
             view.Filter = null;
         }
         else
         {
-            SearchLabel.Visibility =  Visibility.Collapsed;
+            SearchLabel.Visibility = Visibility.Collapsed;
             view.Filter = (obj) =>
             {
-                if(obj is SongBuilder song)
+                if (obj is SongBuilder song)
                 {
                     return song.Title.Contains(SearchBox.Text, StringComparison.OrdinalIgnoreCase) ||
                            song.Artist.Contains(SearchBox.Text, StringComparison.OrdinalIgnoreCase);
@@ -384,7 +384,7 @@ public sealed partial class MainWindow : Window
 
     private void Play_Click(object sender, RoutedEventArgs e)
     {
-        if(_player.IsPlaying)
+        if (_player.IsPlaying)
         {
             PausePlayback();
         }
@@ -396,12 +396,12 @@ public sealed partial class MainWindow : Window
 
     private void PlaybackSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if(!_player.IsPlaying)
+        if (!_player.IsPlaying)
         {
             return;
         }
 
-        if(_selectedSong != _lastPlayed)
+        if (_selectedSong != _lastPlayed)
         {
             //PausePlayback();
         }
@@ -414,18 +414,21 @@ public sealed partial class MainWindow : Window
 
     private void SongsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if(_player.IsPlaying)
+        if (_player.IsPlaying)
         {
             PausePlayback();
         }
-        PlaySelected();
+        else
+        {
+            PlaySelected();
+        }
     }
 
     private void PlaySelected()
     {
-        if(_selectedSong is null)
-        {  
-            return; 
+        if (_selectedSong is null)
+        {
+            return;
         }
 
         UpdatePlayback(_selectedSong);
@@ -444,17 +447,16 @@ public sealed partial class MainWindow : Window
 
     private void UpdatePlayback(SongBuilder? song)
     {
-        if(song is null)
+        if (song is null)
         {
             return;
         }
 
-        if(song != _lastPlayed)
+        if (song != _lastPlayed)
         {
             _player.SetSong(song.Build());
             _lastPlayed = song;
             PlaybackSlider.Maximum = _player.CurrentSongLength.TotalSeconds;
-
         }
     }
 }
