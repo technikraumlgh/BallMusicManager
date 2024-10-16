@@ -1,25 +1,27 @@
-﻿using Ametrin.Utils.Optional;
-using Ametrin.Utils;
-using BallMusicManager.Domain;
+﻿namespace BallMusicManager.Infrastructure;
 
-namespace BallMusicManager.Infrastructure; 
-
-public static class SongBuilderExtensions {
-    public static SongBuilder FromMetaData(this SongBuilder songBuilder) {
+public static class SongBuilderExtensions
+{
+    public static SongBuilder FromMetaData(this SongBuilder songBuilder)
+    {
         using var file = TagLib.File.Create(songBuilder.Path);
         //if(file.Properties.Duration.TotalMinutes < 1.5) Trace.TraceWarning($"{_Path} is probably not a full song");
         return songBuilder.SetDuration(file.Properties.Duration).SetArtist(file.Tag.FirstPerformer);
     }
 
-    public static Option<Song> FromPath(FileInfo fileInfo) {
+    public static Option<Song> FromPath(FileInfo fileInfo)
+    {
         var fileName = fileInfo.NameWithoutExtension();
 
-        try {
+        try
+        {
             return new SongBuilder()
                 .SetPath(fileInfo)
                 .FromMetaData()
                 .FromFileName(fileName).Build();
-        } catch {
+        }
+        catch
+        {
             return Option<Song>.None();
         }
     }

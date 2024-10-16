@@ -11,14 +11,18 @@ using BallMusicManager.Infrastructure;
 
 namespace BallMusicManager.Player;
 
-public sealed partial class MainWindow : Window, IHostProvider {
+public sealed partial class MainWindow : Window, IHostProvider
+{
     private readonly DispatcherTimer Timer = new();
-    private PlaylistPlayer? Playlist {
+    private PlaylistPlayer? Playlist
+    {
         get => playlist;
-        set {
+        set
+        {
             Timer.Stop();
             SongsGrid.ItemsSource = null;
-            if(playlist is not null){
+            if (playlist is not null)
+            {
                 playlist.Player.OnSongStarted -= Timer.Start;
                 playlist.Player.OnSongContinued -= Timer.Start;
                 playlist.Player.OnSongPaused -= Timer.Stop;
@@ -27,7 +31,7 @@ public sealed partial class MainWindow : Window, IHostProvider {
 
             playlist = value;
 
-            if(playlist is null) return;
+            if (playlist is null) return;
             playlist.Player.OnSongStarted += Timer.Start;
             playlist.Player.OnSongContinued += Timer.Start;
             playlist.Player.OnSongPaused += Timer.Stop;
@@ -37,7 +41,7 @@ public sealed partial class MainWindow : Window, IHostProvider {
             UpdatePlaylistInfo();
             UpdateInfo();
 
-            if(playlist.IsEmpty) return;
+            if (playlist.IsEmpty) return;
             MainViewModel.Instance.HasPlaylist = true;
             SongsGrid.SelectedIndex = 0;
         }
@@ -48,7 +52,8 @@ public sealed partial class MainWindow : Window, IHostProvider {
     string IHostProvider.Host => Host.Text;
     string IHostProvider.Password => HostPW.Password;
 
-    public MainWindow() {
+    public MainWindow()
+    {
         InitializeComponent();
         Server = new(this);
         Timer.Interval = TimeSpan.FromMilliseconds(250);
@@ -56,37 +61,46 @@ public sealed partial class MainWindow : Window, IHostProvider {
         Timer.Tick += UpdateDuration;
     }
 
-    public void SetServerOnline(bool value) {
+    public void SetServerOnline(bool value)
+    {
         ServerOffline.Visibility = value ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    public void SetMissingFiles(bool value) {
+    public void SetMissingFiles(bool value)
+    {
         MissingFiles.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void PlayToggleClicked(object sender, RoutedEventArgs e) {
-        if(Playlist is null) return;
-        
-        if(Playlist.IsPlaying) {
+    private void PlayToggleClicked(object sender, RoutedEventArgs e)
+    {
+        if (Playlist is null) return;
+
+        if (Playlist.IsPlaying)
+        {
             Playlist.Pause();
             PlayToggle.Content = "Play";
-        }else {
+        }
+        else
+        {
             Playlist.Play();
             PlayToggle.Content = "Pause";
             Server.Update();
         }
     }
 
-    private void Skip(object sender, RoutedEventArgs args) {
-        if(Playlist is null) return;
+    private void Skip(object sender, RoutedEventArgs args)
+    {
+        if (Playlist is null) return;
         Playlist.Skip();
     }
 
-    private void UpdateServer(object sender, RoutedEventArgs args) {
+    private void UpdateServer(object sender, RoutedEventArgs args)
+    {
         Server.Update();
     }
 
-    private void UpdateInfo() {
+    private void UpdateInfo()
+    {
         if (Playlist is not null && !Playlist.IsEmpty) SongsGrid.SelectedIndex = Playlist.CurrentIndex;
         CurrentTitle.Content = Playlist?.Current?.Title ?? "Title";
         CurrentArtist.Content = Playlist?.Current?.Artist ?? "Artist";
@@ -98,12 +112,15 @@ public sealed partial class MainWindow : Window, IHostProvider {
         Server.Update();
     }
 
-    private void UpdatePlaylistInfo() {
+    private void UpdatePlaylistInfo()
+    {
         CurrentPlaylist.Text = $"{Playlist?.Path} ({Playlist?.Length})";
     }
 
-    private void UpdateDuration(object? sender = default, EventArgs? args = default) {
-        if(Playlist is null){
+    private void UpdateDuration(object? sender = default, EventArgs? args = default)
+    {
+        if (Playlist is null)
+        {
             RemaningTime.Content = "Duration";
             PlaybackBar.Value = 0;
             Timer.Stop();
@@ -113,26 +130,32 @@ public sealed partial class MainWindow : Window, IHostProvider {
         PlaybackBar.Value = Playlist.Player.CurrentTime.TotalSeconds;
     }
 
-    private void SkipTo(object sender, MouseButtonEventArgs args) {
-        if(Playlist is null) return;
+    private void SkipTo(object sender, MouseButtonEventArgs args)
+    {
+        if (Playlist is null) return;
         var row = (args.OriginalSource as DependencyObject)!.FindParent<DataGridRow>();
         if (row is null || row.Item is not Song song) return;
-        if(Playlist.Current as Song == song) {
+        if (Playlist.Current as Song == song)
+        {
             Playlist.Player.Restart();
-        } else {
+        }
+        else
+        {
             Playlist.SetCurrent(Playlist.Songs.IndexOf(song));
         }
     }
 
-    private void OpenFromPlaylist(object sender, RoutedEventArgs e) {
+    private void OpenFromPlaylist(object sender, RoutedEventArgs e)
+    {
         var dialog = new OpenFileDialog().AddExtensionFilter("Playlist", "plz");
-     
+
         dialog.GetFileInfo()
             .Map(PlaylistBuilder.FromArchive)
             .Resolve(playlist => Playlist = playlist);
     }
 
-    private void OpenMessageWindow(object sender, RoutedEventArgs e) {
+    private void OpenMessageWindow(object sender, RoutedEventArgs e)
+    {
         new MessageWindow(Server).Show();
         //Task.Run(()=> );
     }

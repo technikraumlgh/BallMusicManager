@@ -1,9 +1,9 @@
-﻿using BallMusicManager.Domain;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 
 namespace BallMusicManager.Infrastructure;
 
-public sealed class MusicPlayer {
+public sealed class MusicPlayer
+{
     public event Action? OnSongChanged;
     public event Action? OnSongPaused;
     public event Action? OnSongContinued;
@@ -13,10 +13,12 @@ public sealed class MusicPlayer {
     //public event Action? OnStateChanged;
 
     public TimeSpan CurrentSongLength => _currentAudioWave?.TotalTime ?? TimeSpan.Zero;
-    public TimeSpan CurrentTime {
+    public TimeSpan CurrentTime
+    {
         get => _currentAudioWave?.CurrentTime ?? TimeSpan.Zero;
-        set {
-            if(_currentAudioWave is null) return;
+        set
+        {
+            if (_currentAudioWave is null) return;
             _currentAudioWave.CurrentTime = value;
         }
     }
@@ -28,17 +30,20 @@ public sealed class MusicPlayer {
     private WaveStream? _currentAudioWave;
     private bool _wasStoppedManually = false;
 
-    public MusicPlayer(){
+    public MusicPlayer()
+    {
         _player.PlaybackStopped += OnPlaybackStopped;
     }
 
-    public void PlaySong(Song song) {
+    public void PlaySong(Song song)
+    {
         SetSong(song);
         Play();
     }
 
     public void SetSong(Song song) => SetAudioFile(song.Path);
-    public void SetAudioFile(string path) {
+    public void SetAudioFile(string path)
+    {
         Stop();
         _currentAudioWave?.Dispose();
         _currentAudioWave = new AudioFileReader(path);
@@ -46,48 +51,60 @@ public sealed class MusicPlayer {
         OnSongChanged?.Invoke();
     }
 
-    public void Pause() {
-        if(_player.PlaybackState is not PlaybackState.Playing || _currentAudioWave is null) return;
+    public void Pause()
+    {
+        if (_player.PlaybackState is not PlaybackState.Playing || _currentAudioWave is null) return;
         _player.Pause();
         //OnStateChanged?.Invoke();
         OnSongPaused?.Invoke();
     }
 
-    public void Stop() {
-        if(_player.PlaybackState is PlaybackState.Stopped) return;
+    public void Stop()
+    {
+        if (_player.PlaybackState is PlaybackState.Stopped) return;
         _wasStoppedManually = true;
         _player.Stop();
     }
 
-    public void Play() {
-        if(_player.PlaybackState is PlaybackState.Playing || _currentAudioWave is null) return;
+    public void Play()
+    {
+        if (_player.PlaybackState is PlaybackState.Playing || _currentAudioWave is null) return;
         _player.Play();
         //OnStateChanged?.Invoke();
-        if(CurrentTime == TimeSpan.Zero){
+        if (CurrentTime == TimeSpan.Zero)
+        {
             OnSongStarted?.Invoke();
-        }else{
+        }
+        else
+        {
             OnSongContinued?.Invoke();
         }
     }
 
-    public void Restart() {
+    public void Restart()
+    {
         Stop();
         CurrentTime = TimeSpan.Zero;
         Play();
     }
 
-    private void OnPlaybackStopped(object? sender, StoppedEventArgs e) {
+    private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
+    {
         //OnStateChanged?.Invoke();
-        if(_wasStoppedManually) {
+        if (_wasStoppedManually)
+        {
             OnSongStopped?.Invoke();
-        } else {
+        }
+        else
+        {
             OnSongFinished?.Invoke();
         }
 
         _wasStoppedManually = false;
     }
 
-    ~MusicPlayer() {
+    ~MusicPlayer()
+    {
         _player.Dispose();
     }
 }

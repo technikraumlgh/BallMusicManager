@@ -42,24 +42,28 @@ app.MapHub<SignalHub>("signal");
 
 //app.MapGet("nextup", () => Results.Json(next));
 
-app.MapPost("playing", ([FromBody] SongDTO song, string? key) => {
-    if(key is null || key != KEY) return Results.NotFound();
+app.MapPost("playing", ([FromBody] SongDTO song, string? key) =>
+{
+    if (key is null || key != KEY) return Results.NotFound();
     displayService.SetCurrent(song);
     return Results.Ok();
 });
 
-app.MapPost("nextup", ([FromBody] SongDTO song, string? key) => {
-    if(key is null || key != KEY) return Results.NotFound();
+app.MapPost("nextup", ([FromBody] SongDTO song, string? key) =>
+{
+    if (key is null || key != KEY) return Results.NotFound();
     displayService.SetNext(song);
     return Results.Ok();
 });
 
-app.MapGet("display", async (HttpResponse response, CancellationToken cancellationToken) => {
+app.MapGet("display", async (HttpResponse response, CancellationToken cancellationToken) =>
+{
     await response.SendFileAsync("SongDisplay.html", cancellationToken);
 });
 
 
-app.MapPost("message", ([FromBody] MessageDTO msg, string? key) =>{
+app.MapPost("message", ([FromBody] MessageDTO msg, string? key) =>
+{
     if (key is null || key != KEY) return Results.NotFound();
 
     displayService.SendMessage(msg.text);
@@ -67,7 +71,8 @@ app.MapPost("message", ([FromBody] MessageDTO msg, string? key) =>{
     return Results.Ok();
 });
 
-app.MapPost("news", ([FromBody] MessageDTO msg, string? key) => {
+app.MapPost("news", ([FromBody] MessageDTO msg, string? key) =>
+{
     if (key is null || key != KEY) return Results.NotFound();
 
     displayService.SendNews(msg.text);
@@ -75,18 +80,21 @@ app.MapPost("news", ([FromBody] MessageDTO msg, string? key) => {
     return Results.Ok();
 });
 
-app.MapGet("snow.js", async (HttpResponse response, CancellationToken cancellationToken) => {
+app.MapGet("snow.js", async (HttpResponse response, CancellationToken cancellationToken) =>
+{
     await response.SendFileAsync("snow.js", cancellationToken);
 });
 
-app.MapGet("qr-code", async (HttpResponse response, CancellationToken cancellationToken) => {
+app.MapGet("qr-code", async (HttpResponse response, CancellationToken cancellationToken) =>
+{
     await response.SendFileAsync(QR_CODE_FILE, cancellationToken);
 });
-app.MapGet("/", ()=> Results.Redirect("display"));
+app.MapGet("/", () => Results.Redirect("display"));
 
 app.Run();
 
-static void OutputQRCode(string url, int size = 20) {
+static void OutputQRCode(string url, int size = 20)
+{
     using var qrGenerator = new QRCodeGenerator();
     using var qrDataData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
     using var qrCode = new PngByteQRCode(qrDataData);
