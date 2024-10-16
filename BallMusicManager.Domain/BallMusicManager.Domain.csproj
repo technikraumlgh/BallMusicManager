@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Packages\Ametrin.Utils\Ametrin.Utils.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Packages\Ametrin.Utils\Ametrin.Utils.csproj" />
+    <ProjectReference Include="..\..\..\Packages\Ametrin.Optional\src\Ametrin.Optional.csproj" />
+  </ItemGroup>
 
 </Project>
