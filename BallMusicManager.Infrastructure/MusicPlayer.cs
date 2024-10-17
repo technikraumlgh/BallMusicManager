@@ -1,5 +1,4 @@
-﻿using BallMusicManager.Domain;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 
 namespace BallMusicManager.Infrastructure;
 
@@ -19,8 +18,7 @@ public sealed class MusicPlayer
         get => _currentAudioWave?.CurrentTime ?? TimeSpan.Zero;
         set
         {
-            if (_currentAudioWave is null)
-                return;
+            if (_currentAudioWave is null) return;
             _currentAudioWave.CurrentTime = value;
         }
     }
@@ -55,8 +53,7 @@ public sealed class MusicPlayer
 
     public void Pause()
     {
-        if (_player.PlaybackState is not PlaybackState.Playing || _currentAudioWave is null)
-            return;
+        if (_player.PlaybackState is not PlaybackState.Playing || _currentAudioWave is null) return;
         _player.Pause();
         //OnStateChanged?.Invoke();
         OnSongPaused?.Invoke();
@@ -64,15 +61,14 @@ public sealed class MusicPlayer
 
     public void Stop()
     {
-        if(_player.PlaybackState is PlaybackState.Stopped) return;
+        if (_player.PlaybackState is PlaybackState.Stopped) return;
         _wasStoppedManually = true;
         _player.Stop();
     }
 
     public void Play()
     {
-        if (_player.PlaybackState is PlaybackState.Playing || _currentAudioWave is null)
-            return;
+        if (_player.PlaybackState is PlaybackState.Playing || _currentAudioWave is null) return;
         _player.Play();
         //OnStateChanged?.Invoke();
         if (CurrentTime == TimeSpan.Zero)
@@ -95,9 +91,12 @@ public sealed class MusicPlayer
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
     {
         //OnStateChanged?.Invoke();
-        if(_wasStoppedManually) {
+        if (_wasStoppedManually)
+        {
             OnSongStopped?.Invoke();
-        } else {
+        }
+        else
+        {
             OnSongFinished?.Invoke();
         }
 

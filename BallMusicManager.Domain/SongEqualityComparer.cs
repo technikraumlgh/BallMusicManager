@@ -56,7 +56,6 @@ public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityCom
 
     public sealed class LoosePropertiesComparer : IEqualityComparer<SongBuilder>
     {
-
         public bool Equals(SongBuilder? x, SongBuilder? y)
         {
             if (x is null)

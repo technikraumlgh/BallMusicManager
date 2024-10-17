@@ -1,7 +1,4 @@
-﻿using Ametrin.Utils;
-using BallMusicManager.Domain;
-
-namespace BallMusicManager.Infrastructure;
+﻿namespace BallMusicManager.Infrastructure;
 
 public static class SongCache
 {
@@ -11,6 +8,7 @@ public static class SongCache
         using var stream = File.OpenRead(song.Path);
         return Cache(stream, Path.GetFileName(song.Path));
     }
+    
     public static FileInfo Cache(Stream stream, string name)
     {
         if (!CacheDirectory.Exists)

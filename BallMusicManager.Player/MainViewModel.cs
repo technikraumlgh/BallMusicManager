@@ -3,14 +3,17 @@ using Ametrin.Utils.WPF;
 
 namespace BallMusicManager.Player;
 
-internal sealed class MainViewModel : ObservableObject{
+internal sealed class MainViewModel : ObservableObject
+{
     public static MainViewModel Instance = default!;
 
 
     private bool _HasPlaylist = false;
-    public bool HasPlaylist{
+    public bool HasPlaylist
+    {
         get => _HasPlaylist;
-        set{
+        set
+        {
             _HasPlaylist = value;
             OnPropertyChanged();
         }
@@ -18,14 +21,17 @@ internal sealed class MainViewModel : ObservableObject{
 
     private Visibility _ShowFixIndicesButton = Visibility.Collapsed;
 
-    public MainViewModel(){
+    public MainViewModel()
+    {
         Instance = this;
     }
 
 
-    public Visibility ShowFixIndicesButton{
+    public Visibility ShowFixIndicesButton
+    {
         get => _ShowFixIndicesButton;
-        set{
+        set
+        {
             _ShowFixIndicesButton = value;
             OnPropertyChanged();
         }

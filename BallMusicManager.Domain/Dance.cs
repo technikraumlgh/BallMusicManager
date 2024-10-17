@@ -1,10 +1,7 @@
-﻿using Ametrin.Utils;
-using Ametrin.Utils.Optional;
-using System.Collections.Frozen;
+﻿namespace BallMusicManager.Domain;
 
-namespace BallMusicManager.Domain;
-
-public static class Dance{
+public static class Dance
+{
     public static readonly FrozenDictionary<string, string> DanceKeys = new Dictionary<string, string>{
         {"CCC", "ChaChaCha" },
         {"LW", "Langsamer Walzer" },

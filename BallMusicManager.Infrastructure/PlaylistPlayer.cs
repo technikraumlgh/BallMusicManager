@@ -1,7 +1,4 @@
-﻿using BallMusicManager.Domain;
-using System.Collections.Immutable;
-
-namespace BallMusicManager.Infrastructure;
+﻿namespace BallMusicManager.Infrastructure;
 
 public sealed class PlaylistPlayer
 {
@@ -29,25 +26,20 @@ public sealed class PlaylistPlayer
 
     public void SetCurrent(int idx)
     {
-        if (IsEmpty)
-            return;
+        if (IsEmpty) return;
         var old = CurrentIndex;
         var wasPlaying = IsPlaying;
         CurrentIndex = Math.Clamp(idx, 0, LastIndex);
-        if (old != CurrentIndex)
-            Player.SetSong(Current!);
-        if (wasPlaying)
-            Player.Play();
+        if (old != CurrentIndex) Player.SetSong(Current!);
+        if (wasPlaying) Player.Play();
     }
 
     public void Play() => Player.Play();
     public void Pause() => Player.Pause();
     public void Skip(int amount = 1)
     {
-        if (IsEmpty)
-            return;
-        if (amount == 0)
-            return;
+        if (IsEmpty) return;
+        if (amount == 0) return;
 
         SetCurrent(CurrentIndex + amount);
     }

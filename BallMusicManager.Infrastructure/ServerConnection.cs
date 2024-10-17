@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using BallMusicManager.Domain;
 
 namespace BallMusicManager.Infrastructure;
 
@@ -17,8 +16,7 @@ public sealed class ServerConnection
             }
             playlistPlayer = value;
 
-            if (playlistPlayer is null)
-                return;
+            if (playlistPlayer is null) return;
 
             playlistPlayer.Player.OnSongChanged += Update;
         }

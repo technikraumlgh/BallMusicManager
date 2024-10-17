@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html data-theme="spring">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ballplaylist</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" 
-            integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg==" 
-            crossorigin="anonymous" 
-            referrerpolicy="no-referrer">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"
+        integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
 
     <style>
         * {
@@ -94,11 +94,11 @@
             right: 1vw;
         }
 
-        #qr-code_image{
+        #qr-code_image {
             height: 20vh;
         }
 
-        #news{
+        #news {
             position: absolute;
             bottom: 1vh;
             left: 1vw;
@@ -108,7 +108,6 @@
             font-style: italic;
             font-weight: bold;
         }
-
     </style>
 
     <!-- Winter-Theme -->
@@ -128,27 +127,27 @@
     <!-- Spring-Theme -->
     <style>
         :root[data-theme="spring"] {
-    background: linear-gradient(to bottom, #4b92db, #ffb870);
+            background: linear-gradient(to bottom, #4b92db, #ffb870);
         }
     </style>
 </head>
 
-  <body>
+<body>
     <!-- Welcome/Goodbye Screen -->
     <div class="text-container ta-center">
-      <h2 id="welcome-message">Herzlich Willkommen zum Frühlingsball</h2>
+        <h2 id="welcome-message">Herzlich Willkommen zum Frï¿½hlingsball</h2>
     </div>
     <!-- Song Display Screen -->
     <div id="song-container" class="text-container">
-      <p class="small-text">Now Playing</p>
-      <h1 id="dance" class="mt-1">Loading dance failed</h1>
-      <h2 id="title" class="mt-1 italic">Loading title failed</h2>
-      <h3 id="artist" class="mb-4">by Loading artist failed</h3>
+        <p class="small-text">Now Playing</p>
+        <h1 id="dance" class="mt-1">Loading dance failed</h1>
+        <h2 id="title" class="mt-1 italic">Loading title failed</h2>
+        <h3 id="artist" class="mb-4">by Loading artist failed</h3>
 
-      <p class="small-text">Next Up</p>
-      <h2 id="next-dance" class="mt-05">Loading next dance failed</h2>
-      <h3 id="next-title" class="mt-1 italic">Loading next title failed</h3>
-      <h4 id="next-artist" class="mt-1">Loading next artist failed</h4>
+        <p class="small-text">Next Up</p>
+        <h2 id="next-dance" class="mt-05">Loading next dance failed</h2>
+        <h3 id="next-title" class="mt-1 italic">Loading next title failed</h3>
+        <h4 id="next-artist" class="mt-1">Loading next artist failed</h4>
     </div>
 
     <div id="qr-code">
@@ -159,60 +158,60 @@
 
     <!-- Show track -->
     <script defer>
-      const songContainer = document.getElementById("song-container");
-      const title = document.getElementById("title");
-      const dance = document.getElementById("dance");
-      const artist = document.getElementById("artist");
-      const nextTitle = document.getElementById("next-title");
-      const nextDance = document.getElementById("next-dance");
-      const nextArtist = document.getElementById("next-artist");
-      const message = document.getElementById("welcome-message");
-      const news = document.getElementById("news");
+        const songContainer = document.getElementById("song-container");
+        const title = document.getElementById("title");
+        const dance = document.getElementById("dance");
+        const artist = document.getElementById("artist");
+        const nextTitle = document.getElementById("next-title");
+        const nextDance = document.getElementById("next-dance");
+        const nextArtist = document.getElementById("next-artist");
+        const message = document.getElementById("welcome-message");
+        const news = document.getElementById("news");
 
-      (async function readFromServer() {
-        // try {
-        //   const [currentData, nextData] = await Promise.all([
-        //     fetch("playing").then((res) => res.json()),
-        //     fetch("nextup").then((res) => res.json()),
-        //   ]);
-        //   setCurrent(currentData);
-        //   setNext(nextData);
-        // } catch (error) {
-        //   console.warn("Error fetching data:", error);
-        // }
-      })();
+        (async function readFromServer() {
+            // try {
+            //   const [currentData, nextData] = await Promise.all([
+            //     fetch("playing").then((res) => res.json()),
+            //     fetch("nextup").then((res) => res.json()),
+            //   ]);
+            //   setCurrent(currentData);
+            //   setNext(nextData);
+            // } catch (error) {
+            //   console.warn("Error fetching data:", error);
+            // }
+        })();
 
-      const connection = new signalR.HubConnectionBuilder()
-        .withUrl("signal")
-        .withAutomaticReconnect()
-        .build();
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("signal")
+            .withAutomaticReconnect()
+            .build();
 
-      connection.on("current", (message) => setCurrent(JSON.parse(message)));
-      connection.on("next", (message) => setNext(JSON.parse(message)));
-      connection.on("message", (message) => displayMessage(message));
-      connection.on("news", (message) => displayNews(message));
+        connection.on("current", (message) => setCurrent(JSON.parse(message)));
+        connection.on("next", (message) => setNext(JSON.parse(message)));
+        connection.on("message", (message) => displayMessage(message));
+        connection.on("news", (message) => displayNews(message));
 
-      connection.start();
+        connection.start();
 
-      function setCurrent(data) {
-        title.innerText = data.title;
-        dance.innerText = data.dance;
-        artist.innerText = `by ${data.artist}`;
-        songContainer.style.display = 'block';
-        message.style.display = 'none';
-      }
+        function setCurrent(data) {
+            title.innerText = data.title;
+            dance.innerText = data.dance;
+            artist.innerText = `by ${data.artist}`;
+            songContainer.style.display = 'block';
+            message.style.display = 'none';
+        }
 
-      function setNext(data) {
-        nextDance.innerText = data.dance;
-        nextTitle.innerText = data.title;
-        nextArtist.innerText = `by ${data.artist}`;
-      }
-      
-      function displayMessage(msg) {
-        message.innerHTML = msg;
-        songContainer.style.display = 'none';
-        message.style.display = 'block';
-        //message.style.textAlign = 'center';
+        function setNext(data) {
+            nextDance.innerText = data.dance;
+            nextTitle.innerText = data.title;
+            nextArtist.innerText = `by ${data.artist}`;
+        }
+
+        function displayMessage(msg) {
+            message.innerHTML = msg;
+            songContainer.style.display = 'none';
+            message.style.display = 'block';
+            //message.style.textAlign = 'center';
         }
 
         function displayNews(msg) {
@@ -223,16 +222,17 @@
     <!-- Show Snow -->
     <script src="snow.js"></script>
     <script>
-      if (document.documentElement?.dataset.theme === "winter") {
-        _snowCanvas({
-          snowColor: "#a6a6a6",
-          maxSpeed: 4,
-          minSpeed: 1,
-          amount: 150,
-          rMax: 4,
-          rMin: 1,
-        });
-      }
+        if (document.documentElement?.dataset.theme === "winter") {
+            _snowCanvas({
+                snowColor: "#a6a6a6",
+                maxSpeed: 4,
+                minSpeed: 1,
+                amount: 150,
+                rMax: 4,
+                rMin: 1,
+            });
+        }
     </script>
-  </body>
+</body>
+
 </html>
