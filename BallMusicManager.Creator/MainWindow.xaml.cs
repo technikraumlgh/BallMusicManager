@@ -61,12 +61,12 @@ public sealed partial class MainWindow : Window
     {
         var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", "plz");
 
-        dialog.GetFileInfo().Resolve((file) => PlaylistBuilder.ToArchive(file, Playlist));
+        dialog.GetFileInfo().Consume((file) => PlaylistBuilder.ToArchive(file, Playlist));
     }
 
     private void OpenPlaylist(object sender, RoutedEventArgs e)
     {
-        new OpenFileDialog().AddExtensionFilter("Playlist", "plz").GetFileInfo().Resolve(async file =>
+        new OpenFileDialog().AddExtensionFilter("Playlist", "plz").GetFileInfo().Consume(async file =>
         {
             var bar = new LoadingBar(true)
             {
@@ -77,7 +77,7 @@ public sealed partial class MainWindow : Window
 
             var songs = await Task.Run(() => PlaylistBuilder.EnumerateArchive(file));
 
-            songs.Map(songs => Library.AddAllOrReplaceWithExisting(songs)).Resolve(songs =>
+            songs.Select(songs => Library.AddAllOrReplaceWithExisting(songs)).Consume(songs =>
             {
                 Playlist.CollectionChanged -= UpdateLengthDisplay;
                 Playlist = new(songs);
@@ -85,13 +85,13 @@ public sealed partial class MainWindow : Window
                 Playlist.CollectionChanged += UpdateLengthDisplay;
                 UpdateLengthDisplay();
             },
-            flag =>
+            error =>
             {
-                _ = flag switch
+                _ = error switch
                 {
-                    ResultFlag.PathNotFound => MessageBoxHelper.ShowError($"Could not find {file}", owner: this),
-                    ResultFlag.InvalidFile => MessageBoxHelper.ShowError($"{file} is not a valid playlist file", owner: this),
-                    _ => MessageBoxHelper.ShowError($"Failed opening Playlist ({flag})", owner: this),
+                    FileNotFoundException => MessageBoxHelper.ShowError($"Could not find {file}", owner: this),
+                    InvalidDataException => MessageBoxHelper.ShowError($"{file} is not a valid playlist file", owner: this),
+                    _ => MessageBoxHelper.ShowError($"Failed opening Playlist ({error.Message})", owner: this),
                 };
             });
 
@@ -101,7 +101,7 @@ public sealed partial class MainWindow : Window
 
     private void OpenPlaylistLegacy(object sender, RoutedEventArgs e)
     {
-        new OpenFileDialog().AddExtensionFilter("Playlist", "playlist").GetFileInfo().Resolve(file =>
+        new OpenFileDialog().AddExtensionFilter("Playlist", "playlist").GetFileInfo().Consume(file =>
         {
             var songs = Library.AddAllOrReplaceWithExisting(PlaylistBuilder.EnumerateFile(file));
             Playlist.CollectionChanged -= UpdateLengthDisplay;
@@ -182,142 +182,6 @@ public sealed partial class MainWindow : Window
             }
         }
     }
-
-    #region Drag&Drop
-
-    #region Playlist Drag&Drop
-    private void Songs_Drop(object sender, DragEventArgs e)
-    {
-        if (e.Data.GetDataPresent(DataFormats.FileDrop))
-        {
-            Playlist.AddAllIfNew(FileDrop(e));
-            return;
-        }
-
-        if (_draggedSong is null || e.OriginalSource is not DependencyObject obj)
-        {
-            return;
-        }
-
-        var targetItem = obj.FindParentOrSelf<DataGridRow>()?.Item as SongBuilder;
-        if (targetItem is null)
-        {
-            Playlist.Remove(_draggedSong);
-            Playlist.AddIfNew(_draggedSong);
-        }
-        else if (!ReferenceEquals(_draggedSong, targetItem))
-        {
-            var index = Playlist.IndexOf(targetItem);
-            Playlist.Remove(_draggedSong);
-            Playlist.Insert(index, _draggedSong);
-        }
-        _draggedSong = null;
-    }
-
-    private void SongsGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.OriginalSource is not DependencyObject obj)
-        {
-            return;
-        }
-
-        var row = obj.FindParentOrSelf<DataGridRow>();
-        if (row?.Item is not SongBuilder song)
-        {
-            _draggedSong = null;
-            return;
-        }
-
-
-        _draggedSong = song;
-        _selectedSong = song;
-
-        var grid = obj.FindParent<DataGrid>();
-        if (grid?.ItemsSource is SongBuilderCollection context)
-        {
-            _selectionContext = context;
-        }
-
-        LibraryGrid.SelectedItem = song;
-        SongsGrid.SelectedItem = song;
-        LibraryGrid.ScrollIntoView(song);
-        SongsGrid.ScrollIntoView(song);
-    }
-
-    private void SongsGrid_PreviewMouseMove(object sender, MouseEventArgs e)
-    {
-        if (e.LeftButton == MouseButtonState.Pressed && _draggedSong != null)
-        {
-            TryDrag(SongsGrid);
-        }
-    }
-    #endregion
-
-    #region Library Drag&Drop
-    private void LibraryDrop(object sender, DragEventArgs e)
-    {
-        if (e.Data.GetDataPresent(DataFormats.FileDrop))
-        {
-            foreach (var _ in FileDrop(e)) { }
-            return;
-        }
-
-        _draggedSong = null;
-    }
-
-    private void LibraryGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) => SongsGrid_MouseLeftButtonDown(sender, e);
-
-    private void LibraryGrid_PreviewMouseMove(object sender, MouseEventArgs e)
-    {
-        if (e.LeftButton == MouseButtonState.Pressed && _draggedSong != null)
-        {
-            TryDrag(LibraryGrid);
-        }
-    }
-    #endregion
-
-    private IEnumerable<SongBuilder> FileDrop(DragEventArgs e)
-    {
-        if (!e.Data.GetDataPresent(DataFormats.FileDrop))
-            yield break;
-
-        var paths = e.Data.GetData(DataFormats.FileDrop) as string[] ?? [];
-
-        var files = paths.SelectMany(path => Directory.Exists(path)
-            ? Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
-            : [path]).Where(File.Exists)
-            .Select(file => new FileInfo(file));
-
-
-        foreach (var file in files.Where(file => file.Exists).Where(PlaylistBuilder.ValidFile))
-        {
-            var window = new AddSongWindow(file)
-            {
-                Owner = this,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
-            };
-            if (window.ShowDialog() is not true)
-            {
-                continue;
-            }
-
-            yield return Library.AddOrGetExisting(window.Song); //display duplicate waring? or just skip?
-        }
-    }
-
-    private void TryDrag(DependencyObject source)
-    {
-        try
-        {
-            DragDrop.DoDragDrop(source, _draggedSong, DragDropEffects.Link);
-        }
-        catch
-        {
-            _draggedSong = null;
-            // to prevent crashes when mouse leaves window and enters again
-        }
-    }
-    #endregion
 
     private async Task LoadLibrary()
     {

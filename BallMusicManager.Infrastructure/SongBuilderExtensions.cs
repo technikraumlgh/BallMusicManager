@@ -1,8 +1,4 @@
-﻿using Ametrin.Optional;
-using Ametrin.Utils;
-using BallMusicManager.Domain;
-
-namespace BallMusicManager.Infrastructure;
+﻿namespace BallMusicManager.Infrastructure;
 
 public static class SongBuilderExtensions
 {

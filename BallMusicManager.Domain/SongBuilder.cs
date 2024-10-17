@@ -73,7 +73,7 @@ public sealed record SongBuilder()
         var split = fileName.Split("_");
         if (split.Length == 3)
         {
-            return SetIndex(split[0].TryParse<int>().Reduce(-1)).SetDanceFromKey(split[1]).SetTitle(split[2]);
+            return SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromKey(split[1]).SetTitle(split[2]);
         }
         if (split.Length == 1)
         {
@@ -85,7 +85,7 @@ public sealed record SongBuilder()
         }
         if (split.Length > 3)
         {
-            return SetIndex(split[0].TryParse<int>().Reduce(-1)).SetDanceFromKey(split[1]).SetTitle(split.Skip(2).Dump(' '));
+            return SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromKey(split[1]).SetTitle(split.Skip(2).Dump(' '));
         }
         throw new InvalidDataException($"{fileName} does not match naming conventions");
     }

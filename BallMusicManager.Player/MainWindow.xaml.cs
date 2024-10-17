@@ -150,8 +150,8 @@ public sealed partial class MainWindow : Window, IHostProvider
         var dialog = new OpenFileDialog().AddExtensionFilter("Playlist", "plz");
 
         dialog.GetFileInfo()
-            .Map(PlaylistBuilder.FromArchive)
-            .Resolve(playlist => Playlist = playlist);
+            .Select(PlaylistBuilder.FromArchive)
+            .Consume(playlist => Playlist = playlist);
     }
 
     private void OpenMessageWindow(object sender, RoutedEventArgs e)

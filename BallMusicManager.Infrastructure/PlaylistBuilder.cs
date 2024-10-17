@@ -1,8 +1,4 @@
-﻿using Ametrin.Optional;
-using Ametrin.Serialization;
-using Ametrin.Utils;
-using BallMusicManager.Domain;
-using System.Collections.Immutable;
+﻿using Ametrin.Serialization;
 using System.IO.Compression;
 
 namespace BallMusicManager.Infrastructure;
@@ -25,14 +21,14 @@ public static class PlaylistBuilder
 
     const string SONG_LIST_ENTRY_NAME = "song_list.json";
     const string MANIFEST_ENTRY_NAME = "manifest.json";
-    public static Option<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Select(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
-    public static Option<IEnumerable<SongBuilder>> EnumerateArchive(FileInfo file)
+    public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Select(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
+    public static Result<IEnumerable<SongBuilder>> EnumerateArchive(FileInfo file)
     {
-        var archive = file.WhereExists()
+        var archive = file.WhereExists().ToResult(()=> new FileNotFoundException(null, file.FullName))
             .Select(file => new ZipArchive(file.OpenRead()));
 
         var songs = archive.Select(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
-            .Select(ParseSongList).WhereNotEmpty();
+            .Select(ParseSongList).WhereNotEmpty(static () => new InvalidDataException("Sequence was empty"));
 
         (archive, songs).Consume((archive, songs) =>
         {
@@ -44,7 +40,6 @@ public static class PlaylistBuilder
             }
         });
 
-        // don't yield return to allow multi-threading
         return songs;
 
         static IEnumerable<SongBuilder> ParseSongList(ZipArchiveEntry entry)
@@ -54,7 +49,7 @@ public static class PlaylistBuilder
         }
     }
 
-    public static ErrorState ToArchive(FileInfo file, IEnumerable<Song> songs)
+    public static Option ToArchive(FileInfo file, IEnumerable<Song> songs)
     {
         if (!songs.Any())
         {
@@ -64,7 +59,7 @@ public static class PlaylistBuilder
         return ToArchiveImpl(file, songs.Select((song, index) => new SongBuilder(song).SetIndex(index)).ToArray());
     }
 
-    public static ErrorState ToArchive(FileInfo file, IEnumerable<SongBuilder> songs)
+    public static Option ToArchive(FileInfo file, IEnumerable<SongBuilder> songs)
     {
         if (!songs.Any())
         {
@@ -75,7 +70,7 @@ public static class PlaylistBuilder
     }
 
     private const int ARCHIVE_VERSION = 1;
-    private static ErrorState ToArchiveImpl(FileInfo file, SongBuilder[] songs)
+    private static Option ToArchiveImpl(FileInfo file, SongBuilder[] songs)
     {
         var hashes = new HashSet<string>();
         using var archive = file.Exists

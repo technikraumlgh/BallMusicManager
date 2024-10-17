@@ -18,5 +18,5 @@ public static class Dance
         //{"FS", "Freestyle" }, // legacy
     }.ToFrozenDictionary();
 
-    public static string FromKey(string key) => DanceKeys.Get(key).Reduce(key);
+    public static string FromKey(string key) => DanceKeys.Get(key).Or(key);
 }

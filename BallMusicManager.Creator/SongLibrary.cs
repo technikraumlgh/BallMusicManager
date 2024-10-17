@@ -1,5 +1,4 @@
-﻿using Ametrin.Utils.Optional;
-using BallMusicManager.Domain;
+﻿using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 using System.IO;
 
@@ -27,6 +26,6 @@ public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCol
             File.Move("lib.plibz", LibFile.FullName);
         }
         LibFile.Refresh();
-        return new(PlaylistBuilder.EnumerateArchive(LibFile).Reduce([]));
+        return new(PlaylistBuilder.EnumerateArchive(LibFile).Or([]));
     }
 }
