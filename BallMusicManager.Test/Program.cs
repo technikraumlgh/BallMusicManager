@@ -10,4 +10,4 @@ using System.Globalization;
 
 //PlaylistBuilder.ToArchive(new(@"C:\Users\Barion\Downloads\test.zip"), playlist.Songs);
 
-Console.WriteLine(CultureInfo.CurrentCulture.CompareInfo.IsPrefix("Ma Chèrie", "mache", CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace));
+Console.WriteLine(CultureInfo.CurrentCulture.CompareInfo.IsPrefix("Ma Chèrie", "mache", CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols));

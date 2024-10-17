@@ -1,5 +1,4 @@
 ﻿using Ametrin.Utils;
-using Ametrin.Utils.Optional;
 using Ametrin.Utils.WPF;
 using Ametrin.Utils.WPF.FileDialogs;
 using BallMusicManager.Domain;
@@ -239,8 +238,8 @@ public sealed partial class MainWindow : Window
                 if (obj is SongBuilder song)
                 {
                     var compareInfo = CultureInfo.CurrentCulture.CompareInfo;
-                    return compareInfo.IndexOf(song.Title, SearchBox.Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0 ||
-                           compareInfo.IndexOf(song.Artist, SearchBox.Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0;
+                    return compareInfo.IndexOf(song.Title, SearchBox.Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols) >= 0 ||
+                           compareInfo.IndexOf(song.Artist, SearchBox.Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols) >= 0;
                 }
 
                 return false;
