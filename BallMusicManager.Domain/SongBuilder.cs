@@ -82,18 +82,15 @@ public sealed record SongBuilder
         };
     }
 
-    public SongBuilder Copy()
+    public SongBuilder Copy() => new()
     {
-        return new()
-        {
-            Path = Path,
-            Index = Index,
-            Title = Title,
-            Artist = Artist,
-            Dance = Dance,
-            Duration = Duration,
-        };
-    }
+        Path = Path,
+        Index = Index,
+        Title = Title,
+        Artist = Artist,
+        Dance = Dance,
+        Duration = Duration,
+    };
 
     public Song Build() => new(Path, Index, Title, Artist, Dance, Duration);
 }
