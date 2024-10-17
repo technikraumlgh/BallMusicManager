@@ -13,7 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Packages\Ametrin.Serialization\Ametrin.Serialization.csproj" />
     <ProjectReference Include="..\..\..\Packages\Ametrin.Utils.WPF\Ametrin.Utils.WPF.csproj" />
-    <ProjectReference Include="..\..\..\Packages\Ametrin.Utils\Ametrin.Utils.csproj" />
     <ProjectReference Include="..\BallMusicManager.Domain\BallMusicManager.Domain.csproj" />
     <ProjectReference Include="..\BallMusicManager.Infrastructure\BallMusicManager.Infrastructure.csproj" />
   </ItemGroup>

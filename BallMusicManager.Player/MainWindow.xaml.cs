@@ -1,9 +1,7 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Ametrin.Utils.Optional;
 using Ametrin.Utils.WPF;
 using Ametrin.Utils.WPF.FileDialogs;
 using BallMusicManager.Domain;
