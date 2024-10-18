@@ -11,11 +11,7 @@ public static class SongCache
     
     public static FileInfo Cache(Stream stream, string name)
     {
-        if (!CacheDirectory.Exists)
-        {
-            CacheDirectory.Create();
-            File.SetAttributes(CacheDirectory.FullName, FileAttributes.Hidden);
-        }
+        EnsureCacheExists();
 
         var file = CacheDirectory.File(name);
         if (!file.Exists)
@@ -26,11 +22,27 @@ public static class SongCache
         return file;
     }
 
+    public static Option<FileInfo> GetFile(string name)
+    {
+        EnsureCacheExists();
+        return CacheDirectory.File(name).WhereExists();
+    }
+
     public static void Clear()
     {
         if (CacheDirectory.Exists)
         {
             CacheDirectory.Delete(true);
+        }
+    }
+
+    private static void EnsureCacheExists()
+    {
+        if (!CacheDirectory.Exists)
+        {
+            CacheDirectory.Create();
+            FileSystemInfoExtensions.GenerateCacheTag(CacheDirectory, "BallMusicManger"); //just a marker file, does not have to exists
+            File.SetAttributes(CacheDirectory.FullName, FileAttributes.Hidden);
         }
     }
 }

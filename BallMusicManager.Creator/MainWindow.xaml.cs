@@ -319,6 +319,11 @@ public sealed partial class MainWindow : Window
 
         if (song != _lastPlayed)
         {
+            if (!Path.Exists(song.Path))
+            {
+                SongLibrary.
+            }
+
             _player.SetSong(song.Build());
             _lastPlayed = song;
             PlaybackSlider.Maximum = _player.CurrentSongLength.TotalSeconds;

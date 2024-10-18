@@ -1,6 +1,8 @@
-﻿using BallMusicManager.Domain;
+﻿using Ametrin.Optional;
+using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 using System.IO;
+using System.IO.Compression;
 
 namespace BallMusicManager.Creator;
 
@@ -28,4 +30,16 @@ public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCol
         LibFile.Refresh();
         return new(PlaylistBuilder.EnumerateArchive(LibFile).Or([]));
     }
+
+    //public static Option<Stream> CacheArchiveFile(SongBuilder song)
+    //{
+          // cannot return stream because stuff has to be disposed
+    //    var stream
+
+    //    return LibFile.WhereExists()
+    //        .Select(file => new ZipArchive(file.OpenRead()))
+    //        .Select(archive => archive.GetEntry(song.FileHash) ?? Option.None<ZipArchiveEntry>())
+    //        .Select(entry => entry.Open())
+    //        ;
+    //}
 }
