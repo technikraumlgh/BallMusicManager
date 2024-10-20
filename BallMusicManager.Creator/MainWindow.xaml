@@ -34,7 +34,7 @@
             </MenuItem>
         </Menu>
 
-        <Label x:Name="LengthDisplay" Grid.Row="1">Playlist</Label>
+        <Label x:Name="LengthDisplay" Grid.Row="1" FontSize="14" FontWeight="Bold">Playlist</Label>
         <DataGrid x:Name="PlaylistGrid" AutoGenerateColumns="False"
                   CanUserAddRows="False" CanUserSortColumns="False" CanUserDeleteRows="False"
                   AllowDrop="True" Drop="Songs_Drop" SelectionMode="Single"

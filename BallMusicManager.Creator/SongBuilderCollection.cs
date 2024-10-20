@@ -6,7 +6,8 @@ namespace BallMusicManager.Creator;
 public class SongBuilderCollection(IEnumerable<SongBuilder> songs) : ObservableCollection<SongBuilder>(songs)
 {
     public SongBuilderCollection() : this([]) { }
-    public bool ContainsSong(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null) => this.Contains(song, equalityComparer ?? SongEqualityComparer.ByFileHash);
+    public bool ContainsSong(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null) 
+        => this.Contains(song, equalityComparer ?? SongEqualityComparer.ByFileHash);
 
     public bool AddIfNew(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null)
     {

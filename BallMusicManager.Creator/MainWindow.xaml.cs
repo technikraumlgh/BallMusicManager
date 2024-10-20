@@ -18,8 +18,7 @@ public sealed partial class MainWindow : Window
 {
     private SongBuilderCollection Playlist = [];
     private SongLibrary Library = [];
-    private SongBuilder? _selectedSong;
-    private SongBuilderCollection? _selectionContext; // where was the song selected? (important for deleting)
+    private SongSelection _selection = SongSelection.None;
 
     public MainWindow()
     {
@@ -133,31 +132,31 @@ public sealed partial class MainWindow : Window
 
     private void PlaylistGrid_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key is not Key.Delete || _selectedSong is null || _selectionContext != Playlist)
+        if (e.Key is not Key.Delete || _selection.HasSelection || _selection.Context != Playlist)
         {
             return;
         }
 
-        Playlist.Remove(_selectedSong);
+        Playlist.Remove(_selection.Song!);
         UnselectSong();
     }
 
     private void LibraryGrid_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key is not Key.Delete || _selectedSong is null || _selectionContext != Library)
+        if (e.Key is not Key.Delete || _selection.HasSelection || _selection.Context != Library)
         {
             return;
         }
 
-        if (Playlist.Contains(_selectedSong))
+        if (Playlist.Contains(_selection.Song!))
         {
             MessageBoxHelper.ShowWaring("Cannot delete a song that is in the current playlist");
             return;
         }
 
-        if (MessageBoxHelper.Ask($"Do you really want to delete '{_selectedSong.Title}'?") is MessageBoxResult.Yes)
+        if (MessageBoxHelper.Ask($"Do you really want to delete '{_selection.Song!.Title}'?") is MessageBoxResult.Yes)
         {
-            Library.Remove(_selectedSong);
+            Library.Remove(_selection.Song!);
             UnselectSong();
         }
     }
@@ -225,5 +224,12 @@ public sealed partial class MainWindow : Window
 
             return false;
         };
+
+    }
+    private readonly record struct SongSelection(SongBuilder? Song, SongBuilderCollection? Context)
+    {
+        public bool HasSelection => Song is not null;
+        public bool HasContext => HasSelection && Context is not null;
+        public static SongSelection None { get; } = new SongSelection(null, null);
     }
 }

@@ -60,12 +60,12 @@ public partial class MainWindow
         SelectSong(song, grid?.ItemsSource as SongBuilderCollection);
     }
 
-    // we use our own selection logic to allow syncing the song selection between the grids
+    // we use a custom selection logic to allow syncing the song selection between the grids
     private void UnselectSong() => SelectSong(null, null);
+    private void SelectSong(SongSelection selection) => SelectSong(selection.Song, selection.Context);
     private void SelectSong(SongBuilder? song, SongBuilderCollection? context)
     {
-        _selectedSong = song;
-        _selectionContext = context;
+        _selection = new(song, context);
         if(song is null)
         {
             PlaylistGrid.SelectedItem = null;
@@ -131,7 +131,9 @@ public partial class MainWindow
     private IEnumerable<SongBuilder> FileDrop(DragEventArgs e)
     {
         if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
             yield break;
+        }
 
         var paths = e.Data.GetData(DataFormats.FileDrop) as string[] ?? [];
 

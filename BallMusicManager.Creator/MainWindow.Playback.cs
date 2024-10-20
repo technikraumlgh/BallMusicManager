@@ -1,5 +1,4 @@
 ﻿using BallMusicManager.Domain;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows;
 using BallMusicManager.Infrastructure;
@@ -24,20 +23,7 @@ public partial class MainWindow
         }
         else
         {
-            PlaySelected();
-        }
-    }
-
-    private void PlaybackSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (!_player.IsPlaying)
-        {
-            return;
-        }
-
-        if (_selectedSong != _lastPlayed)
-        {
-            //PausePlayback();
+            PlaySelectedSong();
         }
     }
 
@@ -48,20 +34,21 @@ public partial class MainWindow
 
     private void SongsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        PlaySelected();
+        PlaySelectedSong();
+        SelectSong(_selection);
     }
 
-    private void PlaySelected()
+    private void PlaySelectedSong()
     {
-        if (_selectedSong is null)
+        if (!_selection.HasSelection)
         {
             return;
         }
 
         _player.Stop();
 
-        UpdatePlayback(_selectedSong);
-        _selectedSong?.SetDuration(_player.CurrentSongLength);
+        UpdatePlayback(_selection.Song!);
+        _selection.Song!.SetDuration(_player.CurrentSongLength);
         _player.Play();
         _playbackProgressUpdater.Start();
         PlayButton.Content = "\uE769";
