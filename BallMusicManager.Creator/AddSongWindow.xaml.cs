@@ -13,7 +13,7 @@ public sealed partial class AddSongWindow : Window
     public AddSongWindow(FileInfo fileInfo)
     {
         InitializeComponent();
-        DanceField.ItemsSource = Dance.DanceKeys.Values;
+        DanceField.ItemsSource = Dance.DanceSlugs.Values.Distinct();
         AddButton.Focus();
         PathText.Text = fileInfo.FullName;
         Song = new SongBuilder()
@@ -35,10 +35,11 @@ public sealed partial class AddSongWindow : Window
     {
         Song.SetTitle(TitleField.Text.Trim())
             .SetArtist(ArtistField.Text.Trim())
-            .SetDanceFromKey(DanceField.Text.Trim());
+            .SetDanceFromSlug(DanceField.Text.Trim());
         DialogResult = true;
     }
 
+    // TODO: jump to next field and only add song when last field
     private void StackPanel_KeyDown(object sender, KeyEventArgs e)
     {
         if(e.Key is not Key.Enter)
@@ -51,6 +52,6 @@ public sealed partial class AddSongWindow : Window
 
     private void DanceField_LostFocus(object sender, RoutedEventArgs e)
     {
-        DanceField.Text = Dance.FromKey(DanceField.Text);
+        DanceField.Text = Dance.FromSlog(DanceField.Text);
     }
 }

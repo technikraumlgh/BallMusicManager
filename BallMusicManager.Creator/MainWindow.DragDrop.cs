@@ -10,6 +10,8 @@ namespace BallMusicManager.Creator;
 
 public partial class MainWindow
 {
+    private SongBuilder? _draggedSong;
+
     #region Playlist Drag&Drop
     private void Songs_Drop(object sender, DragEventArgs e)
     {
@@ -38,7 +40,7 @@ public partial class MainWindow
         _draggedSong = null;
     }
 
-    private void SongsGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void Song_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.OriginalSource is not DependencyObject obj)
         {
@@ -52,21 +54,37 @@ public partial class MainWindow
             return;
         }
 
+        var grid = obj.FindParent<DataGrid>();
 
         _draggedSong = song;
+        SelectSong(song, grid?.ItemsSource as SongBuilderCollection);
+    }
+
+    // we use our own selection logic to allow syncing the song selection between the grids
+    private void UnselectSong() => SelectSong(null, null);
+    private void SelectSong(SongBuilder? song, SongBuilderCollection? context)
+    {
         _selectedSong = song;
-
-        var grid = obj.FindParent<DataGrid>();
-        if (grid?.ItemsSource is SongBuilderCollection context)
+        _selectionContext = context;
+        if(song is null)
         {
-            _selectionContext = context;
+            PlaylistGrid.SelectedItem = null;
+            LibraryGrid.SelectedItem = null;
+            return;
         }
-
-        SelectIfExistsOrUnselect(SongsGrid, song);
+        SelectIfExistsOrUnselect(PlaylistGrid, song);
         SelectIfExistsOrUnselect(LibraryGrid, song);
 
         static void SelectIfExistsOrUnselect(DataGrid grid, SongBuilder song)
         {
+            if (ReferenceEquals(grid.SelectedItem, song))
+            {
+                return;
+            }
+
+            grid.CommitEdit();
+            grid.SelectionUnit = DataGridSelectionUnit.FullRow;
+
             if (grid.Items.Contains(song))
             {
                 grid.SelectedItem = song;
@@ -74,7 +92,7 @@ public partial class MainWindow
             }
             else
             {
-                grid.UnselectAll();
+                grid.SelectedItem = null;
             }
         }
     }
@@ -83,7 +101,7 @@ public partial class MainWindow
     {
         if (e.LeftButton == MouseButtonState.Pressed && _draggedSong != null)
         {
-            TryDrag(SongsGrid);
+            TryDrag(PlaylistGrid);
         }
     }
     #endregion
@@ -100,8 +118,6 @@ public partial class MainWindow
 
         _draggedSong = null;
     }
-
-    private void LibraryGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) => SongsGrid_MouseLeftButtonDown(sender, e);
 
     private void LibraryGrid_PreviewMouseMove(object sender, MouseEventArgs e)
     {
@@ -149,8 +165,8 @@ public partial class MainWindow
         }
         catch
         {
-            _draggedSong = null;
             // to prevent crashes when mouse leaves window and enters again
+            _draggedSong = null;
         }
     }
 }

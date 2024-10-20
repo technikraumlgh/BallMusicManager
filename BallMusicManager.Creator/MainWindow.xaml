@@ -34,14 +34,14 @@
             </MenuItem>
         </Menu>
 
-        <Label x:Name="LengthDisplay" Grid.Row="1">Length: </Label>
-        <DataGrid x:Name="SongsGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
+        <Label x:Name="LengthDisplay" Grid.Row="1">Playlist</Label>
+        <DataGrid x:Name="PlaylistGrid" AutoGenerateColumns="False"
                   CanUserAddRows="False" CanUserSortColumns="False" CanUserDeleteRows="False"
                   AllowDrop="True" Drop="Songs_Drop" SelectionMode="Single"
-                  PreviewMouseLeftButtonDown="SongsGrid_MouseLeftButtonDown"
+                  PreviewMouseLeftButtonDown="Song_MouseLeftButtonDown"
                   PreviewMouseMove="SongsGrid_PreviewMouseMove"
                   MouseDoubleClick="SongsGrid_MouseDoubleClick"
-                  KeyUp="SongsGrid_KeyUp"
+                  KeyUp="PlaylistGrid_KeyUp"
                   Grid.Row="2" Margin="0 0 4 8">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}" IsReadOnly="True"/>
@@ -53,11 +53,11 @@
 
         <Label x:Name="SearchLabel" Grid.Column="1" FontSize="16" VerticalAlignment="Center" Margin="16 8 0 4">Search</Label>
         <TextBox x:Name="SearchBox" Grid.Column="1" Margin="4 8 0 4" TextChanged="Search_TextChanged"/>
-        <Label Grid.Row="1" Grid.Column="1">Library</Label>
-        <DataGrid x:Name="LibraryGrid" AutoGenerateColumns="False" SelectionChanged="PlaybackSelectionChanged"
+        <Label Grid.Row="1" Grid.Column="1" Margin="4 0" FontSize="14" FontWeight="Bold">Library</Label>
+        <DataGrid x:Name="LibraryGrid" AutoGenerateColumns="False"
                   AllowDrop="True" Drop="LibraryDrop" CanUserDeleteRows="False" SelectionMode="Single"
                   CanUserAddRows="False" CanUserSortColumns="True"
-                  PreviewMouseLeftButtonDown="LibraryGrid_PreviewMouseLeftButtonDown"
+                  PreviewMouseLeftButtonDown="Song_MouseLeftButtonDown"
                   PreviewMouseMove="LibraryGrid_PreviewMouseMove"
                   MouseDoubleClick="SongsGrid_MouseDoubleClick"
                   KeyUp="LibraryGrid_KeyUp"

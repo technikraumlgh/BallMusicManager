@@ -4,7 +4,7 @@ namespace BallMusicManager.Domain;
 
 public sealed record SongBuilder
 {
-    public string Path { get; set; } = string.Empty; //string because it can be a path or an archive entry name
+    public string Path { get; set; } = string.Empty; //string because it can be a path or an archive entry name //TODO: fix this!!!
     public int Index { get; set; } = -1;
     public string Title { get; set; } = string.Empty;
     public string Artist { get; set; } = string.Empty;
@@ -57,7 +57,7 @@ public sealed record SongBuilder
         Artist = artist;
         return this;
     }
-    public SongBuilder SetDanceFromKey(string key) => SetDance(Domain.Dance.FromKey(key));
+    public SongBuilder SetDanceFromSlug(string key) => SetDance(Domain.Dance.FromSlog(key));
     public SongBuilder SetDance(string dance)
     {
         Dance = dance;
@@ -71,13 +71,14 @@ public sealed record SongBuilder
 
     public SongBuilder FromFileName(string fileName)
     {
+        // this complicated logic exists to support the old naming convention Index_Dance_SongName
         var split = fileName.Split("_");
         return split.Length switch
         {
             1 => SetIndex(-1).SetTitle(fileName),
-            2 => SetIndex(-1).SetTitle(split[1]).SetDanceFromKey(split[0]),
-            3 => SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromKey(split[1]).SetTitle(split[2]),
-            > 3 => SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromKey(split[1]).SetTitle(split.Skip(2).Dump(' ')),
+            2 => SetIndex(-1).SetTitle(split[1]).SetDanceFromSlug(split[0]), // is this the best?
+            3 => SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromSlug(split[1]).SetTitle(split[2]),
+            > 3 => SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromSlug(split[1]).SetTitle(split.Skip(2).Dump(' ')),
             _ => throw new ArgumentException($"{fileName} does not match naming conventions")
         };
     }

@@ -21,7 +21,7 @@ public class SongBuilderCollection(IEnumerable<SongBuilder> songs) : ObservableC
 
     public SongBuilder AddOrGetExisting(SongBuilder song, IEqualityComparer<SongBuilder>? equalityComparer = null)
     {
-        equalityComparer ??= SongEqualityComparer.ByFileHash;
+        equalityComparer ??= SongEqualityComparer.ByLoosePropertiesOrFileHash;
         var match = this.FirstOrDefault(other => equalityComparer.Equals(song, other));
         if (match is null)
         {
