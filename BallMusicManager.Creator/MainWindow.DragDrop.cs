@@ -10,99 +10,44 @@ namespace BallMusicManager.Creator;
 
 public partial class MainWindow
 {
-    private SongBuilder? _draggedSong;
+    private const string SONG_DRAG_FORMAT = "lghBallSong";
+    private Point _startPoint = new();
+
+    private void Song_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _startPoint = e.GetPosition(null);
+    }
 
     #region Playlist Drag&Drop
-    private void Songs_Drop(object sender, DragEventArgs e)
+    private void PlaylistGrid_Drop(object sender, DragEventArgs e)
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
-            Playlist.AddAllIfNew(FileDrop(e));
+            Playlist.AddAllIfNew(HandleFileDrop(e));
             return;
         }
 
-        if (_draggedSong is null || e.OriginalSource is not DependencyObject obj)
+        if (!e.Data.GetDataPresent(SONG_DRAG_FORMAT) || e.Data.GetData(SONG_DRAG_FORMAT) is not SongBuilder draggedSong || e.OriginalSource is not DependencyObject obj)
         {
             return;
         }
 
         if (obj.FindParentOrSelf<DataGridRow>()?.Item is not SongBuilder targetItem)
         {
-            Playlist.Remove(_draggedSong);
-            Playlist.AddIfNew(_draggedSong);
+            //Playlist.Remove(draggedSong);
+            Playlist.AddIfNew(draggedSong);
         }
-        else if (!ReferenceEquals(_draggedSong, targetItem))
+        else if (!ReferenceEquals(draggedSong, targetItem))
         {
             var index = Playlist.IndexOf(targetItem);
-            Playlist.Remove(_draggedSong);
-            Playlist.Insert(index, _draggedSong);
-        }
-        _draggedSong = null;
-    }
-
-    private void Song_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.OriginalSource is not DependencyObject obj)
-        {
-            return;
-        }
-
-        var row = obj.FindParentOrSelf<DataGridRow>();
-        if (row?.Item is not SongBuilder song)
-        {
-            _draggedSong = null;
-            return;
-        }
-
-        var grid = obj.FindParent<DataGrid>();
-
-        _draggedSong = song;
-        SelectSong(song, grid?.ItemsSource as SongBuilderCollection);
-    }
-
-    // we use a custom selection logic to allow syncing the song selection between the grids
-    private void UnselectSong() => SelectSong(null, null);
-    private void SelectSong(SongSelection selection) => SelectSong(selection.Song, selection.Context);
-    private void SelectSong(SongBuilder? song, SongBuilderCollection? context)
-    {
-        _selection = new(song, context);
-        if(song is null)
-        {
-            PlaylistGrid.SelectedItem = null;
-            LibraryGrid.SelectedItem = null;
-            return;
-        }
-        SelectIfExistsOrUnselect(PlaylistGrid, song);
-        SelectIfExistsOrUnselect(LibraryGrid, song);
-
-        static void SelectIfExistsOrUnselect(DataGrid grid, SongBuilder song)
-        {
-            if (ReferenceEquals(grid.SelectedItem, song))
-            {
-                return;
-            }
-
-            grid.CommitEdit();
-            grid.SelectionUnit = DataGridSelectionUnit.FullRow;
-
-            if (grid.Items.Contains(song))
-            {
-                grid.SelectedItem = song;
-                grid.ScrollIntoView(song);
-            }
-            else
-            {
-                grid.SelectedItem = null;
-            }
+            Playlist.Remove(draggedSong);
+            Playlist.Insert(index, draggedSong);
         }
     }
 
-    private void SongsGrid_PreviewMouseMove(object sender, MouseEventArgs e)
+    private void PlaylistGrid_PreviewMouseMove(object sender, MouseEventArgs e)
     {
-        if (e.LeftButton == MouseButtonState.Pressed && _draggedSong != null)
-        {
-            TryDrag(PlaylistGrid);
-        }
+        TryDrag(sender, e);
     }
     #endregion
 
@@ -111,24 +56,19 @@ public partial class MainWindow
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
-            foreach (var _ in FileDrop(e))
+            foreach (var _ in HandleFileDrop(e))
             { }
             return;
         }
-
-        _draggedSong = null;
     }
 
     private void LibraryGrid_PreviewMouseMove(object sender, MouseEventArgs e)
     {
-        if (e.LeftButton == MouseButtonState.Pressed && _draggedSong != null)
-        {
-            TryDrag(LibraryGrid);
-        }
+        TryDrag(sender, e);
     }
     #endregion
 
-    private IEnumerable<SongBuilder> FileDrop(DragEventArgs e)
+    private IEnumerable<SongBuilder> HandleFileDrop(DragEventArgs e)
     {
         if (!e.Data.GetDataPresent(DataFormats.FileDrop))
         {
@@ -155,20 +95,36 @@ public partial class MainWindow
                 continue;
             }
 
-            yield return Library.AddOrGetExisting(window.Song); //display duplicate waring? or just skip?
+            yield return Library.AddOrGetExisting(window.Song); //TODO: display duplicate waring? or just skip?
         }
     }
 
-    private void TryDrag(DependencyObject source)
+    private void TryDrag(object sender, MouseEventArgs e)
     {
-        try
+        if (e.OriginalSource is not DependencyObject source)
         {
-            DragDrop.DoDragDrop(source, _draggedSong, DragDropEffects.Link);
+            return;
         }
-        catch
+
+        var mousePosDiff = _startPoint - e.GetPosition(null);
+
+        if (e.LeftButton == MouseButtonState.Pressed &&
+            (Math.Abs(mousePosDiff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+             Math.Abs(mousePosDiff.Y) > SystemParameters.MinimumVerticalDragDistance))
         {
-            // to prevent crashes when mouse leaves window and enters again
-            _draggedSong = null;
+            if (sender is not DataGrid grid)
+            {
+                return;
+            }
+            var row = source.FindParentOrSelf<DataGridRow>();
+
+            if (row is null)
+            {
+                return;
+            }
+
+            var song = grid.ItemContainerGenerator.ItemFromContainer(row);
+            DragDrop.DoDragDrop(row, new DataObject(SONG_DRAG_FORMAT, song), DragDropEffects.Move);
         }
     }
 }
