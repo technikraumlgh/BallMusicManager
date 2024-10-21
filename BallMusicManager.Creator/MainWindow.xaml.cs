@@ -143,7 +143,7 @@ public sealed partial class MainWindow : Window
 
     private void LibraryGrid_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key is not Key.Delete || _selection.HasSelection || _selection.Context != Library)
+        if (e.Key is not Key.Delete || _selection.HasSelection || _selection.Context != Library || IsLibraryEditing())
         {
             return;
         }
@@ -158,6 +158,31 @@ public sealed partial class MainWindow : Window
         {
             Library.Remove(_selection.Song!);
             UnselectSong();
+        }
+    
+        bool IsLibraryEditing()
+        {
+            foreach (var item in LibraryGrid.Items)
+            {
+                var row = LibraryGrid.ItemContainerGenerator.ContainerFromItem(item);
+                if (row == null)
+                {
+                    continue;
+                }
+                foreach(int i in ..LibraryGrid.Columns.Count)
+                {
+                    if (LibraryGrid.Columns[i].GetCellContent(row).Parent is not DataGridCell cell)
+                    {
+                        continue;
+                    }
+
+                    if (cell.IsEditing)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
