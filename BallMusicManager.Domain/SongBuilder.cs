@@ -2,7 +2,8 @@
 
 namespace BallMusicManager.Domain;
 
-public sealed record SongBuilder
+// HashCode has to be based on constant values otherwise the DataGrid will crash
+public sealed class SongBuilder
 {
     public string Path { get; set; } = string.Empty; //string because it can be a path or an archive entry name //TODO: fix this!!!
     public int Index { get; set; } = -1;
@@ -26,6 +27,16 @@ public sealed record SongBuilder
     private string hash = string.Empty;
 
     public SongBuilder() { }
+    public SongBuilder(SongBuilder song)
+    {
+        Path = song.Path;
+        Index = song.Index;
+        Title = song.Title;
+        Artist = song.Artist;
+        Dance = song.Dance;
+        Duration = song.Duration;
+    }
+    
     public SongBuilder(Song song)
     {
         Path = song.Path;
