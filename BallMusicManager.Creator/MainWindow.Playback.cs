@@ -3,6 +3,8 @@ using System.Windows.Input;
 using System.Windows;
 using BallMusicManager.Infrastructure;
 using System.Windows.Threading;
+using Ametrin.Utils.WPF;
+using System.Windows.Controls;
 
 namespace BallMusicManager.Creator;
 
@@ -23,7 +25,7 @@ public partial class MainWindow
         }
         else
         {
-            PlaySelectedSong();
+            PlaySong(LibraryGrid.SelectedItems[^1] as SongBuilder);
         }
     }
 
@@ -34,21 +36,28 @@ public partial class MainWindow
 
     private void SongsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        PlaySelectedSong();
-        SelectSong(_selection);
+        if (e.OriginalSource is not DependencyObject source
+            || sender is not DataGrid grid
+            || source.FindParentOrSelf<DataGridRow>() is not DataGridRow row
+            || grid.ItemContainerGenerator.ItemFromContainer(row) is not SongBuilder song)
+        {
+            return;
+        }
+        
+        PlaySong(song);
     }
 
-    private void PlaySelectedSong()
+    private void PlaySong(SongBuilder? song)
     {
-        if (!_selection.HasSelection)
+        _player.Stop();
+
+        if(song is null)
         {
             return;
         }
 
-        _player.Stop();
-
-        UpdatePlayback(_selection.Song!);
-        _selection.Song!.SetDuration(_player.CurrentSongLength);
+        UpdatePlayback(song);
+        song.SetDuration(_player.CurrentSongLength);
         _player.Play();
         _playbackProgressUpdater.Start();
         PlayButton.Content = "\uE769";
@@ -57,8 +66,8 @@ public partial class MainWindow
     private void PausePlayback()
     {
         _player.Pause();
-        PlayButton.Content = "\uE768";
         _playbackProgressUpdater.Stop();
+        PlayButton.Content = "\uE768";
     }
 
     private void UpdatePlayback(SongBuilder? song)

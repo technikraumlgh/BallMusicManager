@@ -125,7 +125,7 @@ public static class PlaylistBuilder
         {
             foreach (var song in songs)
             {
-                yield return Path.IsPathRooted(song.Path) ? song : song with { Path = Path.Combine(file.DirectoryName!, song.Path) };
+                yield return Path.IsPathRooted(song.Path) ? song : new SongBuilder(song).SetPath(Path.Combine(file.DirectoryName!, song.Path));
             }
         }
     }

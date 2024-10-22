@@ -18,7 +18,7 @@ public sealed partial class MainWindow : Window
 {
     private SongBuilderCollection Playlist = [];
     private SongLibrary Library = [];
-    private SongSelection _selection = SongSelection.None;
+    //private SongSelection _selection = SongSelection.None;
 
     public MainWindow()
     {
@@ -135,34 +135,36 @@ public sealed partial class MainWindow : Window
         Playlist.Clear();
     }
 
-    private void PlaylistGrid_KeyUp(object sender, KeyEventArgs e)
+    private void PlaylistGrid_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key is not Key.Delete || _selection.HasSelection || _selection.Context != Playlist)
+        if (e.Key is not Key.Delete || PlaylistGrid.SelectedItem is not SongBuilder song)
         {
             return;
         }
 
-        Playlist.Remove(_selection.Song!);
-        UnselectSong();
+        e.Handled = true;
+        Playlist.Remove(song);
     }
 
-    private void LibraryGrid_KeyUp(object sender, KeyEventArgs e)
+    private void LibraryGrid_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key is not Key.Delete || _selection.HasSelection || _selection.Context != Library || IsLibraryEditing())
+        if (e.Key is not Key.Delete || LibraryGrid.SelectedItem is not SongBuilder song || IsLibraryEditing())
         {
             return;
         }
 
-        if (Playlist.Contains(_selection.Song!))
+        e.Handled = true;
+
+        if (Playlist.Contains(song))
         {
             MessageBoxHelper.ShowWaring("Cannot delete a song that is in the current playlist");
             return;
         }
 
-        if (MessageBoxHelper.Ask($"Do you really want to delete '{_selection.Song!.Title}'?") is MessageBoxResult.Yes)
+        if (MessageBoxHelper.Ask($"Do you really want to delete '{song.Title}'?") is MessageBoxResult.Yes)
         {
-            Library.Remove(_selection.Song!);
-            UnselectSong();
+            Library.Remove(song);
+            //UnselectSong();
         }
 
         bool IsLibraryEditing()
@@ -176,7 +178,7 @@ public sealed partial class MainWindow : Window
                 }
                 foreach (int i in ..LibraryGrid.Columns.Count)
                 {
-                    if (LibraryGrid.Columns[i].GetCellContent(row).Parent is not DataGridCell cell)
+                    if (LibraryGrid.Columns[i].GetCellContent(row)?.Parent is not DataGridCell cell)
                     {
                         continue;
                     }
@@ -259,11 +261,5 @@ public sealed partial class MainWindow : Window
             return false;
         };
 
-    }
-    private readonly record struct SongSelection(SongBuilder? Song, SongBuilderCollection? Context)
-    {
-        public bool HasSelection => Song is not null;
-        public bool HasContext => HasSelection && Context is not null;
-        public static SongSelection None { get; } = new SongSelection(null, null);
     }
 }
