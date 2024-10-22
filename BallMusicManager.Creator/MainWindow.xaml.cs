@@ -41,8 +41,13 @@ public sealed partial class MainWindow : Window
     {
         if (shouldSaveBeforeClosing)
         {
+            var task = SaveLibrary();
+            if (task.IsCompleted)
+            {
+                return;
+            }
             e.Cancel = true;
-            await SaveLibrary();
+            await task;
             shouldSaveBeforeClosing = false;
             Close();
         }
@@ -106,7 +111,7 @@ public sealed partial class MainWindow : Window
     private void UpdateLengthDisplay(object? sender = null, NotifyCollectionChangedEventArgs? e = default)
     {
         var duration = Playlist.Sum(s => s.Duration);
-        LengthDisplay.Content = duration.Ticks == 0 ?  "Playlist" : (object) $"Playlist ({duration:hh\\:mm\\:ss})";
+        LengthDisplay.Content = duration.Ticks == 0 ? "Playlist" : (object)$"Playlist ({duration:hh\\:mm\\:ss})";
     }
 
     private void ClosePlaylist(object sender, RoutedEventArgs e)
@@ -159,7 +164,7 @@ public sealed partial class MainWindow : Window
             Library.Remove(_selection.Song!);
             UnselectSong();
         }
-    
+
         bool IsLibraryEditing()
         {
             foreach (var item in LibraryGrid.Items)
@@ -169,7 +174,7 @@ public sealed partial class MainWindow : Window
                 {
                     continue;
                 }
-                foreach(int i in ..LibraryGrid.Columns.Count)
+                foreach (int i in ..LibraryGrid.Columns.Count)
                 {
                     if (LibraryGrid.Columns[i].GetCellContent(row).Parent is not DataGridCell cell)
                     {
@@ -204,6 +209,10 @@ public sealed partial class MainWindow : Window
 
     private async Task SaveLibrary()
     {
+        if (Library.Count <= 0)
+        {
+            return;
+        }
         var bar = new LoadingBar(true)
         {
             Owner = this,
