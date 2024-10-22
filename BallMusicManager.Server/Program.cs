@@ -1,4 +1,5 @@
-﻿using Ametrin.Utils;
+﻿using System.Drawing;
+using Ametrin.Utils;
 using BallMusicManager.Domain;
 using BallMusicManager.Server;
 using Microsoft.AspNetCore.Mvc;
@@ -97,5 +98,5 @@ static void OutputQRCode(string url, int size = 20)
     using var qrDataData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
     using var qrCode = new PngByteQRCode(qrDataData);
     using var ms = File.Create(QR_CODE_FILE);
-    ms.Write(qrCode.GetGraphic(size));
+    ms.Write(qrCode.GetGraphic(size, Color.Black, Color.White));
 }
