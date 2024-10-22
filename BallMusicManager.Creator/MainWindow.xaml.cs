@@ -18,7 +18,6 @@ public sealed partial class MainWindow : Window
 {
     private SongBuilderCollection Playlist = [];
     private SongLibrary Library = [];
-    //private SongSelection _selection = SongSelection.None;
 
     public MainWindow()
     {
@@ -111,7 +110,7 @@ public sealed partial class MainWindow : Window
     private void UpdateLengthDisplay(object? sender = null, NotifyCollectionChangedEventArgs? e = default)
     {
         var duration = Playlist.Sum(s => s.Duration);
-        LengthDisplay.Content = duration.Ticks == 0 ? "Playlist" : (object)$"Playlist ({duration:hh\\:mm\\:ss})";
+        LengthDisplay.Content = duration.Ticks == 0 ? "Playlist" : $"Playlist ({duration:hh\\:mm\\:ss})";
     }
 
     private void ClosePlaylist(object sender, RoutedEventArgs e)
@@ -164,30 +163,30 @@ public sealed partial class MainWindow : Window
         if (MessageBoxHelper.Ask($"Do you really want to delete '{song.Title}'?") is MessageBoxResult.Yes)
         {
             Library.Remove(song);
-            //UnselectSong();
         }
 
         bool IsLibraryEditing()
         {
+            if (LibraryGrid.ItemContainerGenerator.ContainerFromItem(LibraryGrid.SelectedItem) is DataGridRow selectedRow)
+            {
+                if (selectedRow.IsEditing)
+                {
+                    return true;
+                }
+            }
+
             foreach (var item in LibraryGrid.Items)
             {
-                var row = LibraryGrid.ItemContainerGenerator.ContainerFromItem(item);
-                if (row == null)
+                if (LibraryGrid.ItemContainerGenerator.ContainerFromItem(item) is not DataGridRow row)
                 {
                     continue;
                 }
-                foreach (int i in ..LibraryGrid.Columns.Count)
-                {
-                    if (LibraryGrid.Columns[i].GetCellContent(row)?.Parent is not DataGridCell cell)
-                    {
-                        continue;
-                    }
 
-                    if (cell.IsEditing)
-                    {
-                        return true;
-                    }
+                if (row.IsEditing)
+                {
+                    return true;
                 }
+
             }
             return false;
         }
