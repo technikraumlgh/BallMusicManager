@@ -16,13 +16,20 @@ builder.Services.AddSingleton<DisplayService>();
 builder.Services.AddAuthentication(); //properly set up
 
 var app = builder.Build();
+var logger = app.Services.GetService<ILogger<Program>>()!;
+
 app.Urls.Add("http://localhost");
 
-var ip = SystemHelper.LocalIPAddress();
-var url = $"http://{ip}";
-app.Urls.Add(url);
-
-OutputQRCode(url);
+SystemHelper.LocalIPAddress()
+    .Select(ip => $"http://{ip}").Consume(url =>
+    {
+        app.Urls.Add(url);
+        OutputQRCode(url);
+        logger.LogInformation("Running on {url}", url);
+    }, () =>
+    {
+        logger.LogWarning("No public IP found!");
+    });
 
 
 app.UseRouting();
@@ -30,17 +37,8 @@ app.UseAuthorization();
 //app.UseCors();
 
 var displayService = app.Services.GetService<DisplayService>()!;
-var logger = app.Services.GetService<ILogger<Program>>()!;
-
-
-logger.LogInformation("Running on {url}", url);
-
 
 app.MapHub<SignalHub>("signal");
-
-//app.MapGet("playing", () => Results.Json(playing));
-
-//app.MapGet("nextup", () => Results.Json(next));
 
 app.MapPost("playing", ([FromBody] SongDTO song, string? key) =>
 {
