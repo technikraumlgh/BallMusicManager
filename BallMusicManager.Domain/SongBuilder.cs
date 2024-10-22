@@ -68,7 +68,7 @@ public sealed class SongBuilder
         Artist = artist;
         return this;
     }
-    public SongBuilder SetDanceFromSlug(string key) => SetDance(Domain.Dance.FromSlog(key));
+    public SongBuilder SetDanceFromSlug(string key) => SetDance(Domain.Dance.FromSlug(key));
     public SongBuilder SetDance(string dance)
     {
         Dance = dance;

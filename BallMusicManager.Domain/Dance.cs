@@ -21,6 +21,6 @@ public static class Dance
         //{"FS", "Freestyle" }, // legacy, use Party
     }.ToFrozenDictionary();
 
-    // when ever a dance string enters the program it checks whether it is a known slug and replaces it
-    public static string FromSlog(string key) => DanceSlugs.Get(key).Or(key);
+    // when ever a dance string enters the program it checks whether it is a known slug and if so replaces it
+    public static string FromSlug(string key) => DanceSlugs.Get(key.ToUpper()).Or(key);
 }

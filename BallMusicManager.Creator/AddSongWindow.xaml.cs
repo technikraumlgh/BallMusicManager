@@ -52,6 +52,6 @@ public sealed partial class AddSongWindow : Window
 
     private void DanceField_LostFocus(object sender, RoutedEventArgs e)
     {
-        DanceField.Text = Dance.FromSlog(DanceField.Text);
+        DanceField.Text = Dance.FromSlug(DanceField.Text);
     }
 }
