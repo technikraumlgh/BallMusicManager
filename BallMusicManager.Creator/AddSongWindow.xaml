@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BallMusicManager.Creator"
         mc:Ignorable="d"
+        SizeToContent="WidthAndHeight"
         Title="Add Song" Height="170" Width="400">
     <StackPanel Margin="8 4" KeyDown="StackPanel_KeyDown">
         <TextBlock x:Name="PathText" TextAlignment="Center" FontSize="14">Title</TextBlock>
