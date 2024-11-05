@@ -2,21 +2,25 @@
 
 public static class Dance
 {
-    public static readonly FrozenDictionary<string, string> DanceKeys = new Dictionary<string, string>{
+    // this exists for compat with the old naming convention and to make entering dances easier
+    public static readonly FrozenDictionary<string, string> DanceSlugs = new Dictionary<string, string> {
         {"CCC", "ChaChaCha" },
         {"LW", "Langsamer Walzer" },
         {"JVE", "Jive" },
         {"DFX", "Discofox" },
-        {"FXTR", "Foxtrott" },
+        {"FXT", "Foxtrott" },
+        {"FXTR", "Foxtrott" }, // legacy
         {"RMB", "Rumba" },
         {"WW", "Wiener Walzer" },
         {"TGO", "Tango" },
         {"SMB", "Samba" },
         {"SLS", "Salsa" },
-        {"RNR", "Rock'n Roll" },
+        {"RNR", "Rock n Roll" },
         {"PT", "Party" },
-        //{"FS", "Freestyle" }, // legacy
+        {"FS", "Party" },
+        //{"FS", "Freestyle" }, // legacy, use Party
     }.ToFrozenDictionary();
 
-    public static string FromKey(string key) => DanceKeys.Get(key).Or(key);
+    // when ever a dance string enters the program it checks whether it is a known slug and if so replaces it
+    public static string FromSlug(string key) => DanceSlugs.Get(key.ToUpper()).Or(key);
 }

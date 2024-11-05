@@ -11,7 +11,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace BallMusicManager.Creator;
 
@@ -19,20 +18,12 @@ public sealed partial class MainWindow : Window
 {
     private SongBuilderCollection Playlist = [];
     private SongLibrary Library = [];
-    private TimeSpan Duration = TimeSpan.Zero;
-    private readonly MusicPlayer _player = new();
-    private readonly DispatcherTimer _playbackProgressUpdater = new();
-    private SongBuilder? _draggedSong;
-    private SongBuilder? _lastPlayed;
-    private SongBuilder? _selectedSong;
-    private SongBuilderCollection? _selectionContext;
 
     public MainWindow()
     {
         InitializeComponent();
-        SongsGrid.ItemsSource = Playlist;
+        PlaylistGrid.ItemsSource = Playlist;
         Playlist.CollectionChanged += UpdateLengthDisplay;
-        _playbackProgressUpdater.Interval = TimeSpan.FromSeconds(.5);
         _playbackProgressUpdater.Tick += UpdatePlaybackSliderValue;
 
         Loaded += (sender, e) =>
@@ -49,8 +40,13 @@ public sealed partial class MainWindow : Window
     {
         if (shouldSaveBeforeClosing)
         {
+            var task = SaveLibrary();
+            if (task.IsCompleted)
+            {
+                return;
+            }
             e.Cancel = true;
-            await SaveLibrary();
+            await task;
             shouldSaveBeforeClosing = false;
             Close();
         }
@@ -80,7 +76,7 @@ public sealed partial class MainWindow : Window
             {
                 Playlist.CollectionChanged -= UpdateLengthDisplay;
                 Playlist = new(songs);
-                SongsGrid.ItemsSource = Playlist;
+                PlaylistGrid.ItemsSource = Playlist;
                 Playlist.CollectionChanged += UpdateLengthDisplay;
                 UpdateLengthDisplay();
             },
@@ -105,7 +101,7 @@ public sealed partial class MainWindow : Window
             var songs = Library.AddAllOrReplaceWithExisting(PlaylistBuilder.EnumerateFile(file));
             Playlist.CollectionChanged -= UpdateLengthDisplay;
             Playlist = new(songs);
-            SongsGrid.ItemsSource = Playlist;
+            PlaylistGrid.ItemsSource = Playlist;
             Playlist.CollectionChanged += UpdateLengthDisplay;
             UpdateLengthDisplay();
         });
@@ -113,8 +109,8 @@ public sealed partial class MainWindow : Window
 
     private void UpdateLengthDisplay(object? sender = null, NotifyCollectionChangedEventArgs? e = default)
     {
-        Duration = Playlist.Sum(s => s.Duration);
-        LengthDisplay.Content = $"Duration: {Duration:hh\\:mm\\:ss}";
+        var duration = Playlist.Sum(s => s.Duration);
+        LengthDisplay.Content = duration.Ticks == 0 ? "Playlist" : $"Playlist ({duration:hh\\:mm\\:ss})";
     }
 
     private void ClosePlaylist(object sender, RoutedEventArgs e)
@@ -138,47 +134,61 @@ public sealed partial class MainWindow : Window
         Playlist.Clear();
     }
 
-    private void UpdatePlaybackSliderValue(object? sender, EventArgs e)
+    private void PlaylistGrid_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        PlaybackSlider.ValueChanged -= PlaybackSlider_ValueChanged;
-        PlaybackSlider.Value = _player.CurrentTime.TotalSeconds;
-        PlaybackSlider.ValueChanged += PlaybackSlider_ValueChanged;
-    }
-
-    private void SongsGrid_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.Key is Key.Delete)
+        if (e.Key is not Key.Delete || PlaylistGrid.SelectedItem is not SongBuilder song)
         {
-            if (_selectedSong is not null && _selectionContext == Playlist)
-            {
-                _selectionContext.Remove(_selectedSong);
-                SongsGrid.SelectedItem = null;
-                _selectionContext = null;
-                _selectedSong = null;
-            }
+            return;
         }
+
+        e.Handled = true;
+        Playlist.Remove(song);
     }
 
-    private void LibraryGrid_KeyUp(object sender, KeyEventArgs e)
+    private void LibraryGrid_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key is Key.Delete)
+        if (e.Key is not Key.Delete || LibraryGrid.SelectedItem is not SongBuilder song || IsLibraryEditing())
         {
-            if (_selectedSong is not null && _selectionContext == Library)
-            {
-                if (Playlist.Contains(_selectedSong))
-                {
-                    MessageBoxHelper.ShowWaring("Cannot delete a song that is in the active playlist");
-                    return;
-                }
+            return;
+        }
 
-                if (MessageBoxHelper.Ask($"Do you really want to delete {_selectedSong.Title}?") is MessageBoxResult.Yes)
+        e.Handled = true;
+
+        if (Playlist.Contains(song))
+        {
+            MessageBoxHelper.ShowWaring("Cannot delete a song that is in the current playlist");
+            return;
+        }
+
+        if (MessageBoxHelper.Ask($"Do you really want to delete '{song.Title}'?") is MessageBoxResult.Yes)
+        {
+            Library.Remove(song);
+        }
+
+        bool IsLibraryEditing()
+        {
+            if (LibraryGrid.ItemContainerGenerator.ContainerFromItem(LibraryGrid.SelectedItem) is DataGridRow selectedRow)
+            {
+                if (selectedRow.IsEditing)
                 {
-                    _selectionContext.Remove(_selectedSong);
-                    LibraryGrid.SelectedItem = null;
-                    _selectionContext = null;
-                    _selectedSong = null;
+                    return true;
                 }
             }
+
+            foreach (var item in LibraryGrid.Items)
+            {
+                if (LibraryGrid.ItemContainerGenerator.ContainerFromItem(item) is not DataGridRow row)
+                {
+                    continue;
+                }
+
+                if (row.IsEditing)
+                {
+                    return true;
+                }
+
+            }
+            return false;
         }
     }
 
@@ -200,6 +210,10 @@ public sealed partial class MainWindow : Window
 
     private async Task SaveLibrary()
     {
+        if (Library.Count <= 0)
+        {
+            return;
+        }
         var bar = new LoadingBar(true)
         {
             Owner = this,
@@ -222,6 +236,7 @@ public sealed partial class MainWindow : Window
         _ = LoadLibrary();
     }
 
+    const CompareOptions SEARCH_SETTINGS = CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols;
     private void Search_TextChanged(object sender, TextChangedEventArgs e)
     {
         var view = CollectionViewSource.GetDefaultView(LibraryGrid.ItemsSource);
@@ -229,94 +244,23 @@ public sealed partial class MainWindow : Window
         {
             SearchLabel.Visibility = Visibility.Visible;
             view.Filter = null;
+            return;
         }
-        else
+
+        SearchLabel.Visibility = Visibility.Collapsed;
+        view.Filter = (obj) =>
         {
-            SearchLabel.Visibility = Visibility.Collapsed;
-            view.Filter = (obj) =>
+            if (obj is SongBuilder song)
             {
-                if (obj is SongBuilder song)
-                {
-                    var compareInfo = CultureInfo.CurrentCulture.CompareInfo;
-                    return compareInfo.IndexOf(song.Title, SearchBox.Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols) >= 0 ||
-                           compareInfo.IndexOf(song.Artist, SearchBox.Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols) >= 0;
-                }
+                var compareInfo = CultureInfo.CurrentCulture.CompareInfo;
+                return compareInfo.IndexOf(song.Title, SearchBox.Text, SEARCH_SETTINGS) >= 0 ||
+                        compareInfo.IndexOf(song.Artist, SearchBox.Text, SEARCH_SETTINGS) >= 0;
+            }
 
-                return false;
-            };
-        }
-    }
+            return false;
+        };
 
-    private void Play_Click(object sender, RoutedEventArgs e)
-    {
-        if (_player.IsPlaying)
-        {
-            PausePlayback();
-        }
-        else
-        {
-            PlaySelected();
-        }
-    }
-
-    private void PlaybackSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (!_player.IsPlaying)
-        {
-            return;
-        }
-
-        if (_selectedSong != _lastPlayed)
-        {
-            //PausePlayback();
-        }
-    }
-
-    private void PlaybackSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        _player.CurrentTime = TimeSpan.FromSeconds(e.NewValue);
-    }
-
-    private void SongsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-        if (_player.IsPlaying)
-        {
-            PausePlayback();
-        }
-        else
-        {
-            PlaySelected();
-        }
-    }
-
-    private void PlaySelected()
-    {
-        if (_selectedSong is null)
-        {
-            return;
-        }
-
-        UpdatePlayback(_selectedSong);
-        _selectedSong?.SetDuration(_player.CurrentSongLength);
-        _player.Play();
-        _playbackProgressUpdater.Start();
-        PlayButton.Content = "\uE769";
-    }
-
-    private void PausePlayback()
-    {
-        _player.Pause();
-        PlayButton.Content = "\uE768";
-        _playbackProgressUpdater.Stop();
-    }
-
-    private void UpdatePlayback(SongBuilder? song)
-    {
-        if (song is null)
-        {
-            return;
-        }
-
+        move to playback
         if (song != _lastPlayed)
         {
             if (song.Path is ArchiveLocation)

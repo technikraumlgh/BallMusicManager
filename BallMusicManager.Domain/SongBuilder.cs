@@ -7,7 +7,8 @@ using System.Text.Json.Serialization;
 
 namespace BallMusicManager.Domain;
 
-public sealed record SongBuilder()
+// HashCode has to be based on constant values otherwise the DataGrid will crash
+public sealed class SongBuilder
 {
     [JsonConverter(typeof(SongLocationJsonConverter))]
     public SongLocation Path { get; set; } = new UndefinedLocation(); // do not rename (json serialization)
@@ -50,7 +51,18 @@ public sealed record SongBuilder()
     [JsonIgnore]
     private string hash = string.Empty;
 
-    public SongBuilder(Song song) : this()
+    public SongBuilder() { }
+    public SongBuilder(SongBuilder song)
+    {
+        Path = song.Path;
+        Index = song.Index;
+        Title = song.Title;
+        Artist = song.Artist;
+        Dance = song.Dance;
+        Duration = song.Duration;
+    }
+    
+    public SongBuilder(Song song)
     {
         Path = song.Path;
         Index = song.Index;
@@ -81,7 +93,7 @@ public sealed record SongBuilder()
         Artist = artist;
         return this;
     }
-    public SongBuilder SetDanceFromKey(string key) => SetDance(Domain.Dance.FromKey(key));
+    public SongBuilder SetDanceFromSlug(string key) => SetDance(Domain.Dance.FromSlug(key));
     public SongBuilder SetDance(string dance)
     {
         Dance = dance;
@@ -95,39 +107,28 @@ public sealed record SongBuilder()
 
     public SongBuilder FromFileName(string fileName)
     {
+        // this complicated logic exists to support the old naming convention Index_Dance_SongName
         var split = fileName.Split("_");
-        if (split.Length == 3)
+        return split.Length switch
         {
-            return SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromKey(split[1]).SetTitle(split[2]);
-        }
-        if (split.Length == 1)
-        {
-            return SetIndex(-1).SetTitle(fileName);
-        }
-        if (split.Length == 2)
-        {
-            return SetIndex(-1).SetTitle(split[1]).SetDanceFromKey(split[0]);
-        }
-        if (split.Length > 3)
-        {
-            return SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromKey(split[1]).SetTitle(split.Skip(2).Dump(' '));
-        }
-        throw new InvalidDataException($"{fileName} does not match naming conventions");
-    }
-
-    public SongBuilder Copy()
-    {
-        return new()
-        {
-            Path = Path,
-            Index = Index,
-            Title = Title,
-            Artist = Artist,
-            Dance = Dance,
-            Duration = Duration,
-            hash = hash,
+            1 => SetIndex(-1).SetTitle(fileName),
+            2 => SetIndex(-1).SetTitle(split[1]).SetDanceFromSlug(split[0]), // is this the best?
+            3 => SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromSlug(split[1]).SetTitle(split[2]),
+            > 3 => SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromSlug(split[1]).SetTitle(split.Skip(2).Dump(' ')),
+            _ => throw new ArgumentException($"{fileName} does not match naming conventions")
         };
     }
+
+    public SongBuilder Copy() => new()
+    {
+        Path = Path,
+        Index = Index,
+        Title = Title,
+        Artist = Artist,
+        Dance = Dance,
+        Duration = Duration,
+        hash = hash,
+    };
 
     public Song Build() => new(Path, Index, Title, Artist, Dance, Duration);
 }

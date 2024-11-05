@@ -7,7 +7,7 @@ public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityCom
     public static readonly SongEqualityComparer ByProperties = new();
     public static readonly FileHashComparer ByFileHash = new();
     public static readonly LoosePropertiesComparer ByLooseProperties = new();
-    public static readonly LoosePropertiesComparer ByLoosePropertiesOrFileHash = new();
+    public static readonly LoosePropertiesOrFileHashComparer ByLoosePropertiesOrFileHash = new();
 
     public bool Equals(Song? x, Song? y)
     {
