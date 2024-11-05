@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -20,12 +22,22 @@ public sealed record SongBuilder()
         {
             if (!HasFileHash)
             {
-                hash = Path is FileLocation file
-                    ? file.FileInfo.ComputeSha256Hash()
-                    : throw new InvalidOperationException("Cannot compute hash for a song without FileLocation");
-
+                hash = Path switch
+                {
+                    FileLocation file => file.FileInfo.ComputeSha256Hash(),
+                    ArchiveLocation file => GetHash(file),
+                    _ => throw new InvalidOperationException("Cannot compute hash for a song without proper location"),
+                };
             }
             return hash;
+
+            static string GetHash(ArchiveLocation location){
+                using var archive = new ZipArchive(location.ArchiveFileInfo.OpenRead(), ZipArchiveMode.Read);
+                var entry = archive.GetEntry(location.EntryName)!;
+                using var stream = entry.Open();
+                using var hasher = SHA256.Create();
+                return hasher.ComputeHash(stream).ToHexString();
+            }
         }
 
         // for json deserialization
@@ -130,32 +142,110 @@ public sealed record ArchiveLocation(string EntryName, FileInfo ArchiveFileInfo)
 {
     public FileInfo ArchiveFileInfo { get; init; } = ArchiveFileInfo.Exists ? ArchiveFileInfo : throw new FileNotFoundException(null, ArchiveFileInfo.FullName);
 }
+public sealed record HashEmbeddedLocation : SongLocation;
 public sealed record UndefinedLocation : SongLocation;
+// for backcompat reasons when deserialising. gets replaced after loading
+public sealed record LegacyLocation(string Path) : SongLocation;
 
 public sealed class SongLocationJsonConverter : JsonConverter<SongLocation>
 {
     public override SongLocation? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var value = reader.GetString() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(value))
+        //for legacy purposes
+        if (reader.TokenType == JsonTokenType.String)
         {
-            return new UndefinedLocation();
+            var legacy = reader.GetString();
+            if (string.IsNullOrWhiteSpace(legacy))
+            {
+                return new UndefinedLocation();
+            }
+
+            if (Path.IsPathFullyQualified(legacy))
+            {
+                return new FileLocation(new(legacy));
+            }
+
+            return new LegacyLocation(legacy);
         }
-        if (Path.IsPathFullyQualified(value))
+
+        if (reader.TokenType != JsonTokenType.StartObject)
         {
-            return new FileLocation(new(value));
+            throw new JsonException();
         }
-        return new ArchiveLocation(value);
+
+        reader.Read();
+
+        string? type = null;
+        string? path = null;
+        string? entry = null;
+
+        while (reader.TokenType == JsonTokenType.PropertyName)
+        {
+            var propertyName = reader.GetString();
+            reader.Read();
+
+            switch (propertyName)
+            {
+                case "type":
+                    type = reader.GetString();
+                    break;
+                case "path":
+                    path = reader.GetString();
+                    break;
+                case "entry":
+                    entry = reader.GetString();
+                    break;
+                default:
+                    reader.Skip();
+                    break;
+            }
+
+            reader.Read();
+        }
+
+        if (reader.TokenType != JsonTokenType.EndObject)
+            throw new JsonException();
+
+        return type switch
+        {
+            "file" when path != null => new FileLocation(new FileInfo(path)),
+            "archive" when path != null && entry != null => new ArchiveLocation(entry, new FileInfo(path)),
+            "hash_embedded" => new HashEmbeddedLocation(),
+            "null" => new UndefinedLocation(),
+            _ => throw new JsonException()
+        };
     }
+
 
     public override void Write(Utf8JsonWriter writer, SongLocation value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value switch
+        writer.WriteStartObject();
+
+        switch (value)
         {
-            FileLocation file => file.FileInfo.FullName,
-            ArchiveLocation archive => archive.EntryName,
-            UndefinedLocation => string.Empty,
-            _ => throw new UnreachableException(),
-        });
+            case FileLocation file:
+                writer.WriteString("type", "file");
+                writer.WriteString("path", file.FileInfo.FullName);
+                break;
+
+            case ArchiveLocation archive:
+                writer.WriteString("type", "archive");
+                writer.WriteString("entry", archive.EntryName);
+                writer.WriteString("path", archive.ArchiveFileInfo.FullName);
+                break;
+
+            case HashEmbeddedLocation:
+                writer.WriteString("type", "hash_embedded");
+                break;
+
+            case UndefinedLocation:
+                writer.WriteString("type", "null");
+                break;
+
+            default:
+                throw new UnreachableException();
+        }
+
+        writer.WriteEndObject();
     }
 }

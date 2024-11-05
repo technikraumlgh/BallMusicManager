@@ -1,13 +1,9 @@
-﻿using BallMusicManager.Infrastructure;
+﻿using Ametrin.Serialization;
+using BallMusicManager.Domain;
+using BallMusicManager.Infrastructure;
 using System.Globalization;
 
-//var playlist = PlaylistBuilder.FromFile(new(@"D:\Musik\LGH Bälle\WB 23 MS\WB 23 MS.playlist"));
-//var playlist = PlaylistBuilder.FromArchive(new(@"C:\Users\Barion\Downloads\test.zip")).ReduceOrThrow();
+SongLocation location = new UndefinedLocation();
+JsonExtensions.DefaultOptions.Converters.Add(new SongLocationJsonConverter());
 
-//playlist.Skip();
-//playlist.Play();
-//Console.ReadLine();
-
-//PlaylistBuilder.ToArchive(new(@"C:\Users\Barion\Downloads\test.zip"), playlist.Songs);
-
-Console.WriteLine(CultureInfo.CurrentCulture.CompareInfo.IsPrefix("Ma Chèrie", "mache", CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols));
+System.Console.WriteLine(location.ConvertToJson());

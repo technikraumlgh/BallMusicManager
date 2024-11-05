@@ -30,7 +30,12 @@ public static class PlaylistBuilder
         var archive = OpenArchive(file);
 
         var songs = archive.Select(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
-            .Select(ParseSongList).WhereNotEmpty().Select(Enumerable.ToArray);
+            .Select(ParseSongList).Select(songs => songs.Select(song => song.Path switch
+                {
+                    LegacyLocation legacy => song.SetLocation(new ArchiveLocation(legacy.Path, file)),
+                    HashEmbeddedLocation hashEmbedded => song.SetLocation(new ArchiveLocation(song.FileHash, file)),
+                    _ => song
+                })).WhereNotEmpty().Select(Enumerable.ToArray);
 
         (archive, songs).Consume((archive, songs) =>
         {
@@ -105,7 +110,7 @@ public static class PlaylistBuilder
             if (hashes.Contains(song.FileHash)) //TODO: properly handle this case
             {
                 var other = songs.Where(other => song.FileHash == other.FileHash).FirstOrDefault();
-                //throw new UnreachableException($"{song.Path} produced an already existing hash!");
+                throw new UnreachableException($"{song.Path} produced an already existing hash!");
             }
 
             if (archive.GetEntry(song.FileHash) is null)
@@ -117,6 +122,7 @@ public static class PlaylistBuilder
                         break;
 
                     case ArchiveLocation archiveLocation:
+                        Debug.Assert(archiveLocation.ArchiveFileInfo != archiveFile);
                         var target = archive.CreateEntry(song.FileHash);
                         using (var targetStream = target.Open())
                         {
@@ -126,17 +132,14 @@ public static class PlaylistBuilder
                             sourceStream.CopyTo(targetStream);
                         }
                         break;
+
+                    default:
+                        throw new InvalidOperationException($"Location of {song} not defined properly");
                 }
-                archive.CreateEntryFromFile(song.Path switch
-                {
-                    FileLocation loc => loc.FileInfo.FullName,
-                    _ => throw new InvalidOperationException("Cannot write a Song without FileLocation to an archive"),
-                }, song.FileHash);
                 hashes.Add(song.FileHash);
             }
 
-            // filename becomes it's hash to prevent saving the same file twice...
-            song.SetLocation(new ArchiveLocation(song.FileHash, archiveFile));
+            song.SetLocation(new HashEmbeddedLocation());
         }
 
         WriteSongList();
