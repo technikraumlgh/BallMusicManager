@@ -23,7 +23,7 @@ public partial class MainWindow
         {
             PausePlayback();
         }
-        else
+        else if (LibraryGrid.SelectedItems.Count > 0)
         {
             PlaySong(LibraryGrid.SelectedItems[^1] as SongBuilder);
         }
