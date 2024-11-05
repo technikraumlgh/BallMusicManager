@@ -41,7 +41,7 @@ public sealed class MusicPlayer
         Play();
     }
 
-    public void SetSong(Song song) => SetAudioFile(song.Path);
+    public void SetSong(Song song) => SetAudioFile(song.Path switch { FileLocation file => file.FileInfo.FullName, _ => throw new ArgumentException("Cannot play song without linked audio file") });
     public void SetAudioFile(string path)
     {
         Stop();

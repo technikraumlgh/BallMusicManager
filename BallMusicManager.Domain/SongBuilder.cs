@@ -1,10 +1,14 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace BallMusicManager.Domain;
 
 public sealed record SongBuilder()
 {
-    public string Path { get; set; } = string.Empty; //Needs to be string because can be file path or archive entry name
+    [JsonConverter(typeof(SongLocationJsonConverter))]
+    public SongLocation Path { get; set; } = new UndefinedLocation();
     public int Index { get; set; } = -1;
     public string Title { get; set; } = string.Empty;
     public string Artist { get; set; } = string.Empty;
@@ -16,11 +20,21 @@ public sealed record SongBuilder()
         {
             if (string.IsNullOrEmpty(hash))
             {
-                var fileInfo = new FileInfo(Path);
-                hash = fileInfo.ComputeSha256Hash();
+                if (Path is FileLocation file)
+                {
+                    hash = file.FileInfo.ComputeSha256Hash();
+                }
+                else
+                {
+                    throw new Exception("Cannot compute hash for an song without a FileLocation");
+                }
+
             }
             return hash;
         }
+
+        // for json deserialization
+        set => hash = value;
     }
 
     private string hash = string.Empty;
@@ -35,8 +49,8 @@ public sealed record SongBuilder()
         Duration = song.Duration;
     }
 
-    public SongBuilder SetPath(FileInfo file) => SetPath(file.FullName);
-    public SongBuilder SetPath(string path)
+    public SongBuilder SetPath(FileInfo file) => SetPath(new FileLocation(file));
+    public SongBuilder SetPath(SongLocation path)
     {
         Path = path;
         return this;
@@ -104,4 +118,40 @@ public sealed record SongBuilder()
     }
 
     public Song Build() => new(Path, Index, Title, Artist, Dance, Duration);
+}
+
+public abstract record SongLocation;
+public sealed record FileLocation(FileInfo FileInfo) : SongLocation
+{
+    public static FileLocation Of(string path) => new(new FileInfo(path));
+}
+public sealed record ArchiveLocation(string EntryName) : SongLocation;
+public sealed record UndefinedLocation : SongLocation;
+
+public sealed class SongLocationJsonConverter : JsonConverter<SongLocation>
+{
+    public override SongLocation? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var value = reader.GetString() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return new UndefinedLocation();
+        }
+        if (Path.IsPathFullyQualified(value))
+        {
+            return new FileLocation(new(value));
+        }
+        return new ArchiveLocation(value);
+    }
+
+    public override void Write(Utf8JsonWriter writer, SongLocation value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value switch
+        {
+            FileLocation file => file.FileInfo.FullName,
+            ArchiveLocation archive => archive.EntryName,
+            UndefinedLocation => string.Empty,
+            _ => throw new UnreachableException(),
+        });
+    }
 }

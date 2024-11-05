@@ -3,12 +3,19 @@
 public static class SongCache
 {
     public static readonly DirectoryInfo CacheDirectory = new("$cache");
-    public static FileInfo Cache(SongBuilder song)
+
+    public static FileInfo CacheFromArchive(SongBuilder song, FileInfo Archive)
     {
-        using var stream = File.OpenRead(song.Path);
-        return Cache(stream, Path.GetFileName(song.Path));
+        using var archive = PlaylistBuilder.OpenArchive(Archive).OrThrow();
+
+        var entry = archive.GetEntry(song.FileHash) ?? throw new ArgumentException("");
+
+        using var stream = entry.Open();
+        var result = Cache(stream, song.FileHash);
+        song.SetPath(result);
+        return result;
     }
-    
+
     public static FileInfo Cache(Stream stream, string name)
     {
         EnsureCacheExists();

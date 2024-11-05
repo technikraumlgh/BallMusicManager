@@ -319,9 +319,14 @@ public sealed partial class MainWindow : Window
 
         if (song != _lastPlayed)
         {
-            if (!Path.Exists(song.Path))
+            if (song.Path is ArchiveLocation)
             {
-                SongLibrary.
+                SongCache.CacheFromArchive(song, SongLibrary.LibFile);
+            }
+            if (song.Path is not FileLocation)
+            {
+                MessageBoxHelper.ShowError($"{song.Title} has no linked file");
+                return;
             }
 
             _player.SetSong(song.Build());

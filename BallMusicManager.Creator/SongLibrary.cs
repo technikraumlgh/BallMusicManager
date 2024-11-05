@@ -15,7 +15,7 @@ public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCol
         PlaylistBuilder.ToArchive(LibFile, this);
     }
 
-    static readonly FileInfo LibFile = new("Library/lib.plibz");
+    public static readonly FileInfo LibFile = new("Library/lib.plibz");
     public static SongLibrary LoadOrNew()
     {
         if (!Directory.Exists("Library"))

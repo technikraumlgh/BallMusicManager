@@ -1,4 +1,5 @@
 ﻿using Ametrin.Serialization;
+using System.Diagnostics;
 using System.IO.Compression;
 
 namespace BallMusicManager.Infrastructure;
@@ -11,7 +12,7 @@ public static class PlaylistBuilder
     {
         var files = folder.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly).Where(ValidFile);
         //var files = Directory.GetFiles(path, , ).Where(path => Song.).ToArray();
-        return new(folder.FullName, files.Select(SongBuilderExtensions.FromPath).WhereSome());
+        return new(folder.FullName, files.Select(SongBuilderExtensions.FromPath).WhereSuccess());
     }
 
     public static PlaylistPlayer FromFile(FileInfo file)
@@ -22,23 +23,24 @@ public static class PlaylistBuilder
     const string SONG_LIST_ENTRY_NAME = "song_list.json";
     const string MANIFEST_ENTRY_NAME = "manifest.json";
     public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Select(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
-    public static Result<IEnumerable<SongBuilder>> EnumerateArchive(FileInfo file)
+    public static Result<SongBuilder[]> EnumerateArchive(FileInfo file)
     {
-        var archive = file.WhereExists().ToResult(()=> new FileNotFoundException(null, file.FullName))
-            .Select(file => new ZipArchive(file.OpenRead()));
+        var archive = OpenArchive(file);
 
         var songs = archive.Select(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
-            .Select(ParseSongList).WhereNotEmpty(static () => new InvalidDataException("Sequence was empty"));
+            .Select(ParseSongList).WhereNotEmpty().Select(Enumerable.ToArray);
 
         (archive, songs).Consume((archive, songs) =>
         {
             foreach (var song in songs)
             {
-                var songEntry = archive.GetEntry(song.Path)!;
-                using var songStream = songEntry.Open();
-                song.Path = SongCache.Cache(songStream, song.Path).FullName;
+                //var songEntry = archive.GetEntry(song.Path)!;
+                //using var songStream = songEntry.Open();
+                //song.Path = SongCache.Cache(songStream, song.Path).FullName;
             }
         });
+
+        archive.Dispose();
 
         return songs;
 
@@ -47,6 +49,12 @@ public static class PlaylistBuilder
             using var stream = entry.Open();
             return JsonExtensions.Deserialize<SongBuilder[]>(stream).Select<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
         }
+    }
+
+    public static Result<ZipArchive> OpenArchive(FileInfo file)
+    {
+        return file.ToResult().WhereExists()
+            .Select(file => new ZipArchive(file.OpenRead()));
     }
 
     public static Option ToArchive(FileInfo file, IEnumerable<Song> songs)
@@ -88,12 +96,16 @@ public static class PlaylistBuilder
 
             if (archive.GetEntry(song.FileHash) is null)
             {
-                archive.CreateEntryFromFile(song.Path, song.FileHash);
+                archive.CreateEntryFromFile(song.Path switch
+                {
+                    FileLocation loc => loc.FileInfo.FullName,
+                    _ => throw new InvalidOperationException("Cannot write a Song without FileLocation to an archive"),
+                }, song.FileHash);
                 hashes.Add(song.FileHash);
             }
 
             // filename becomes it's hash to prevent saving the same file twice...
-            song.SetPath(song.FileHash);
+            song.SetPath(new ArchiveLocation(song.FileHash));
         }
 
         WriteSongList();
@@ -126,7 +138,12 @@ public static class PlaylistBuilder
         {
             foreach (var song in songs)
             {
-                yield return Path.IsPathRooted(song.Path) ? song : song with { Path = Path.Combine(file.DirectoryName!, song.Path) };
+                yield return song.Path switch
+                {
+                    ArchiveLocation archive => song with { Path = FileLocation.Of(Path.Combine(file.DirectoryName!, archive.EntryName)) },
+                    FileLocation => song,
+                    _ => throw new UnreachableException(),
+                };
             }
         }
     }
