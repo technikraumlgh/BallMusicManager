@@ -10,7 +10,7 @@ public static class PlaylistBuilder
     public static PlaylistPlayer FromFolder(DirectoryInfo folder)
     {
         var files = folder.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly).Where(ValidFile);
-        return new(folder.FullName, files.Select(SongBuilderExtensions.FromPath).WhereSome());
+        return new(folder.FullName, files.Select(SongBuilderExtensions.FromPath).WhereSuccess());
     }
 
     public static PlaylistPlayer FromFile(FileInfo file)
@@ -23,11 +23,11 @@ public static class PlaylistBuilder
     public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Select(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
     public static Result<IEnumerable<SongBuilder>> EnumerateArchive(FileInfo file)
     {
-        var archive = file.WhereExists().ToResult(()=> new FileNotFoundException(null, file.FullName))
+        var archive = file.WhereExists().ToResult(()=> new FileNotFoundException(null, file.FullName) as Exception)
             .Select(file => new ZipArchive(file.OpenRead()));
 
         var songs = archive.Select(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
-            .Select(ParseSongList).WhereNotEmpty(static () => new InvalidDataException("Sequence was empty"));
+            .Select(ParseSongList).WhereNotEmpty();
 
         (archive, songs).Consume((archive, songs) =>
         {
