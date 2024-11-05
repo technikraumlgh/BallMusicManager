@@ -1,22 +1,29 @@
-﻿using System.Runtime.Intrinsics.Arm;
-using System.Security.Cryptography;
-
-namespace BallMusicManager.Infrastructure;
+﻿namespace BallMusicManager.Infrastructure;
 
 public static class SongCache
 {
     public static readonly DirectoryInfo CacheDirectory = new("$cache");
 
-    public static FileInfo CacheFromArchive(SongBuilder song, FileInfo Archive)
+    public static FileInfo CacheFromArchive(SongBuilder song)
     {
-        using var archive = PlaylistBuilder.OpenArchive(Archive).OrThrow();
+        return song.Path switch
+        {
+            FileLocation file => file.FileInfo,
+            ArchiveLocation archive => Impl(song, archive),
+            _ => throw new InvalidOperationException($"Cannot cache Song at {song.Path}")
+        };
 
-        var entry = archive.GetEntry(song.FileHash) ?? throw new ArgumentException("");
+        static FileInfo Impl(SongBuilder song, ArchiveLocation location)
+        {
+            using var archive = PlaylistBuilder.OpenArchive(location.ArchiveFileInfo).OrThrow();
 
-        using var stream = entry.Open();
-        var result = Cache(stream, song.FileHash);
-        song.SetLocation(result);
-        return result;
+            var entry = archive.GetEntry(location.EntryName)!;
+
+            using var stream = entry.Open();
+            var result = Cache(stream, song.FileHash);
+            song.SetLocation(result);
+            return result;
+        }
     }
 
     public static FileInfo Cache(Stream stream, string name)

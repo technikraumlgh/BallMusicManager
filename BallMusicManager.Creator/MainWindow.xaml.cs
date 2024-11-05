@@ -56,7 +56,26 @@ public sealed partial class MainWindow : Window
     {
         var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", "plz");
 
-        dialog.GetFileInfo().Consume((file) => PlaylistBuilder.ToArchive(file, Playlist));
+        dialog.GetFileInfo().Consume(async file =>
+        {
+
+            var bar = new LoadingBar(true)
+            {
+                Owner = this,
+            };
+            bar.LabelProgress.Report("Saving Playlist...");
+            bar.Show();
+
+
+            (await Task.Run(() => PlaylistBuilder.ToArchive(file, Playlist))).Consume(
+                error: () =>
+                {
+                    MessageBoxHelper.ShowError($"Failed saving Playlist", owner: this);
+                }
+            );
+
+            bar.Close();
+        });
     }
 
     private void OpenPlaylist(object sender, RoutedEventArgs e)
@@ -70,7 +89,7 @@ public sealed partial class MainWindow : Window
             bar.LabelProgress.Report("Loading Playlist...");
             bar.Show();
 
-            var songs = await Task.Run(() => PlaylistBuilder.EnumerateArchive(file));
+            var songs = await Task.Run(() => PlaylistBuilder.EnumerateArchiveEntries(file));
 
             songs.Select(songs => Library.AddAllOrReplaceWithExisting(songs)).Consume(songs =>
             {

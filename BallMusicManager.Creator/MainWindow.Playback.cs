@@ -77,7 +77,7 @@ public partial class MainWindow
         {
             if (song.Path is ArchiveLocation)
             {
-                SongCache.CacheFromArchive(song, SongLibrary.LibFile);
+                SongCache.CacheFromArchive(song);
             }
             if (song.Path is not FileLocation)
             {

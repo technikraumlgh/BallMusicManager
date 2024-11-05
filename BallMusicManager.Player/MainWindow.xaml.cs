@@ -64,11 +64,6 @@ public sealed partial class MainWindow : Window, IHostProvider
         ServerOffline.Visibility = value ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    public void SetMissingFiles(bool value)
-    {
-        MissingFiles.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-    }
-
     private void PlayToggleClicked(object sender, RoutedEventArgs e)
     {
         if (Playlist is null) return;

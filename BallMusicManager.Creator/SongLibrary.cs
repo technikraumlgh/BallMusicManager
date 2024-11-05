@@ -30,6 +30,6 @@ public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCol
         }
 
         LibFile.Refresh();
-        return new(PlaylistBuilder.EnumerateArchive(LibFile).Or([]));
+        return new(PlaylistBuilder.EnumerateArchiveEntries(LibFile).Or([]));
     }
 }
