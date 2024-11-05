@@ -70,15 +70,21 @@ public partial class MainWindow
         PlayButton.Content = "\uE768";
     }
 
-    private void UpdatePlayback(SongBuilder? song)
+    private void UpdatePlayback(SongBuilder song)
     {
-        if (song is null)
-        {
-            return;
-        }
 
         if (song != _lastPlayed)
         {
+            if (song.Path is ArchiveLocation)
+            {
+                SongCache.CacheFromArchive(song, SongLibrary.LibFile);
+            }
+            if (song.Path is not FileLocation)
+            {
+                MessageBoxHelper.ShowError($"{song.Title} has no linked file");
+                return;
+            }
+
             _player.SetSong(song.Build());
             _lastPlayed = song;
             PlaybackSlider.Maximum = _player.CurrentSongLength.TotalSeconds;

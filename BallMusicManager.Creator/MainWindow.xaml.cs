@@ -259,23 +259,5 @@ public sealed partial class MainWindow : Window
 
             return false;
         };
-
-        move to playback
-        if (song != _lastPlayed)
-        {
-            if (song.Path is ArchiveLocation)
-            {
-                SongCache.CacheFromArchive(song, SongLibrary.LibFile);
-            }
-            if (song.Path is not FileLocation)
-            {
-                MessageBoxHelper.ShowError($"{song.Title} has no linked file");
-                return;
-            }
-
-            _player.SetSong(song.Build());
-            _lastPlayed = song;
-            PlaybackSlider.Maximum = _player.CurrentSongLength.TotalSeconds;
-        }
     }
 }
