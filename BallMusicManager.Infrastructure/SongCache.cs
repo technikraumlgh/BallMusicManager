@@ -1,4 +1,7 @@
-﻿namespace BallMusicManager.Infrastructure;
+﻿using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography;
+
+namespace BallMusicManager.Infrastructure;
 
 public static class SongCache
 {
@@ -12,7 +15,7 @@ public static class SongCache
 
         using var stream = entry.Open();
         var result = Cache(stream, song.FileHash);
-        song.SetPath(result);
+        song.SetLocation(result);
         return result;
     }
 

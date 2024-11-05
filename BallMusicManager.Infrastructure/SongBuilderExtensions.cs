@@ -9,7 +9,7 @@ public static class SongBuilderExtensions
             FileLocation location => location.FileInfo.FullName,
             _ => throw new ArgumentException("Cannot read metadata from a song without a file"),
         });
-        //if(file.Properties.Duration.TotalMinutes < 1.5) Trace.TraceWarning($"{_Path} is probably not a full song");
+
         return songBuilder.SetDuration(file.Properties.Duration).SetArtist(file.Tag.FirstPerformer);
     }
 
@@ -20,7 +20,7 @@ public static class SongBuilderExtensions
         try
         {
             return new SongBuilder()
-                .SetPath(fileInfo)
+                .SetLocation(fileInfo)
                 .FromMetaData()
                 .FromFileName(fileName).Build();
         }

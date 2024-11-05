@@ -23,23 +23,13 @@ public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCol
             Directory.CreateDirectory("Library");
         }
 
+        // to move the old library file to the new location
         if (File.Exists("lib.plibz") && !LibFile.Exists)
         {
             File.Move("lib.plibz", LibFile.FullName);
         }
+
         LibFile.Refresh();
         return new(PlaylistBuilder.EnumerateArchive(LibFile).Or([]));
     }
-
-    //public static Option<Stream> CacheArchiveFile(SongBuilder song)
-    //{
-          // cannot return stream because stuff has to be disposed
-    //    var stream
-
-    //    return LibFile.WhereExists()
-    //        .Select(file => new ZipArchive(file.OpenRead()))
-    //        .Select(archive => archive.GetEntry(song.FileHash) ?? Option.None<ZipArchiveEntry>())
-    //        .Select(entry => entry.Open())
-    //        ;
-    //}
 }

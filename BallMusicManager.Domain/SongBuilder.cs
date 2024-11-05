@@ -8,7 +8,7 @@ namespace BallMusicManager.Domain;
 public sealed record SongBuilder()
 {
     [JsonConverter(typeof(SongLocationJsonConverter))]
-    public SongLocation Path { get; set; } = new UndefinedLocation();
+    public SongLocation Path { get; set; } = new UndefinedLocation(); // do not rename (json serialization)
     public int Index { get; set; } = -1;
     public string Title { get; set; } = string.Empty;
     public string Artist { get; set; } = string.Empty;
@@ -18,16 +18,11 @@ public sealed record SongBuilder()
     {
         get
         {
-            if (string.IsNullOrEmpty(hash))
+            if (!HasFileHash)
             {
-                if (Path is FileLocation file)
-                {
-                    hash = file.FileInfo.ComputeSha256Hash();
-                }
-                else
-                {
-                    throw new Exception("Cannot compute hash for an song without a FileLocation");
-                }
+                hash = Path is FileLocation file
+                    ? file.FileInfo.ComputeSha256Hash()
+                    : throw new InvalidOperationException("Cannot compute hash for a song without FileLocation");
 
             }
             return hash;
@@ -37,6 +32,10 @@ public sealed record SongBuilder()
         set => hash = value;
     }
 
+    [JsonIgnore]
+    public bool HasFileHash => !string.IsNullOrWhiteSpace(hash);
+
+    [JsonIgnore]
     private string hash = string.Empty;
 
     public SongBuilder(Song song) : this()
@@ -49,8 +48,8 @@ public sealed record SongBuilder()
         Duration = song.Duration;
     }
 
-    public SongBuilder SetPath(FileInfo file) => SetPath(new FileLocation(file));
-    public SongBuilder SetPath(SongLocation path)
+    public SongBuilder SetLocation(FileInfo file) => SetLocation(new FileLocation(file));
+    public SongBuilder SetLocation(SongLocation path)
     {
         Path = path;
         return this;
@@ -114,18 +113,23 @@ public sealed record SongBuilder()
             Artist = Artist,
             Dance = Dance,
             Duration = Duration,
+            hash = hash,
         };
     }
 
     public Song Build() => new(Path, Index, Title, Artist, Dance, Duration);
 }
 
+// this is a type union. The song location can either be a file, an archive entry or undefined. undefined is an error state.
 public abstract record SongLocation;
 public sealed record FileLocation(FileInfo FileInfo) : SongLocation
 {
     public static FileLocation Of(string path) => new(new FileInfo(path));
 }
-public sealed record ArchiveLocation(string EntryName) : SongLocation;
+public sealed record ArchiveLocation(string EntryName, FileInfo ArchiveFileInfo) : SongLocation
+{
+    public FileInfo ArchiveFileInfo { get; init; } = ArchiveFileInfo.Exists ? ArchiveFileInfo : throw new FileNotFoundException(null, ArchiveFileInfo.FullName);
+}
 public sealed record UndefinedLocation : SongLocation;
 
 public sealed class SongLocationJsonConverter : JsonConverter<SongLocation>

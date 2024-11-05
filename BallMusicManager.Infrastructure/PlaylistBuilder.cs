@@ -1,6 +1,8 @@
 ﻿using Ametrin.Serialization;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
+using System.Security.Cryptography;
 
 namespace BallMusicManager.Infrastructure;
 
@@ -34,9 +36,14 @@ public static class PlaylistBuilder
         {
             foreach (var song in songs)
             {
-                //var songEntry = archive.GetEntry(song.Path)!;
-                //using var songStream = songEntry.Open();
-                //song.Path = SongCache.Cache(songStream, song.Path).FullName;
+                if (!song.HasFileHash && song.Path is ArchiveLocation location)
+                {
+                    var songEntry = archive.GetEntry(location.EntryName)!;
+                    var hash = GetFileHash(songEntry);
+                    song.FileHash = hash;
+                    using var songStream = songEntry.Open();
+                    song.SetLocation(SongCache.Cache(songStream, hash));
+                }
             }
         });
 
@@ -48,6 +55,13 @@ public static class PlaylistBuilder
         {
             using var stream = entry.Open();
             return JsonExtensions.Deserialize<SongBuilder[]>(stream).Select<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
+        }
+
+        static string GetFileHash(ZipArchiveEntry entry)
+        {
+            using var hasher = SHA256.Create();
+            using var stream = entry.Open();
+            return hasher.ComputeHash(stream).ToHexString();
         }
     }
 
@@ -78,12 +92,12 @@ public static class PlaylistBuilder
     }
 
     private const int ARCHIVE_VERSION = 1;
-    private static Option ToArchiveImpl(FileInfo file, SongBuilder[] songs)
+    private static Option ToArchiveImpl(FileInfo archiveFile, SongBuilder[] songs)
     {
         var hashes = new HashSet<string>();
-        using var archive = file.Exists
-            ? new ZipArchive(file.Open(FileMode.Open), ZipArchiveMode.Update)
-            : new ZipArchive(file.Create(), ZipArchiveMode.Update);
+        using var archive = archiveFile.Exists
+            ? new ZipArchive(archiveFile.Open(FileMode.Open), ZipArchiveMode.Update)
+            : new ZipArchive(archiveFile.Create(), ZipArchiveMode.Update);
 
 
         foreach (var song in songs)
@@ -96,6 +110,23 @@ public static class PlaylistBuilder
 
             if (archive.GetEntry(song.FileHash) is null)
             {
+                switch (song.Path)
+                {
+                    case FileLocation fileLocation:
+                        archive.CreateEntryFromFile(fileLocation.FileInfo.FullName, song.FileHash);
+                        break;
+
+                    case ArchiveLocation archiveLocation:
+                        var target = archive.CreateEntry(song.FileHash);
+                        using (var targetStream = target.Open())
+                        {
+                            using var otherArchiveStream = new ZipArchive(archiveLocation.ArchiveFileInfo.Open(FileMode.Open), ZipArchiveMode.Read);
+                            var source = otherArchiveStream.GetEntry(archiveLocation.EntryName)!;
+                            using var sourceStream = source.Open();
+                            sourceStream.CopyTo(targetStream);
+                        }
+                        break;
+                }
                 archive.CreateEntryFromFile(song.Path switch
                 {
                     FileLocation loc => loc.FileInfo.FullName,
@@ -105,7 +136,7 @@ public static class PlaylistBuilder
             }
 
             // filename becomes it's hash to prevent saving the same file twice...
-            song.SetPath(new ArchiveLocation(song.FileHash));
+            song.SetLocation(new ArchiveLocation(song.FileHash, archiveFile));
         }
 
         WriteSongList();

@@ -17,7 +17,7 @@ public sealed partial class AddSongWindow : Window
         AddButton.Focus();
         PathText.Text = fileInfo.FullName;
         Song = new SongBuilder()
-            .SetPath(fileInfo)
+            .SetLocation(fileInfo)
             .FromMetaData();
 
 
