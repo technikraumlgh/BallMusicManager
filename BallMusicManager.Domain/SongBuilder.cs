@@ -99,7 +99,7 @@ public sealed class SongBuilder
     {
         return Path switch
         {
-            FileLocation file => file.FileInfo.ComputeSha256Hash(),
+            FileLocation file => file.FileInfo.ComputeSHA256Hash(),
             ArchiveLocation file => GetHash(file),
             _ => throw new InvalidOperationException("Cannot compute hash for a song without proper location"),
         };
