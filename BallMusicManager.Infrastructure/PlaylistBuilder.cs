@@ -1,5 +1,7 @@
 ﻿using Ametrin.Serialization;
+using System.Diagnostics;
 using System.IO.Compression;
+using System.Security.Cryptography;
 
 namespace BallMusicManager.Infrastructure;
 
@@ -20,24 +22,44 @@ public static class PlaylistBuilder
 
     const string SONG_LIST_ENTRY_NAME = "song_list.json";
     const string MANIFEST_ENTRY_NAME = "manifest.json";
-    public static Result<PlaylistPlayer> FromArchive(FileInfo file) => EnumerateArchive(file).Select(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
-    public static Result<IEnumerable<SongBuilder>> EnumerateArchive(FileInfo file)
+    public static Result<PlaylistPlayer> FromArchive(FileInfo file)
     {
-        var archive = file.WhereExists().ToResult(()=> new FileNotFoundException(null, file.FullName) as Exception)
-            .Select(file => new ZipArchive(file.OpenRead()));
+        var songs = EnumerateArchiveEntries(file);
+        songs.Consume(songs =>
+        {
+            songs.Consume(song => SongCache.CacheFromArchive(song));
+        });
+        return songs.Select(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
+    }
+
+    public static Result<SongBuilder[]> EnumerateArchiveEntries(FileInfo file)
+    {
+        var archive = OpenArchive(file);
 
         var songs = archive.Select(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
-            .Select(ParseSongList).WhereNotEmpty();
+            .Select(ParseSongList).Select(songs => songs.Select(song => song.Path switch
+                {
+                    LegacyLocation legacy => song.SetLocation(new ArchiveLocation(legacy.Path, file)),
+                    HashEmbeddedLocation hashEmbedded => song.SetLocation(new ArchiveLocation(song.FileHash, file)),
+                    _ => song
+                })).WhereNotEmpty().Select(Enumerable.ToArray);
 
         (archive, songs).Consume((archive, songs) =>
         {
             foreach (var song in songs)
             {
-                var songEntry = archive.GetEntry(song.Path)!;
-                using var songStream = songEntry.Open();
-                song.Path = SongCache.Cache(songStream, song.Path).FullName;
+                if (!song.HasFileHash && song.Path is ArchiveLocation location)
+                {
+                    var songEntry = archive.GetEntry(location.EntryName)!;
+                    var hash = GetFileHash(songEntry);
+                    song.FileHash = hash;
+                    using var songStream = songEntry.Open();
+                    song.SetLocation(SongCache.Cache(songStream, hash));
+                }
             }
         });
+
+        archive.Dispose();
 
         return songs;
 
@@ -46,16 +68,19 @@ public static class PlaylistBuilder
             using var stream = entry.Open();
             return JsonExtensions.Deserialize<SongBuilder[]>(stream).Select<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
         }
+
+        static string GetFileHash(ZipArchiveEntry entry)
+        {
+            using var hasher = SHA256.Create();
+            using var stream = entry.Open();
+            return hasher.ComputeHash(stream).ToHexString();
+        }
     }
 
-    public static Option ToArchive(FileInfo file, IEnumerable<Song> songs)
+    public static Result<ZipArchive> OpenArchive(FileInfo file)
     {
-        if (!songs.Any())
-        {
-            return false;
-        }
-
-        return ToArchiveImpl(file, songs.Select((song, index) => new SongBuilder(song).SetIndex(index)).ToArray());
+        return file.ToResult().WhereExists()
+            .Select(file => new ZipArchive(file.OpenRead()));
     }
 
     public static Option ToArchive(FileInfo file, IEnumerable<SongBuilder> songs)
@@ -69,31 +94,54 @@ public static class PlaylistBuilder
     }
 
     private const int ARCHIVE_VERSION = 1;
-    private static Option ToArchiveImpl(FileInfo file, SongBuilder[] songs)
+    private static Option ToArchiveImpl(FileInfo archiveFile, SongBuilder[] songs)
     {
-        var hashes = new HashSet<string>();
-        using var archive = file.Exists
-            ? new ZipArchive(file.Open(FileMode.Open), ZipArchiveMode.Update)
-            : new ZipArchive(file.Create(), ZipArchiveMode.Update);
+        var usedEntries = new HashSet<string>();
+        using var archive = archiveFile.Exists
+            ? new ZipArchive(archiveFile.Open(FileMode.Open), ZipArchiveMode.Update)
+            : new ZipArchive(archiveFile.Create(), ZipArchiveMode.Update);
 
 
         foreach (var song in songs)
         {
-            if (hashes.Contains(song.FileHash)) //TODO: properly handle this case
+            if (usedEntries.Contains(song.FileHash)) //TODO: properly handle this case
             {
                 var other = songs.Where(other => song.FileHash == other.FileHash).FirstOrDefault();
-                //throw new UnreachableException($"{song.Path} produced an already existing hash!");
+                throw new UnreachableException($"{song.Path} produced an already existing hash!");
             }
+            usedEntries.Add(song.FileHash);
 
             if (archive.GetEntry(song.FileHash) is null)
             {
-                archive.CreateEntryFromFile(song.Path, song.FileHash);
-                hashes.Add(song.FileHash);
+                switch (song.Path)
+                {
+                    case FileLocation fileLocation:
+                        archive.CreateEntryFromFile(fileLocation.FileInfo.FullName, song.FileHash);
+                        break;
+
+                    case ArchiveLocation archiveLocation:
+                        Debug.Assert(archiveLocation.ArchiveFileInfo != archiveFile);
+                        var target = archive.CreateEntry(song.FileHash);
+                        using (var targetStream = target.Open())
+                        {
+                            using var sourceArchiveStream = new ZipArchive(archiveLocation.ArchiveFileInfo.Open(FileMode.Open), ZipArchiveMode.Read);
+                            var source = sourceArchiveStream.GetEntry(archiveLocation.EntryName)!;
+                            using var sourceStream = source.Open();
+                            sourceStream.CopyTo(targetStream);
+                        }
+                        break;
+
+                    default:
+                        throw new InvalidOperationException($"Location of {song} not defined properly");
+                }
             }
 
-            // filename becomes it's hash to prevent saving the same file twice...
-            song.SetPath(song.FileHash);
+            song.SetLocation(new HashEmbeddedLocation());
         }
+
+        // cleans the archive of unused files
+        // ToArray to isolate the deletion from archive.Entries as it will change
+        archive.Entries.Where(entry => !usedEntries.Contains(entry.Name)).ToArray().Consume(entry => entry.Delete());
 
         WriteSongList();
 
@@ -125,7 +173,12 @@ public static class PlaylistBuilder
         {
             foreach (var song in songs)
             {
-                yield return Path.IsPathRooted(song.Path) ? song : new SongBuilder(song).SetPath(Path.Combine(file.DirectoryName!, song.Path));
+                yield return song.Path switch
+                {
+                    ArchiveLocation archive => new SongBuilder(song).SetLocation(FileLocation.Of(Path.Combine(file.DirectoryName!, archive.EntryName))),
+                    FileLocation => song,
+                    _ => throw new UnreachableException(),
+                };
             }
         }
     }

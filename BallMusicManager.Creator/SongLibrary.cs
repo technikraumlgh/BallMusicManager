@@ -1,6 +1,8 @@
-﻿using BallMusicManager.Domain;
+﻿using Ametrin.Optional;
+using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 using System.IO;
+using System.IO.Compression;
 
 namespace BallMusicManager.Creator;
 
@@ -13,7 +15,7 @@ public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCol
         PlaylistBuilder.ToArchive(LibFile, this);
     }
 
-    static readonly FileInfo LibFile = new("Library/lib.plibz");
+    public static readonly FileInfo LibFile = new("Library/lib.plibz");
     public static SongLibrary LoadOrNew()
     {
         if (!Directory.Exists("Library"))
@@ -28,6 +30,6 @@ public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCol
         }
 
         LibFile.Refresh();
-        return new(PlaylistBuilder.EnumerateArchive(LibFile).Or([]));
+        return new(PlaylistBuilder.EnumerateArchiveEntries(LibFile).Or([]));
     }
 }

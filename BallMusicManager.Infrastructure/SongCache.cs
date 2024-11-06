@@ -3,19 +3,32 @@
 public static class SongCache
 {
     public static readonly DirectoryInfo CacheDirectory = new("$cache");
-    public static FileInfo Cache(SongBuilder song)
+
+    public static FileInfo CacheFromArchive(SongBuilder song)
     {
-        using var stream = File.OpenRead(song.Path);
-        return Cache(stream, Path.GetFileName(song.Path));
+        return song.Path switch
+        {
+            FileLocation file => file.FileInfo,
+            ArchiveLocation archive => Impl(song, archive),
+            _ => throw new InvalidOperationException($"Cannot cache Song at {song.Path}")
+        };
+
+        static FileInfo Impl(SongBuilder song, ArchiveLocation location)
+        {
+            using var archive = PlaylistBuilder.OpenArchive(location.ArchiveFileInfo).OrThrow();
+
+            var entry = archive.GetEntry(location.EntryName)!;
+
+            using var stream = entry.Open();
+            var result = Cache(stream, song.FileHash);
+            song.SetLocation(result);
+            return result;
+        }
     }
-    
+
     public static FileInfo Cache(Stream stream, string name)
     {
-        if (!CacheDirectory.Exists)
-        {
-            CacheDirectory.Create();
-            File.SetAttributes(CacheDirectory.FullName, FileAttributes.Hidden);
-        }
+        EnsureCacheExists();
 
         var file = CacheDirectory.File(name);
         if (!file.Exists)
@@ -26,11 +39,27 @@ public static class SongCache
         return file;
     }
 
+    public static Option<FileInfo> GetFile(string name)
+    {
+        EnsureCacheExists();
+        return CacheDirectory.File(name).WhereExists();
+    }
+
     public static void Clear()
     {
         if (CacheDirectory.Exists)
         {
             CacheDirectory.Delete(true);
+        }
+    }
+
+    private static void EnsureCacheExists()
+    {
+        if (!CacheDirectory.Exists)
+        {
+            CacheDirectory.Create();
+            FileSystemInfoExtensions.GenerateCacheTag(CacheDirectory, "BallMusicManger"); //just a marker file, does not have to exists
+            File.SetAttributes(CacheDirectory.FullName, FileAttributes.Hidden);
         }
     }
 }

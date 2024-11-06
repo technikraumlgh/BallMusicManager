@@ -96,10 +96,10 @@ public sealed class ServerConnection
 
     private async Task Ping(string url)
     {
-        using var client = new HttpClient();
+        using var httpClient = new HttpClient();
         try
         {
-            await client.GetAsync(url);
+            await httpClient.GetAsync(url);
             HostProvider.SetServerOnline(true);
         }
         catch (Exception)

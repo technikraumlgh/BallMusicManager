@@ -48,7 +48,7 @@
                 <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Tanz" FontSize="15" Binding="{Binding Dance}" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Artist" FontSize="15" Binding="{Binding Artist}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Länge" FontSize="15" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Länge" FontSize="15" Width="*" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -68,7 +68,7 @@
                 <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}"/>
                 <DataGridTextColumn Header="Tanz" FontSize="15" Binding="{Binding Dance}"/>
                 <DataGridTextColumn Header="Artist" FontSize="15" Binding="{Binding Artist}"/>
-                <DataGridTextColumn Header="Länge" FontSize="15" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Länge" FontSize="15" Width="*" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
 
