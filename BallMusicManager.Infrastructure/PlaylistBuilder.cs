@@ -48,13 +48,16 @@ public static class PlaylistBuilder
         {
             foreach (var song in songs)
             {
-                if (!song.HasFileHash && song.Path is ArchiveLocation location)
+                if (song.Path is ArchiveLocation location && (!song.HasFileHash || song.FileHash.Length >= 512))
                 {
                     var songEntry = archive.GetEntry(location.EntryName)!;
-                    var hash = GetFileHash(songEntry);
-                    song.FileHash = hash;
-                    using var songStream = songEntry.Open();
-                    song.SetLocation(SongCache.Cache(songStream, hash));
+                    song.SetHash(GetFileHash(songEntry));
+                    //using var songStream = songEntry.Open();
+                    //song.SetLocation(SongCache.Cache(songStream, song.FileHash));
+                }
+                else if (song.HasFileHash && song.FileHash.Length >= 512)
+                {
+                    song.SetHash(Convert.FromHexString(song.FileHash));
                 }
             }
         });
@@ -69,11 +72,10 @@ public static class PlaylistBuilder
             return JsonExtensions.Deserialize<SongBuilder[]>(stream).Select<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
         }
 
-        static string GetFileHash(ZipArchiveEntry entry)
+        static byte[] GetFileHash(ZipArchiveEntry entry)
         {
-            using var hasher = SHA256.Create();
             using var stream = entry.Open();
-            return hasher.ComputeHash(stream).ToHexString();
+            return stream.ComputeSHA256Hash();
         }
     }
 
@@ -120,10 +122,15 @@ public static class PlaylistBuilder
                         break;
 
                     case ArchiveLocation archiveLocation:
-                        Debug.Assert(archiveLocation.ArchiveFileInfo != archiveFile);
-                        var target = archive.CreateEntry(song.FileHash);
-                        using (var targetStream = target.Open())
+                        if (archiveLocation.ArchiveFileInfo.FullName == archiveFile.FullName)
                         {
+                            var entry = archive.GetEntry(archiveLocation.EntryName);
+                            entry.Name = song.FileHash;
+                        }
+                        else
+                        {
+                            var target = archive.CreateEntry(song.FileHash);
+                            using var targetStream = target.Open();
                             using var sourceArchiveStream = new ZipArchive(archiveLocation.ArchiveFileInfo.Open(FileMode.Open), ZipArchiveMode.Read);
                             var source = sourceArchiveStream.GetEntry(archiveLocation.EntryName)!;
                             using var sourceStream = source.Open();

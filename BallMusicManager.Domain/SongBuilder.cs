@@ -23,26 +23,10 @@ public sealed class SongBuilder
         {
             if (!HasFileHash)
             {
-                hash = Path switch
-                {
-                    FileLocation file => file.FileInfo.ComputeSha256Hash(),
-                    ArchiveLocation file => GetHash(file),
-                    _ => throw new InvalidOperationException("Cannot compute hash for a song without proper location"),
-                };
+                SetHash(ComputeHash());
             }
             return hash;
-
-            static string GetHash(ArchiveLocation location){
-                using var archive = new ZipArchive(location.ArchiveFileInfo.OpenRead(), ZipArchiveMode.Read);
-                var entry = archive.GetEntry(location.EntryName)!;
-                using var stream = entry.Open();
-                using var hasher = SHA256.Create();
-                return hasher.ComputeHash(stream).ToHexString();
-            }
         }
-
-        // for json deserialization
-        set => hash = value;
     }
 
     [JsonIgnore]
@@ -61,7 +45,7 @@ public sealed class SongBuilder
         Dance = song.Dance;
         Duration = song.Duration;
     }
-    
+
     public SongBuilder(Song song)
     {
         Path = song.Path;
@@ -103,6 +87,30 @@ public sealed class SongBuilder
     {
         Duration = duration;
         return this;
+    }
+
+    public SongBuilder SetHash(byte[] bytes)
+    {
+        hash = Convert.ToBase64String(bytes);
+        return this;
+    }
+
+    public byte[] ComputeHash()
+    {
+        return Path switch
+        {
+            FileLocation file => file.FileInfo.ComputeSha256Hash(),
+            ArchiveLocation file => GetHash(file),
+            _ => throw new InvalidOperationException("Cannot compute hash for a song without proper location"),
+        };
+
+        static byte[] GetHash(ArchiveLocation location)
+        {
+            using var archive = new ZipArchive(location.ArchiveFileInfo.OpenRead(), ZipArchiveMode.Read);
+            var entry = archive.GetEntry(location.EntryName)!;
+            using var stream = entry.Open();
+            return stream.ComputeSHA256Hash();
+        }
     }
 
     public SongBuilder FromFileName(string fileName)
