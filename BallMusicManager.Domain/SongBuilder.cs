@@ -23,22 +23,9 @@ public sealed class SongBuilder
         {
             if (!HasFileHash)
             {
-                hash = Path switch
-                {
-                    FileLocation file => file.FileInfo.ComputeSHA256Hash().ToHexString(),
-                    ArchiveLocation file => GetHash(file),
-                    _ => throw new InvalidOperationException("Cannot compute hash for a song without proper location"),
-                };
+                SetHash(ComputeHash());
             }
             return hash;
-
-            static string GetHash(ArchiveLocation location){
-                using var archive = new ZipArchive(location.ArchiveFileInfo.OpenRead(), ZipArchiveMode.Read);
-                var entry = archive.GetEntry(location.EntryName)!;
-                using var stream = entry.Open();
-                using var hasher = SHA256.Create();
-                return hasher.ComputeHash(stream).ToHexString();
-            }
         }
 
         // for json deserialization
@@ -105,9 +92,34 @@ public sealed class SongBuilder
         return this;
     }
 
+    public SongBuilder SetHash(byte[] bytes)
+    {
+        hash = bytes.ToHexString();
+        return this;
+    }
+
+    public byte[] ComputeHash()
+    {
+        return Path switch
+        {
+            FileLocation file => file.FileInfo.ComputeSHA256Hash(),
+            ArchiveLocation file => GetHash(file),
+            _ => throw new InvalidOperationException("Cannot compute hash for a song without proper location"),
+        };
+
+        static byte[] GetHash(ArchiveLocation location)
+        {
+            using var archive = new ZipArchive(location.ArchiveFileInfo.OpenRead(), ZipArchiveMode.Read);
+            var entry = archive.GetEntry(location.EntryName)!;
+            using var stream = entry.Open();
+            return stream.ComputeSHA256Hash();
+        }
+    }
+
     public SongBuilder FromFileName(string fileName)
     {
         // this complicated logic exists to support the old naming convention Index_Dance_SongName
+        // you might want to delete parts of this in the future to prevent wierd interpretations
         var split = fileName.Split("_");
         return split.Length switch
         {
@@ -137,6 +149,7 @@ public sealed class SongBuilder
 public abstract record SongLocation;
 public sealed record FileLocation(FileInfo FileInfo) : SongLocation
 {
+    public FileInfo FileInfo { get; init; } = FileInfo.Exists ? FileInfo : throw new FileNotFoundException(null, FileInfo.FullName);
     public static FileLocation Of(string path) => new(new FileInfo(path));
 }
 public sealed record ArchiveLocation(string EntryName, FileInfo ArchiveFileInfo) : SongLocation

@@ -36,6 +36,8 @@ public static class PlaylistBuilder
     {
         var archive = OpenArchive(file);
 
+        var manifest = archive.Select(archive => archive.GetEntry(MANIFEST_ENTRY_NAME)!).Select(ReadManifest);
+
         var songs = archive.Select(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
             .Select(ParseSongList).Select(songs => songs.Select(song => song.Path switch
                 {
@@ -44,6 +46,8 @@ public static class PlaylistBuilder
                     _ => song
                 })).WhereNotEmpty().Select(Enumerable.ToArray);
 
+        // just to support archives where the hash wasn't used yet (only existed during development)
+        // remove in the future
         (archive, songs).Consume((archive, songs) =>
         {
             foreach (var song in songs)
@@ -51,10 +55,7 @@ public static class PlaylistBuilder
                 if (!song.HasFileHash && song.Path is ArchiveLocation location)
                 {
                     var songEntry = archive.GetEntry(location.EntryName)!;
-                    var hash = GetFileHash(songEntry);
-                    song.FileHash = hash;
-                    using var songStream = songEntry.Open();
-                    song.SetLocation(SongCache.Cache(songStream, hash));
+                    song.SetHash(GetFileHash(songEntry));
                 }
             }
         });
@@ -69,11 +70,16 @@ public static class PlaylistBuilder
             return JsonExtensions.Deserialize<SongBuilder[]>(stream).Select<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
         }
 
-        static string GetFileHash(ZipArchiveEntry entry)
+        static byte[] GetFileHash(ZipArchiveEntry entry)
         {
-            using var hasher = SHA256.Create();
             using var stream = entry.Open();
-            return hasher.ComputeHash(stream).ToHexString();
+            return stream.ComputeSHA256Hash();
+        }
+
+        static Result<ArchiveManifest> ReadManifest(ZipArchiveEntry entry)
+        {
+            using var stream = entry.Open();
+            return JsonExtensions.Deserialize<ArchiveManifest>(stream).ToResult();
         }
     }
 
@@ -153,7 +159,7 @@ public static class PlaylistBuilder
         {
             var entry = archive.OverwriteEntry(SONG_LIST_ENTRY_NAME);
             using var stream = entry.Open();
-            songs.WriteToStream(stream);
+            songs.WriteToStreamAsJson(stream);
         }
 
         void WriteManifest()
@@ -161,7 +167,7 @@ public static class PlaylistBuilder
             var manifest = new ArchiveManifest(ARCHIVE_VERSION, songs.Length, DateTime.Now);
             var entry = archive.OverwriteEntry(MANIFEST_ENTRY_NAME);
             using var stream = entry.Open();
-            manifest.WriteToStream(stream);
+            manifest.WriteToStreamAsJson(stream);
         }
     }
 
