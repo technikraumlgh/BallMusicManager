@@ -27,6 +27,9 @@ public sealed class SongBuilder
             }
             return hash;
         }
+
+        // json deserialization
+        set { hash = value; }
     }
 
     [JsonIgnore]

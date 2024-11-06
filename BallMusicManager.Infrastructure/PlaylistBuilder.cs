@@ -48,14 +48,12 @@ public static class PlaylistBuilder
         {
             foreach (var song in songs)
             {
-                if (song.Path is ArchiveLocation location && (!song.HasFileHash || song.FileHash.Length >= 512))
+                if (song.Path is ArchiveLocation location && (!song.HasFileHash || song.FileHash.Length >= 64))
                 {
                     var songEntry = archive.GetEntry(location.EntryName)!;
                     song.SetHash(GetFileHash(songEntry));
-                    //using var songStream = songEntry.Open();
-                    //song.SetLocation(SongCache.Cache(songStream, song.FileHash));
                 }
-                else if (song.HasFileHash && song.FileHash.Length >= 512)
+                else if (song.HasFileHash && song.FileHash.Length >= 64)
                 {
                     song.SetHash(Convert.FromHexString(song.FileHash));
                 }
@@ -122,14 +120,16 @@ public static class PlaylistBuilder
                         break;
 
                     case ArchiveLocation archiveLocation:
+                        var target = archive.CreateEntry(song.FileHash);
                         if (archiveLocation.ArchiveFileInfo.FullName == archiveFile.FullName)
                         {
-                            var entry = archive.GetEntry(archiveLocation.EntryName);
-                            entry.Name = song.FileHash;
+                            using var targetStream = target.Open();
+                            var source = archive.GetEntry(archiveLocation.EntryName)!;
+                            using var sourceStream = source.Open();
+                            sourceStream.CopyTo(targetStream);
                         }
                         else
                         {
-                            var target = archive.CreateEntry(song.FileHash);
                             using var targetStream = target.Open();
                             using var sourceArchiveStream = new ZipArchive(archiveLocation.ArchiveFileInfo.Open(FileMode.Open), ZipArchiveMode.Read);
                             var source = sourceArchiveStream.GetEntry(archiveLocation.EntryName)!;

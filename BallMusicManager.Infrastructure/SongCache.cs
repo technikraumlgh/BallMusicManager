@@ -17,7 +17,7 @@ public static class SongCache
         {
             using var archive = PlaylistBuilder.OpenArchive(location.ArchiveFileInfo).OrThrow();
 
-            var entry = archive.GetEntry(location.EntryName)!;
+            var entry = archive.GetEntry(location.EntryName) ?? throw new NullReferenceException("The referenced file did not exists in the archive");
 
             using var stream = entry.Open();
             var result = Cache(stream, song.FileHash);
@@ -29,7 +29,7 @@ public static class SongCache
     public static FileInfo Cache(Stream stream, string name)
     {
         EnsureCacheExists();
-
+        name = name.Replace('+', '-').Replace('/', '_').Replace("=", string.Empty);
         var file = CacheDirectory.File(name);
         if (!file.Exists)
         {
