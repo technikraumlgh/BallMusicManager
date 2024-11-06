@@ -15,10 +15,9 @@ public static class Dance
         {"TGO", "Tango" },
         {"SMB", "Samba" },
         {"SLS", "Salsa" },
-        {"RNR", "Rock n Roll" },
+        {"RNR", "Rock 'n' Roll" },
         {"PT", "Party" },
-        {"FS", "Party" },
-        //{"FS", "Freestyle" }, // legacy, use Party
+        {"FS", "Party" }, // legacy, was called Freestyle
     }.ToFrozenDictionary();
 
     // when ever a dance string enters the program it checks whether it is a known slug and if so replaces it
