@@ -54,7 +54,7 @@ public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityCom
         public int GetHashCode([DisallowNull] SongBuilder obj) => obj.FileHash.GetHashCode();
     }
 
-    public sealed class LoosePropertiesComparer : IEqualityComparer<SongBuilder>
+    public sealed class LoosePropertiesComparer : IEqualityComparer<SongBuilder>, IEqualityComparer<Song>
     {
         public bool Equals(SongBuilder? x, SongBuilder? y)
         {
@@ -69,7 +69,24 @@ public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityCom
                 && x.Dance.Equals(y.Dance, StringComparison.OrdinalIgnoreCase);
         }
 
-        public int GetHashCode([DisallowNull] SongBuilder obj) => HashCode.Combine(obj.Title.ToLower().GetHashCode(), obj.Artist.ToLower().GetHashCode(), obj.Dance.ToLower().GetHashCode());
+        public bool Equals(Song? x, Song? y)
+        {
+            if (x is null)
+            {
+                return y is null;
+            }
+            if (y is null) return false;
+
+            return x.Title.Equals(y.Title, StringComparison.OrdinalIgnoreCase)
+                && x.Artist.Equals(y.Artist, StringComparison.OrdinalIgnoreCase)
+                && x.Dance.Equals(y.Dance, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode([DisallowNull] SongBuilder obj) 
+            => HashCode.Combine(obj.Title.ToLower().GetHashCode(), obj.Artist.ToLower().GetHashCode(), obj.Dance.ToLower().GetHashCode());
+
+        public int GetHashCode([DisallowNull] Song obj)
+            => HashCode.Combine(obj.Title.ToLower().GetHashCode(), obj.Artist.ToLower().GetHashCode(), obj.Dance.ToLower().GetHashCode());
     }
 
     public sealed class LoosePropertiesOrFileHashComparer : IEqualityComparer<SongBuilder>
