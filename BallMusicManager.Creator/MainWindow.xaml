@@ -28,6 +28,10 @@
                 <MenuItem Header="Open Legacy" Click="OpenPlaylistLegacy"/>
             </MenuItem>
 
+            <MenuItem Header="Dashboard" FontSize="16">
+                <MenuItem Header="Open" Click="OpenDashboard_Click"/>
+            </MenuItem>
+            
             <MenuItem Header="Library" FontSize="16">
                 <MenuItem Header="Reload" Click="LibraryReloadClick"/>
                 <MenuItem Header="Save" Click="LibrarySaveClick"/>

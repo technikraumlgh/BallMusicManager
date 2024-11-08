@@ -53,6 +53,14 @@ public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityCom
                 && x.Title.Equals(y.Title, StringComparison.OrdinalIgnoreCase)
                 && x.Artist.Equals(y.Artist, StringComparison.OrdinalIgnoreCase)
                 && x.Dance.Equals(y.Dance, StringComparison.OrdinalIgnoreCase);
+        
+        public bool Equals(FakeSong? x, Song? y)
+            => x is null
+                ? y is null
+                : y is not null
+                && x.Title.Equals(y.Title, StringComparison.OrdinalIgnoreCase)
+                && x.Artist.Equals(y.Artist, StringComparison.OrdinalIgnoreCase)
+                && x.Dance.Equals(y.Dance, StringComparison.OrdinalIgnoreCase);
 
         public int GetHashCode([DisallowNull] SongBuilder obj)
             => HashCode.Combine(obj.Title.ToLower().GetHashCode(), obj.Artist.ToLower().GetHashCode(), obj.Dance.ToLower().GetHashCode());

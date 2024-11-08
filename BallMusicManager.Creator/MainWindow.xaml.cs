@@ -1,8 +1,5 @@
-﻿using Ametrin.Utils;
-using Ametrin.Utils.WPF;
+﻿using Ametrin.Utils.WPF;
 using Ametrin.Utils.WPF.FileDialogs;
-using BallMusicManager.Domain;
-using BallMusicManager.Infrastructure;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
@@ -16,7 +13,7 @@ namespace BallMusicManager.Creator;
 
 public sealed partial class MainWindow : Window
 {
-    private SongBuilderCollection Playlist = [];
+    public SongBuilderCollection Playlist = [];
     private SongLibrary Library = [];
 
     public MainWindow()
@@ -278,5 +275,10 @@ public sealed partial class MainWindow : Window
 
             return false;
         };
+    }
+
+    private void OpenDashboard_Click(object sender, RoutedEventArgs e)
+    {
+        new Dashboard(this).Show();
     }
 }
