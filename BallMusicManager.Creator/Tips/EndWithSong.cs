@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using BallMusicManager.Domain;
 
 namespace BallMusicManager.Creator.Tips;
 

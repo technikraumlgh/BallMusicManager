@@ -1,6 +1,4 @@
 ﻿using System.Collections.Immutable;
-using BallMusicManager.Domain;
-using Ametrin.Utils;
 
 namespace BallMusicManager.Creator.Tips;
 
@@ -16,7 +14,7 @@ public sealed class DurationBetween(TimeSpan min, TimeSpan max) : Rule
         {
             yield return new (Severity.Recommendation, $"Deine Playlist könnte zu lang sein. Empfehlung: {min.Hours} - {max.Hours} Stunden für einen normalen Ball");
         }
-        if (duration < min / 2)
+        else if (duration < min / 2)
         {
             yield return new (Severity.Error, $"Deine Playlist ist zu kurz. Empfehlung: {min.Hours} - {max.Hours} Stunden für einen normalen Ball");
         }
