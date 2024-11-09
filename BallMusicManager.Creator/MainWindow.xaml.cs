@@ -1,5 +1,6 @@
 ﻿using Ametrin.Utils.WPF;
 using Ametrin.Utils.WPF.FileDialogs;
+using System.Collections.Immutable;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
@@ -13,7 +14,7 @@ namespace BallMusicManager.Creator;
 
 public sealed partial class MainWindow : Window
 {
-    public SongBuilderCollection Playlist = [];
+    private SongBuilderCollection Playlist = [];
     private SongLibrary Library = [];
 
     public MainWindow()
@@ -277,8 +278,26 @@ public sealed partial class MainWindow : Window
         };
     }
 
+    private Dashboard? dashboard = null;
     private void OpenDashboard_Click(object sender, RoutedEventArgs e)
     {
-        new Dashboard(this).Show();
+        if (dashboard is not null)
+        {
+            if (!dashboard.Activate())
+            {
+                dashboard.Activated -= UpdateDashboard;
+                dashboard = null;
+            }
+        }
+
+        if (dashboard is null)
+        {
+            dashboard = new Dashboard(Playlist.Select(song => song.Build()).ToImmutableArray());
+            dashboard.Show();
+            dashboard.Activated += UpdateDashboard;
+        }
     }
+
+
+    private void UpdateDashboard(object? sender = null, EventArgs? e = default) => dashboard?.Update(Playlist.Select(song => song.Build()).ToImmutableArray());
 }

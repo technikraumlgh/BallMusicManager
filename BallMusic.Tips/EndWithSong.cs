@@ -1,11 +1,11 @@
 ﻿using System.Collections.Immutable;
 
-namespace BallMusicManager.Creator.Tips;
+namespace BallMusic.Tips;
 
 public sealed class EndWithSong(FakeSong song, Rule.Severity severity) : Rule
 {
-    private readonly FakeSong song = song;
-    private readonly Severity severity = severity;
+    internal readonly FakeSong song = song;
+    internal readonly Severity severity = severity;
 
     public override IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
     {

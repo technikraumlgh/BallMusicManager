@@ -15,6 +15,7 @@
     <ProjectReference Include="..\..\..\Packages\Ametrin.Utils.WPF\Ametrin.Utils.WPF.csproj" />
     <ProjectReference Include="..\BallMusicManager.Domain\BallMusicManager.Domain.csproj" />
     <ProjectReference Include="..\BallMusicManager.Infrastructure\BallMusicManager.Infrastructure.csproj" />
+    <ProjectReference Include="..\BallMusic.Tips\BallMusic.Tips.csproj" />
   </ItemGroup>
 
 </Project>
