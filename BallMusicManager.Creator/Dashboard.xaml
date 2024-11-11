@@ -23,15 +23,15 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="0" Grid.Column="0" Margin="4 8 4 8" Padding="12 8" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
-            <StackPanel >
+        <Border Grid.Row="0" Grid.Column="0" Margin="4 8 4 8" Padding="12 8" CornerRadius="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+            <StackPanel>
                 <Label x:Name="DurationLabel" FontSize="14" Content="Länge"/>
                 <Label x:Name="DancesDurationLabel" FontSize="14" Content=" -  Tänze"/>
                 <Label x:Name="PartyDurationLabel" FontSize="14" Content=" -  Party"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="0" Grid.Column="1" Margin="4 8" Padding="12 8" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+        <Border Grid.Row="0" Grid.Column="1" Margin="4 8" Padding="12 8" CornerRadius="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
             <StackPanel x:Name="SongCountView">
             </StackPanel>
         </Border>

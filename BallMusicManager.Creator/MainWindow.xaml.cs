@@ -14,7 +14,21 @@ namespace BallMusicManager.Creator;
 
 public sealed partial class MainWindow : Window
 {
-    private SongBuilderCollection Playlist = [];
+    private SongBuilderCollection Playlist
+    {
+        get;
+        set
+        {
+            Playlist.CollectionChanged -= UpdateLengthDisplay;
+            Playlist.CollectionChanged -= UpdateDashboard;
+            field = value;
+            PlaylistGrid.ItemsSource = Playlist;
+            Playlist.CollectionChanged += UpdateLengthDisplay;
+            Playlist.CollectionChanged += UpdateDashboard;
+            UpdateLengthDisplay();
+            UpdateDashboard();
+        }
+    } = [];
     private SongLibrary Library = [];
     private volatile bool _isSaving = false;
 
@@ -22,7 +36,8 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         PlaylistGrid.ItemsSource = Playlist;
-        Playlist.CollectionChanged += UpdateLengthDisplay;
+        Playlist = [];
+        //Playlist.CollectionChanged += UpdateLengthDisplay;
         _playbackProgressUpdater.Tick += UpdatePlaybackSliderValue;
 
         Loaded += (sender, e) =>
@@ -110,11 +125,7 @@ public sealed partial class MainWindow : Window
 
             songs.Select(songs => Library.AddAllOrReplaceWithExisting(songs)).Consume(songs =>
             {
-                Playlist.CollectionChanged -= UpdateLengthDisplay;
                 Playlist = new(songs);
-                PlaylistGrid.ItemsSource = Playlist;
-                Playlist.CollectionChanged += UpdateLengthDisplay;
-                UpdateLengthDisplay();
             },
             error =>
             {
@@ -292,7 +303,7 @@ public sealed partial class MainWindow : Window
             {
                 var compareInfo = CultureInfo.CurrentCulture.CompareInfo;
                 return compareInfo.IndexOf(song.Title, SearchBox.Text, SEARCH_SETTINGS) >= 0 ||
-                        compareInfo.IndexOf(song.Artist, SearchBox.Text, SEARCH_SETTINGS) >= 0;
+                       compareInfo.IndexOf(song.Artist, SearchBox.Text, SEARCH_SETTINGS) >= 0;
             }
 
             return false;
@@ -306,7 +317,6 @@ public sealed partial class MainWindow : Window
         {
             if (!dashboard.Activate())
             {
-                dashboard.Activated -= UpdateDashboard;
                 dashboard = null;
             }
         }
@@ -315,7 +325,6 @@ public sealed partial class MainWindow : Window
         {
             dashboard = new Dashboard(Playlist.Select(song => song.Build()).ToImmutableArray());
             dashboard.Show();
-            dashboard.Activated += UpdateDashboard;
         }
     }
 

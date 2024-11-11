@@ -7,12 +7,26 @@ namespace BallMusicManager.Creator;
 
 public partial class Dashboard : Window
 {
-    private readonly ImmutableArray<Rule> Rules =
-    [
-        new EndWithSong(new FakeSong("Can You Feel The Love Tonight", "Elton John", "Langsamer Walzer"), Rule.Severity.Error),
-        new DurationBetween(TimeSpan.FromHours(4, 30), TimeSpan.FromHours(6)),
-        new CountOfDance([("ChaChaCha", 0.14f, 0.5f), ("Discofox", 0.14f, 0.5f), ("Langsamer Walzer", 0.1f, 0.4f), ("Wiener Walzer", 0.1f, 0.4f), ("Rumba", 0.06f, 0.3f), ("Tango", 0.06f, 0.3f), ("Foxtrott", 0.05f, 0.3f), ("Samba", 0f, 0.1f), ("Jive", 0.01f, 0.1f), ("Salsa", 0f, 0.1f)]),
-    ];
+    private readonly Rule PlaylistRule = new CombinedRule([
+        new DurationBetween(TimeSpan.FromHours(4, 30), TimeSpan.FromHours(5, 30)),
+        new PartyDurationBetween(TimeSpan.FromMinutes(12), TimeSpan.FromMinutes(20)),
+        new EndWithSong(new FakeSong("Can You Feel The Love Tonight", "Elton John", Dance.LangsamerWalzer), Rule.Severity.Error),
+        
+        // these limits should be very loose, just prevent something really stupid
+        // they should be configured very carefully under consideration of what people (especially Unterstufe) can dance
+        new CountOfDance([                          // given 70 songs
+            (Dance.ChaChaCha, 0.14f, 0.5f),         // 9 - 35
+            (Dance.Discofox, 0.14f, 0.5f),          // 9 - 35
+            (Dance.LangsamerWalzer, 0.1f, 0.4f),    // 7 - 28
+            (Dance.WienerWalzer, 0.1f, 0.4f),       // 7 - 28
+            (Dance.Rumba, 0.06f, 0.3f),             // 4 - 21
+            (Dance.Tango, 0.06f, 0.3f),             // 4 - 21
+            (Dance.Foxtrott, 0.05f, 0.2f),          // 3 - 14
+            (Dance.Jive, 0f, 0.09f),                // 0 - 6
+            (Dance.Samba, 0f, 0.09f),               // 0 - 6
+            (Dance.Salsa, 0f, 0.09f),               // 0 - 6
+        ]),
+    ]);
 
     public Dashboard(ImmutableArray<Song> songs)
     {
@@ -27,8 +41,8 @@ public partial class Dashboard : Window
         SongCountView.Children.Clear();
 
         DurationLabel.Content = $"Länge:\t{songs.Sum(s => s.Duration):hh\\:mm\\:ss}";
-        DancesDurationLabel.Content = $" - Tänze:\t{songs.Where(s => s.Dance != "Party").Sum(s => s.Duration):hh\\:mm\\:ss}";
-        PartyDurationLabel.Content = $" - Party:\t{songs.Where(s => s.Dance == "Party").Sum(s => s.Duration):hh\\:mm\\:ss}";
+        DancesDurationLabel.Content = $" - Tänze:\t{songs.Where(s => s.Dance != Dance.Party).Sum(s => s.Duration):hh\\:mm\\:ss}";
+        PartyDurationLabel.Content = $" - Party:\t{songs.Where(s => s.Dance == Dance.Party).Sum(s => s.Duration):hh\\:mm\\:ss}";
 
         SongCountView.Children.Add(new Label
         {
@@ -52,12 +66,9 @@ public partial class Dashboard : Window
             return;
         }
 
-        foreach (var rule in Rules)
+        foreach (var tip in PlaylistRule.GetTips(songs))
         {
-            foreach (var tip in rule.GetTips(songs))
-            {
-                RecommendationsView.Items.Add(tip);
-            }
+            RecommendationsView.Items.Add(tip);
         }
     }
 }

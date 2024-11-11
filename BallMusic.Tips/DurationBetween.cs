@@ -12,15 +12,15 @@ public sealed class DurationBetween(TimeSpan min, TimeSpan max) : Rule
         var duration = songs.Sum(s => s.Duration);
         if (duration > max)
         {
-            yield return new (Severity.Tip, $"Deine Playlist könnte zu lang sein. Empfehlung: {min:hh\\:mm} - {max:hh\\:mm} Stunden für einen normalen Ball");
+            yield return new (Severity.Tip, $"Playlist könnte zu lang sein. Empfehlung: {min:hh\\:mm} - {max:hh\\:mm} Stunden für einen normalen Ball");
         }
         else if (duration < min / 2)
         {
-            yield return new (Severity.Error, $"Deine Playlist ist zu kurz. Empfehlung: {min:hh\\:mm} - {max:hh\\:mm} Stunden für einen normalen Ball");
+            yield return new (Severity.Error, $"Playlist ist zu kurz. Empfehlung: {min:hh\\:mm} - {max:hh\\:mm} Stunden für einen normalen Ball");
         }
         else if (duration < min)
         {
-            yield return new (Severity.Warning, $"Deine Playlist könnte zu kurz sein. Empfehlung: {min:hh\\:mm} - {max:hh\\:mm} Stunden für einen normalen Ball");
+            yield return new (Severity.Warning, $"Playlist könnte zu kurz sein. Empfehlung: {min:hh\\:mm} - {max:hh\\:mm} Stunden für einen normalen Ball");
         }
     }
 }

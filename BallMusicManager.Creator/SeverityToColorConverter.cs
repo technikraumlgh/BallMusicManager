@@ -9,7 +9,7 @@ internal sealed class SeverityToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value switch
     {
-        Rule.Severity.Tip => Brushes.LightGreen,
+        Rule.Severity.Tip => Brushes.CornflowerBlue,
         Rule.Severity.Warning => Brushes.Yellow,
         Rule.Severity.Error => Brushes.Red,
         _ => Brushes.White,
