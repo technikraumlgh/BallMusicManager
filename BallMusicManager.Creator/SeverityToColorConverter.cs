@@ -1,4 +1,4 @@
-﻿using BallMusicManager.Creator.Tips;
+﻿using BallMusic.Tips;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -9,7 +9,7 @@ internal sealed class SeverityToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value switch
     {
-        Rule.Severity.Recommendation => Brushes.LightGreen,
+        Rule.Severity.Tip => Brushes.LightGreen,
         Rule.Severity.Warning => Brushes.Yellow,
         Rule.Severity.Error => Brushes.Red,
         _ => Brushes.White,
