@@ -31,6 +31,11 @@ public sealed partial class MainWindow : Window
         };
 
         Closing += OnWindowClosingAsync;
+
+        Closed += (sender, args) =>
+        {
+            dashboard?.Close();
+        };
     }
 
     private bool shouldSaveBeforeClosing = true;
@@ -236,7 +241,6 @@ public sealed partial class MainWindow : Window
             Owner = this,
         };
         bar.LabelProgress.Report("Saving Library...");
-        IsEnabled = false;
         bar.Show();
         await Task.Run(Library!.Save);
         bar.Close();
