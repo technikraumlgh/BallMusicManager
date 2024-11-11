@@ -16,6 +16,7 @@ public sealed partial class MainWindow : Window
 {
     private SongBuilderCollection Playlist = [];
     private SongLibrary Library = [];
+    private volatile bool _isSaving = false;
 
     public MainWindow()
     {
@@ -41,6 +42,12 @@ public sealed partial class MainWindow : Window
     private bool shouldSaveBeforeClosing = true;
     private async void OnWindowClosingAsync(object? sender, CancelEventArgs e)
     {
+        if(_isSaving)
+        {
+            e.Cancel = true;
+            return;
+        }
+
         if (shouldSaveBeforeClosing)
         {
             var task = SaveLibrary();
@@ -57,11 +64,17 @@ public sealed partial class MainWindow : Window
 
     private void SavePlaylist(object sender, RoutedEventArgs e)
     {
+        if (_isSaving)
+        {
+            return;
+        }
+        
         var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", "plz");
 
         dialog.GetFileInfo().Consume(async file =>
         {
 
+            _isSaving = true;
             var bar = new LoadingBar(true)
             {
                 Owner = this,
@@ -78,6 +91,7 @@ public sealed partial class MainWindow : Window
             );
 
             bar.Close();
+            _isSaving = false;
         });
     }
 
@@ -232,10 +246,12 @@ public sealed partial class MainWindow : Window
 
     private async Task SaveLibrary()
     {
-        if (Library.Count <= 0)
+        if (Library.Count <= 0 || _isSaving)
         {
             return;
         }
+        _isSaving = true;
+        IsEnabled = false;
         var bar = new LoadingBar(true)
         {
             Owner = this,
@@ -244,6 +260,7 @@ public sealed partial class MainWindow : Window
         bar.Show();
         await Task.Run(Library!.Save);
         bar.Close();
+        _isSaving = false;
         IsEnabled = true;
     }
 
