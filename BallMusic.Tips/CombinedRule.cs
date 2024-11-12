@@ -2,10 +2,10 @@
 
 namespace BallMusic.Tips;
 
-public sealed class CombinedRule(ImmutableArray<Rule> rules) : Rule
+public sealed class CombinedRule(ImmutableArray<IRule> rules) : IRule
 {
-    private readonly ImmutableArray<Rule> rules = rules;
+    private readonly ImmutableArray<IRule> rules = rules;
 
-    public override IEnumerable<Tip> GetTips(ImmutableArray<Song> songs) 
+    public IEnumerable<Tip> GetTips(ImmutableArray<Song> songs) 
         => rules.SelectMany(rule => rule.GetTips(songs));
 }

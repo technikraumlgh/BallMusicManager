@@ -2,11 +2,11 @@ using System.Collections.Immutable;
 
 namespace BallMusic.Tips;
 
-public sealed class CountOfDance(ImmutableArray<(string dance, float minPercentage, float maxPercentage)> requiredDances) : Rule
+public sealed class CountOfDance(ImmutableArray<(string dance, float minPercentage, float maxPercentage)> requiredDances) : IRule
 {
     internal readonly ImmutableArray<(string dance, float minPercentage, float maxPercentage)> requiredDances = requiredDances;
 
-    public override IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
+    public IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
     {
         var dances = songs.CountBy(song => song.Dance).ToDictionary();
 

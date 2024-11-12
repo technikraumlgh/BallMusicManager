@@ -2,12 +2,12 @@
 
 namespace BallMusic.Tips;
 
-public sealed class DurationBetween(TimeSpan min, TimeSpan max) : Rule
+public sealed class DurationBetween(TimeSpan min, TimeSpan max) : IRule
 {
     internal readonly TimeSpan min = min;
     internal readonly TimeSpan max = max;
 
-    public override IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
+    public IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
     {
         var duration = songs.Sum(s => s.Duration);
         if (duration > max)
