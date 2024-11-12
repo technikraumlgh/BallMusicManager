@@ -2,12 +2,12 @@
 
 namespace BallMusic.Tips;
 
-public sealed class EndWithSong(FakeSong song, Rule.Severity severity) : Rule
+public sealed class EndWithSong(FakeSong song, Severity severity) : IRule
 {
     internal readonly FakeSong song = song;
     internal readonly Severity severity = severity;
 
-    public override IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
+    public IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
     {
         if (!SongEqualityComparer.ByLooseProperties.Equals(song, songs[^1]))
         {

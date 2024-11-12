@@ -2,12 +2,12 @@
 
 namespace BallMusic.Tips;
 
-public sealed class PartyDurationBetween(TimeSpan min, TimeSpan max) : Rule
+public sealed class PartyDurationBetween(TimeSpan min, TimeSpan max) : IRule
 {
     private readonly TimeSpan min = min;
     private readonly TimeSpan max = max;
 
-    public override IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
+    public IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
     {
         var duration = songs.Where(s => s.Dance == Dance.Party).Sum(s => s.Duration);
 
