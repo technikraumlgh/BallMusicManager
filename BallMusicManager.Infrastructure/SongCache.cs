@@ -58,7 +58,6 @@ public static class SongCache
         if (!CacheDirectory.Exists)
         {
             CacheDirectory.Create();
-            FileSystemInfoExtensions.GenerateCacheTag(CacheDirectory, "BallMusicManger"); //just a marker file, does not have to exists
             File.SetAttributes(CacheDirectory.FullName, FileAttributes.Hidden);
         }
     }
