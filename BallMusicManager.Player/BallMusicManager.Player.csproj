@@ -11,10 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NAudio" Version="2.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\Packages\Ametrin.Serialization\Ametrin.Serialization.csproj" />
     <ProjectReference Include="..\..\..\Packages\Ametrin.Utils.WPF\Ametrin.Utils.WPF.csproj" />
     <ProjectReference Include="..\BallMusicManager.Domain\BallMusicManager.Domain.csproj" />
