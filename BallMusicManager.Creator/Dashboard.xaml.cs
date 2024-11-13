@@ -10,7 +10,7 @@ public partial class Dashboard : Window
     private readonly IRule PlaylistRule = new CombinedRule([
         new DurationBetween(TimeSpan.FromHours(4, 30), TimeSpan.FromHours(5, 30)),
         new PartyDurationBetween(TimeSpan.FromMinutes(12), TimeSpan.FromMinutes(20)),
-        new EndWithSong(new FakeSong("Can You Feel The Love Tonight", "Elton John", Dance.LangsamerWalzer), IRule.Severity.Error),
+        new EndWithSong(new FakeSong("Can You Feel The Love Tonight", "Elton John", Dance.LangsamerWalzer), Severity.Error),
         
         // these limits should be very loose, just prevent something really stupid
         // they should be configured very carefully under consideration of what people (especially Unterstufe) can dance
@@ -62,7 +62,7 @@ public partial class Dashboard : Window
 
         if (songs.IsEmpty)
         {
-            RecommendationsView.Items.Add(new Tip(IRule.Severity.Warning, "Playlist is Empty"));
+            RecommendationsView.Items.Add(new Tip(Severity.Warning, "Playlist is Empty"));
             return;
         }
 
