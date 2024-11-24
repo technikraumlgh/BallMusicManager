@@ -142,7 +142,7 @@ public sealed partial class MainWindow : Window, IHostProvider
     {
         var dialog = new OpenFileDialog().AddExtensionFilter("Playlist", "plz");
 
-        dialog.GetFileInfo()
+        dialog.GetFileInfo().ToResult(static ()=> new Exception())
             .Select(PlaylistBuilder.FromArchive)
             .Consume(playlist => Playlist = playlist);
     }

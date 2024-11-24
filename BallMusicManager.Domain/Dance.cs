@@ -34,5 +34,5 @@ public static class Dance
     }.ToFrozenDictionary();
 
     // when ever a dance string enters the program it checks whether it is a known slug and if so replaces it
-    public static string FromSlug(string key) => DanceSlugs.Get(key.ToUpper()).Or(key);
+    public static string FromSlug(string key) => DanceSlugs.TryGetValue(key.ToUpper(), out var lol) ? lol : key;
 }

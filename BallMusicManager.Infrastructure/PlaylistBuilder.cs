@@ -1,7 +1,6 @@
 ﻿using Ametrin.Serialization;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Security.Cryptography;
 
 namespace BallMusicManager.Infrastructure;
 
@@ -76,10 +75,10 @@ public static class PlaylistBuilder
             return stream.ComputeSHA256Hash();
         }
 
-        static Result<ArchiveManifest> ReadManifest(ZipArchiveEntry entry)
+        static Option<ArchiveManifest> ReadManifest(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
-            return JsonExtensions.Deserialize<ArchiveManifest>(stream).ToResult();
+            return JsonExtensions.Deserialize<ArchiveManifest>(stream);
         }
     }
 
