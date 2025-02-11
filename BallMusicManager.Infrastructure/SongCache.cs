@@ -42,7 +42,7 @@ public static class SongCache
     public static Option<FileInfo> GetFile(string name)
     {
         EnsureCacheExists();
-        return CacheDirectory.File(name).WhereExists();
+        return CacheDirectory.File(name).RequireExists();
     }
 
     public static void Clear()
