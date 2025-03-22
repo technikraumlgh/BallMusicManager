@@ -123,7 +123,7 @@ public sealed partial class MainWindow : Window
 
             var songs = await Task.Run(() => PlaylistBuilder.EnumerateArchiveEntries(file));
 
-            songs.Select(songs => Library.AddAllOrReplaceWithExisting(songs)).Consume(songs =>
+            songs.Map(songs => Library.AddAllOrReplaceWithExisting(songs)).Consume(songs =>
             {
                 Playlist = new(songs);
             },

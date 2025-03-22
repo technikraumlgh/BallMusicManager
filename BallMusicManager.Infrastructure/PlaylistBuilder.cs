@@ -43,7 +43,7 @@ public static class PlaylistBuilder
                     LegacyLocation legacy => song.SetLocation(new ArchiveLocation(legacy.Path, file)),
                     HashEmbeddedLocation hashEmbedded => song.SetLocation(new ArchiveLocation(song.FileHash, file)),
                     _ => song
-                })).RequireNotEmpty().Map(Enumerable.ToArray);
+                })).RejectEmpty().Map(Enumerable.ToArray);
 
         // just to support archives where the hash wasn't used yet (only existed during development)
         // remove in the future

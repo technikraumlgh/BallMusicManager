@@ -10,6 +10,12 @@ const string QR_CODE_FILE = "qr.png";
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseDefaultServiceProvider((context, options) =>
+{
+    options.ValidateScopes = true;
+    options.ValidateOnBuild = true;
+});
+
 //builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
 //builder.Services.AddCors();
 builder.Services.AddSignalR();
@@ -22,7 +28,7 @@ var logger = app.Services.GetService<ILogger<Program>>()!;
 app.Urls.Add("http://localhost");
 
 SystemHelper.LocalIPAddress()
-    .Select(ip => $"http://{ip}").Consume(url =>
+    .Map(ip => $"http://{ip}").Consume(url =>
     {
         app.Urls.Add(url);
         OutputQRCode(url);
