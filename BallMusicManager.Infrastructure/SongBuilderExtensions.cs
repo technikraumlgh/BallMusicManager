@@ -14,7 +14,7 @@ public static class SongBuilderExtensions
 
     public static Option<Song> FromPath(FileInfo fileInfo)
     {
-        var fileName = fileInfo.NameWithoutExtension();
+        var fileName = Path.GetFileNameWithoutExtension(fileInfo.FullName);
 
         try
         {
