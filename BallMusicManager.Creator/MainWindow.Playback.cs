@@ -1,8 +1,8 @@
 ﻿using System.Windows.Input;
 using System.Windows;
 using System.Windows.Threading;
-using Ametrin.Utils.WPF;
 using System.Windows.Controls;
+using BallMusic.WPF;
 
 namespace BallMusicManager.Creator;
 

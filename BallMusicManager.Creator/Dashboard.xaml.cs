@@ -40,9 +40,9 @@ public partial class Dashboard : Window
         RecommendationsView.Items.Clear();
         SongCountView.Children.Clear();
 
-        DurationLabel.Content = $"Länge:\t{songs.Sum(s => s.Duration):hh\\:mm\\:ss}";
-        DancesDurationLabel.Content = $" - Tänze:\t{songs.Where(s => s.Dance != Dance.Party).Sum(s => s.Duration):hh\\:mm\\:ss}";
-        PartyDurationLabel.Content = $" - Party:\t{songs.Where(s => s.Dance == Dance.Party).Sum(s => s.Duration):hh\\:mm\\:ss}";
+        DurationLabel.Content = $"Länge:\t{TimeSpan.FromTicks(songs.Sum(s => s.Duration.Ticks)):hh\\:mm\\:ss}";
+        DancesDurationLabel.Content = $" - Tänze:\t{TimeSpan.FromTicks(songs.Where(s => s.Dance != Dance.Party).Sum(s => s.Duration.Ticks)):hh\\:mm\\:ss}";
+        PartyDurationLabel.Content = $" - Party:\t{TimeSpan.FromTicks(songs.Where(s => s.Dance == Dance.Party).Sum(s => s.Duration.Ticks)):hh\\:mm\\:ss}";
 
         SongCountView.Children.Add(new Label
         {

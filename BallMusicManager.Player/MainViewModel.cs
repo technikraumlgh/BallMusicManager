@@ -1,9 +1,10 @@
-﻿using System.Windows;
-using Ametrin.Utils.WPF;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace BallMusicManager.Player;
 
-internal sealed class MainViewModel : ObservableObject
+internal sealed class MainViewModel : INotifyPropertyChanged
 {
     public static MainViewModel Instance = default!;
 
@@ -35,5 +36,12 @@ internal sealed class MainViewModel : ObservableObject
             _ShowFixIndicesButton = value;
             OnPropertyChanged();
         }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

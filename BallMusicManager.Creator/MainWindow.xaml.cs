@@ -1,6 +1,4 @@
-﻿using Ametrin.Utils.WPF;
-using Ametrin.Utils.WPF.FileDialogs;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
@@ -9,6 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using Ametrin.Utils.WPF.FileDialogs;
+using BallMusic.WPF;
 
 namespace BallMusicManager.Creator;
 
@@ -156,8 +156,8 @@ public sealed partial class MainWindow : Window
 
     private void UpdateLengthDisplay(object? sender = null, NotifyCollectionChangedEventArgs? e = default)
     {
-        var duration = Playlist.Sum(s => s.Duration);
-        LengthDisplay.Content = duration.Ticks == 0 ? "Playlist" : $"Playlist ({duration:hh\\:mm\\:ss})";
+        var durationInTicks = Playlist.Sum(s => s.Duration.Ticks);
+        LengthDisplay.Content = durationInTicks == 0 ? "Playlist" : $"Playlist ({TimeSpan.FromTicks(durationInTicks):hh\\:mm\\:ss})";
     }
 
     private void ClosePlaylist(object sender, RoutedEventArgs e)

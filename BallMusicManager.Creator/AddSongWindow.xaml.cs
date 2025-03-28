@@ -20,7 +20,7 @@ public sealed partial class AddSongWindow : Window
 
         try
         {
-            Song.FromFileName(fileInfo.NameWithoutExtension());
+            Song.FromFileName(Path.GetFileNameWithoutExtension(fileInfo.Name));
             TitleField.Text = Song.Title;
             ArtistField.Text = Song.Artist;
             DanceField.Text = Song.Dance;

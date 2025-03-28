@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Packages\Ametrin.Utils\src\Ametrin.Utils.csproj" />
     <ProjectReference Include="..\BallMusicManager.Domain\BallMusicManager.Domain.csproj" />
   </ItemGroup>
 

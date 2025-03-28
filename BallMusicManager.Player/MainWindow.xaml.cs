@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Ametrin.Utils.WPF;
 using Ametrin.Utils.WPF.FileDialogs;
+using BallMusic.WPF;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 
@@ -128,7 +129,7 @@ public sealed partial class MainWindow : Window, IHostProvider
         if (Playlist is null) return;
         var row = (args.OriginalSource as DependencyObject)!.FindParent<DataGridRow>();
         if (row is null || row.Item is not Song song) return;
-        if (Playlist.Current as Song == song)
+        if (Playlist.Current == song)
         {
             Playlist.Player.Restart();
         }
