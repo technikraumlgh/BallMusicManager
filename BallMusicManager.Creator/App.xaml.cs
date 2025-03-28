@@ -1,5 +1,4 @@
-﻿using BallMusicManager.Infrastructure;
-using System.Windows;
+﻿using System.Windows;
 
 namespace BallMusicManager.Creator;
 
@@ -19,7 +18,6 @@ public partial class App : Application
         PerformCleanup();
         base.OnExit(e);
     }
-
 
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {

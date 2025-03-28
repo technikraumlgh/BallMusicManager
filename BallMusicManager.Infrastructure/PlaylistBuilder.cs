@@ -1,7 +1,6 @@
-﻿using Ametrin.Serialization;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO.Compression;
-using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace BallMusicManager.Infrastructure;
 
@@ -27,24 +26,27 @@ public static class PlaylistBuilder
         var songs = EnumerateArchiveEntries(file);
         songs.Consume(songs =>
         {
-            songs.Consume(song => SongCache.CacheFromArchive(song));
+            foreach (var song in songs)
+            {
+                SongCache.CacheFromArchive(song);
+            }
         });
-        return songs.Select(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
+        return songs.Map(songs => new PlaylistPlayer(file.FullName, songs.Select(s => s.Build())));
     }
 
     public static Result<SongBuilder[]> EnumerateArchiveEntries(FileInfo file)
     {
         var archive = OpenArchive(file);
 
-        var manifest = archive.Select(archive => archive.GetEntry(MANIFEST_ENTRY_NAME)!).Select(ReadManifest);
+        var manifest = archive.Map(archive => archive.GetEntry(MANIFEST_ENTRY_NAME)!).Map(ReadManifest);
 
-        var songs = archive.Select(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
-            .Select(ParseSongList).Select(songs => songs.Select(song => song.Path switch
+        var songs = archive.Map(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
+            .Map(ParseSongList).Map(songs => songs.Select(song => song.Path switch
                 {
                     LegacyLocation legacy => song.SetLocation(new ArchiveLocation(legacy.Path, file)),
                     HashEmbeddedLocation hashEmbedded => song.SetLocation(new ArchiveLocation(song.FileHash, file)),
                     _ => song
-                })).WhereNotEmpty().Select(Enumerable.ToArray);
+                })).RejectEmpty().Map(Enumerable.ToArray);
 
         // just to support archives where the hash wasn't used yet (only existed during development)
         // remove in the future
@@ -67,26 +69,26 @@ public static class PlaylistBuilder
         static IEnumerable<SongBuilder> ParseSongList(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
-            return JsonExtensions.Deserialize<SongBuilder[]>(stream).Select<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
+            return JsonSerializer.Deserialize<SongBuilder[]>(stream).ToOption().Map<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
         }
 
         static byte[] GetFileHash(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
-            return stream.ComputeSHA256Hash();
+            return SongBuilder.ComputeSHA256Hash(stream);
         }
 
-        static Result<ArchiveManifest> ReadManifest(ZipArchiveEntry entry)
+        static Option<ArchiveManifest> ReadManifest(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
-            return JsonExtensions.Deserialize<ArchiveManifest>(stream).ToResult();
+            return JsonSerializer.Deserialize<ArchiveManifest>(stream);
         }
     }
 
     public static Result<ZipArchive> OpenArchive(FileInfo file)
     {
-        return file.ToResult().WhereExists()
-            .Select(file => new ZipArchive(file.OpenRead()));
+        return file.ToResult().RequireExists()
+            .Map(file => new ZipArchive(file.OpenRead()));
     }
 
     public static Option ToArchive(FileInfo file, IEnumerable<SongBuilder> songs)
@@ -96,7 +98,7 @@ public static class PlaylistBuilder
             return false;
         }
 
-        return ToArchiveImpl(file, songs.Select((song, index) => song.Copy().SetIndex(index)).ToArray());
+        return ToArchiveImpl(file, [.. songs.Select((song, index) => song.Copy().SetIndex(index))]);
     }
 
     private const int ARCHIVE_VERSION = 1;
@@ -147,7 +149,10 @@ public static class PlaylistBuilder
 
         // cleans the archive of unused files
         // ToArray to isolate the deletion from archive.Entries as it will change
-        archive.Entries.Where(entry => !usedEntries.Contains(entry.Name)).ToArray().Consume(entry => entry.Delete());
+        foreach (var entry in archive.Entries.Where(entry => !usedEntries.Contains(entry.Name)).ToArray())
+        {
+            entry.Delete();
+        }
 
         WriteSongList();
 
@@ -159,7 +164,7 @@ public static class PlaylistBuilder
         {
             var entry = archive.OverwriteEntry(SONG_LIST_ENTRY_NAME);
             using var stream = entry.Open();
-            songs.WriteToStreamAsJson(stream);
+            JsonSerializer.Serialize(stream, songs);
         }
 
         void WriteManifest()
@@ -167,13 +172,14 @@ public static class PlaylistBuilder
             var manifest = new ArchiveManifest(ARCHIVE_VERSION, songs.Length, DateTime.Now);
             var entry = archive.OverwriteEntry(MANIFEST_ENTRY_NAME);
             using var stream = entry.Open();
-            manifest.WriteToStreamAsJson(stream);
+            JsonSerializer.Serialize(stream, manifest);
         }
     }
 
     public static IEnumerable<SongBuilder> EnumerateFile(FileInfo file)
     {
-        return JsonExtensions.ReadFromJsonFile<List<SongBuilder>>(file).Select(MapFrom).Or([]);
+        using var stream = file.OpenRead();
+        return MapFrom(JsonSerializer.Deserialize<List<SongBuilder>>(stream)!);
 
         IEnumerable<SongBuilder> MapFrom(IEnumerable<SongBuilder> songs)
         {

@@ -1,8 +1,6 @@
-﻿using Ametrin.Utils;
-using Ametrin.Utils.WPF;
+﻿using Ametrin.Utils.WPF;
 using Ametrin.Utils.WPF.FileDialogs;
-using BallMusicManager.Domain;
-using BallMusicManager.Infrastructure;
+using System.Collections.Immutable;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
@@ -16,7 +14,21 @@ namespace BallMusicManager.Creator;
 
 public sealed partial class MainWindow : Window
 {
-    private SongBuilderCollection Playlist = [];
+    private SongBuilderCollection Playlist
+    {
+        get;
+        set
+        {
+            Playlist.CollectionChanged -= UpdateLengthDisplay;
+            Playlist.CollectionChanged -= UpdateDashboard;
+            field = value;
+            PlaylistGrid.ItemsSource = Playlist;
+            Playlist.CollectionChanged += UpdateLengthDisplay;
+            Playlist.CollectionChanged += UpdateDashboard;
+            UpdateLengthDisplay();
+            UpdateDashboard();
+        }
+    } = [];
     private SongLibrary Library = [];
     private volatile bool _isSaving = false;
 
@@ -24,7 +36,8 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         PlaylistGrid.ItemsSource = Playlist;
-        Playlist.CollectionChanged += UpdateLengthDisplay;
+        Playlist = [];
+        //Playlist.CollectionChanged += UpdateLengthDisplay;
         _playbackProgressUpdater.Tick += UpdatePlaybackSliderValue;
 
         Loaded += (sender, e) =>
@@ -34,6 +47,11 @@ public sealed partial class MainWindow : Window
         };
 
         Closing += OnWindowClosingAsync;
+
+        Closed += (sender, args) =>
+        {
+            dashboard?.Close();
+        };
     }
 
     private bool shouldSaveBeforeClosing = true;
@@ -105,13 +123,9 @@ public sealed partial class MainWindow : Window
 
             var songs = await Task.Run(() => PlaylistBuilder.EnumerateArchiveEntries(file));
 
-            songs.Select(songs => Library.AddAllOrReplaceWithExisting(songs)).Consume(songs =>
+            songs.Map(songs => Library.AddAllOrReplaceWithExisting(songs)).Consume(songs =>
             {
-                Playlist.CollectionChanged -= UpdateLengthDisplay;
                 Playlist = new(songs);
-                PlaylistGrid.ItemsSource = Playlist;
-                Playlist.CollectionChanged += UpdateLengthDisplay;
-                UpdateLengthDisplay();
             },
             error =>
             {
@@ -289,10 +303,31 @@ public sealed partial class MainWindow : Window
             {
                 var compareInfo = CultureInfo.CurrentCulture.CompareInfo;
                 return compareInfo.IndexOf(song.Title, SearchBox.Text, SEARCH_SETTINGS) >= 0 ||
-                        compareInfo.IndexOf(song.Artist, SearchBox.Text, SEARCH_SETTINGS) >= 0;
+                       compareInfo.IndexOf(song.Artist, SearchBox.Text, SEARCH_SETTINGS) >= 0;
             }
 
             return false;
         };
     }
+
+    private Dashboard? dashboard = null;
+    private void OpenDashboard_Click(object sender, RoutedEventArgs e)
+    {
+        if (dashboard is not null)
+        {
+            if (!dashboard.Activate())
+            {
+                dashboard = null;
+            }
+        }
+
+        if (dashboard is null)
+        {
+            dashboard = new Dashboard(Playlist.Select(song => song.Build()).ToImmutableArray());
+            dashboard.Show();
+        }
+    }
+
+
+    private void UpdateDashboard(object? sender = null, EventArgs? e = default) => dashboard?.Update(Playlist.Select(song => song.Build()).ToImmutableArray());
 }

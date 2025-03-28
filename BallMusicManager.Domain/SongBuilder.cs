@@ -7,11 +7,11 @@ using System.Text.Json.Serialization;
 
 namespace BallMusicManager.Domain;
 
-// HashCode has to be based on constant values otherwise the DataGrid will crash
 public sealed class SongBuilder
 {
+    // do not rename these properties (json serialization)
     [JsonConverter(typeof(SongLocationJsonConverter))]
-    public SongLocation Path { get; set; } = new UndefinedLocation(); // do not rename (json serialization)
+    public SongLocation Path { get; set; } = new UndefinedLocation();
     public int Index { get; set; } = -1;
     public string Title { get; set; } = string.Empty;
     public string Artist { get; set; } = string.Empty;
@@ -94,7 +94,7 @@ public sealed class SongBuilder
 
     public SongBuilder SetHash(byte[] bytes)
     {
-        hash = bytes.ToHexString();
+        hash = Convert.ToHexString(bytes);
         return this;
     }
 
@@ -102,7 +102,7 @@ public sealed class SongBuilder
     {
         return Path switch
         {
-            FileLocation file => file.FileInfo.ComputeSHA256Hash(),
+            FileLocation file => ComputeSHA256Hash(file.FileInfo),
             ArchiveLocation file => GetHash(file),
             _ => throw new InvalidOperationException("Cannot compute hash for a song without proper location"),
         };
@@ -112,8 +112,20 @@ public sealed class SongBuilder
             using var archive = new ZipArchive(location.ArchiveFileInfo.OpenRead(), ZipArchiveMode.Read);
             var entry = archive.GetEntry(location.EntryName)!;
             using var stream = entry.Open();
-            return stream.ComputeSHA256Hash();
+            return ComputeSHA256Hash(stream);
         }
+    }
+
+    public static byte[] ComputeSHA256Hash(FileInfo fileInfo)
+    {
+        using var stream = fileInfo.OpenRead();
+        return ComputeSHA256Hash(stream);
+    }
+
+    public static byte[] ComputeSHA256Hash(Stream stream)
+    {
+        using var hasher = SHA256.Create();
+        return hasher.ComputeHash(stream);
     }
 
     public SongBuilder FromFileName(string fileName)
@@ -125,8 +137,8 @@ public sealed class SongBuilder
         {
             1 => SetIndex(-1).SetTitle(fileName),
             2 => SetIndex(-1).SetTitle(split[1]).SetDanceFromSlug(split[0]), // is this the best?
-            3 => SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromSlug(split[1]).SetTitle(split[2]),
-            > 3 => SetIndex(split[0].TryParse<int>().Or(-1)).SetDanceFromSlug(split[1]).SetTitle(split.Skip(2).Dump(' ')),
+            3 => SetIndex(int.TryParse(split[0], out var index) ? index : -1).SetDanceFromSlug(split[1]).SetTitle(split[2]),
+            > 3 => SetIndex(int.TryParse(split[0], out var index) ? index : -1).SetDanceFromSlug(split[1]).SetTitle(string.Join(' ', split.Skip(2))),
             _ => throw new ArgumentException($"{fileName} does not match naming conventions")
         };
     }
@@ -143,123 +155,4 @@ public sealed class SongBuilder
     };
 
     public Song Build() => new(Path, Index, Title, Artist, Dance, Duration);
-}
-
-// this is a type union. The song location can either be a file, an archive entry or undefined. undefined is an error state.
-public abstract record SongLocation;
-public sealed record FileLocation(FileInfo FileInfo) : SongLocation
-{
-    public FileInfo FileInfo { get; init; } = FileInfo.Exists ? FileInfo : throw new FileNotFoundException(null, FileInfo.FullName);
-    public static FileLocation Of(string path) => new(new FileInfo(path));
-}
-public sealed record ArchiveLocation(string EntryName, FileInfo ArchiveFileInfo) : SongLocation
-{
-    public FileInfo ArchiveFileInfo { get; init; } = ArchiveFileInfo.Exists ? ArchiveFileInfo : throw new FileNotFoundException(null, ArchiveFileInfo.FullName);
-}
-public sealed record HashEmbeddedLocation : SongLocation;
-public sealed record UndefinedLocation : SongLocation;
-// for backcompat reasons when deserialising. gets replaced after loading
-public sealed record LegacyLocation(string Path) : SongLocation;
-
-public sealed class SongLocationJsonConverter : JsonConverter<SongLocation>
-{
-    public override SongLocation? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        //for legacy purposes
-        if (reader.TokenType == JsonTokenType.String)
-        {
-            var legacy = reader.GetString();
-            if (string.IsNullOrWhiteSpace(legacy))
-            {
-                return new UndefinedLocation();
-            }
-
-            if (Path.IsPathFullyQualified(legacy))
-            {
-                return new FileLocation(new(legacy));
-            }
-
-            return new LegacyLocation(legacy);
-        }
-
-        if (reader.TokenType != JsonTokenType.StartObject)
-        {
-            throw new JsonException();
-        }
-
-        reader.Read();
-
-        string? type = null;
-        string? path = null;
-        string? entry = null;
-
-        while (reader.TokenType == JsonTokenType.PropertyName)
-        {
-            var propertyName = reader.GetString();
-            reader.Read();
-
-            switch (propertyName)
-            {
-                case "type":
-                    type = reader.GetString();
-                    break;
-                case "path":
-                    path = reader.GetString();
-                    break;
-                case "entry":
-                    entry = reader.GetString();
-                    break;
-                default:
-                    reader.Skip();
-                    break;
-            }
-
-            reader.Read();
-        }
-
-        if (reader.TokenType != JsonTokenType.EndObject)
-            throw new JsonException();
-
-        return type switch
-        {
-            "file" when path != null => new FileLocation(new FileInfo(path)),
-            "archive" when path != null && entry != null => new ArchiveLocation(entry, new FileInfo(path)),
-            "hash_embedded" => new HashEmbeddedLocation(),
-            "null" => new UndefinedLocation(),
-            _ => throw new JsonException()
-        };
-    }
-
-
-    public override void Write(Utf8JsonWriter writer, SongLocation value, JsonSerializerOptions options)
-    {
-        writer.WriteStartObject();
-
-        switch (value)
-        {
-            case FileLocation file:
-                writer.WriteString("type", "file");
-                writer.WriteString("path", file.FileInfo.FullName);
-                break;
-
-            case ArchiveLocation archive:
-                writer.WriteString("type", "archive");
-                writer.WriteString("entry", archive.EntryName);
-                writer.WriteString("path", archive.ArchiveFileInfo.FullName);
-                break;
-
-            case HashEmbeddedLocation:
-                writer.WriteString("type", "hash_embedded");
-                break;
-
-            case UndefinedLocation:
-                writer.WriteString("type", "null");
-                break;
-
-            default:
-                throw new UnreachableException();
-        }
-
-        writer.WriteEndObject();
-    }
 }

@@ -1,6 +1,4 @@
 ﻿using Ametrin.Utils.WPF;
-using BallMusicManager.Domain;
-using BallMusicManager.Infrastructure;
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Input;

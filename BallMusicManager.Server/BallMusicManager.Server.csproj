@@ -16,4 +16,13 @@
   <ItemGroup>
     <ProjectReference Include="..\BallMusicManager.Domain\BallMusicManager.Domain.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="snow.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SongDisplay.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

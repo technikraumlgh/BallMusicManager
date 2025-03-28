@@ -1,5 +1,7 @@
 ﻿using System.Drawing;
-using Ametrin.Utils;
+using System.Net;
+using System.Net.Sockets;
+using Ametrin.Optional;
 using BallMusicManager.Domain;
 using BallMusicManager.Server;
 using Microsoft.AspNetCore.Mvc;
@@ -10,27 +12,32 @@ const string QR_CODE_FILE = "qr.png";
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseDefaultServiceProvider((context, options) =>
+{
+    options.ValidateScopes = true;
+    options.ValidateOnBuild = true;
+});
+
 //builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
 //builder.Services.AddCors();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<DisplayService>();
-builder.Services.AddAuthentication(); //properly set up
+builder.Services.AddAuthentication(); // TODO: proper auth
 
 var app = builder.Build();
 var logger = app.Services.GetService<ILogger<Program>>()!;
 
 app.Urls.Add("http://localhost");
 
-SystemHelper.LocalIPAddress()
-    .Select(ip => $"http://{ip}").Consume(url =>
-    {
-        app.Urls.Add(url);
-        OutputQRCode(url);
-        logger.LogInformation("Running on {url}", url);
-    }, () =>
-    {
-        logger.LogWarning("No public IP found!");
-    });
+LocalIPAddress().Map(ip => $"http://{ip}").Consume(url =>
+{
+    app.Urls.Add(url);
+    OutputQRCode(url);
+    logger.LogInformation("Running on {url}", url);
+}, () =>
+{
+    logger.LogWarning("No public IP found!");
+});
 
 
 app.UseRouting();
@@ -99,4 +106,19 @@ static void OutputQRCode(string url, int size = 20)
     using var qrCode = new PngByteQRCode(qrDataData);
     using var ms = File.Create(QR_CODE_FILE);
     ms.Write(qrCode.GetGraphic(size, Color.Black, Color.White));
+}
+
+static Option<IPAddress> LocalIPAddress()
+{
+    try
+    {
+        using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+        socket.Connect("8.8.8.8", 65530);
+        var endPoint = socket.LocalEndPoint as IPEndPoint;
+        return endPoint!.Address;
+    }
+    catch
+    {
+        return default;
+    }
 }

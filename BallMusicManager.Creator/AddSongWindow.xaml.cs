@@ -1,7 +1,4 @@
-﻿using Ametrin.Utils;
-using BallMusicManager.Domain;
-using BallMusicManager.Infrastructure;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Input;
 

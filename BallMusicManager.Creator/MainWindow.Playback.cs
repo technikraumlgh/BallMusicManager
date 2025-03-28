@@ -1,7 +1,5 @@
-﻿using BallMusicManager.Domain;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using System.Windows;
-using BallMusicManager.Infrastructure;
 using System.Windows.Threading;
 using Ametrin.Utils.WPF;
 using System.Windows.Controls;
@@ -14,7 +12,7 @@ public partial class MainWindow
     private readonly MusicPlayer _player = new();
     private readonly DispatcherTimer _playbackProgressUpdater = new()
     {
-        Interval = TimeSpan.FromMilliseconds(200) 
+        Interval = TimeSpan.FromMilliseconds(200)
     };
 
     private void Play_Click(object sender, RoutedEventArgs e)
@@ -43,7 +41,7 @@ public partial class MainWindow
         {
             return;
         }
-        
+
         PlaySong(song);
     }
 
@@ -51,7 +49,7 @@ public partial class MainWindow
     {
         _player.Stop();
 
-        if(song is null)
+        if (song is null)
         {
             return;
         }

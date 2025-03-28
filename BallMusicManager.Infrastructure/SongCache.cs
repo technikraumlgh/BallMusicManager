@@ -42,7 +42,7 @@ public static class SongCache
     public static Option<FileInfo> GetFile(string name)
     {
         EnsureCacheExists();
-        return CacheDirectory.File(name).WhereExists();
+        return CacheDirectory.File(name).RequireExists();
     }
 
     public static void Clear()
@@ -58,7 +58,6 @@ public static class SongCache
         if (!CacheDirectory.Exists)
         {
             CacheDirectory.Create();
-            FileSystemInfoExtensions.GenerateCacheTag(CacheDirectory, "BallMusicManger"); //just a marker file, does not have to exists
             File.SetAttributes(CacheDirectory.FullName, FileAttributes.Hidden);
         }
     }
