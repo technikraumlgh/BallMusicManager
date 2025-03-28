@@ -1,6 +1,5 @@
 using System.Windows.Media;
 using System.Windows;
-using BallMusic.WPF;
 
 namespace BallMusic.WPF;
 

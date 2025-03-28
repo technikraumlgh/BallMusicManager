@@ -1,4 +1,4 @@
-﻿namespace Ametrin.Utils.WPF.FileDialogs;
+﻿namespace BallMusic.WPF.FileDialogs;
 
 public sealed record FileFilter(string Description, string Pattern)
 {

@@ -1,7 +1,7 @@
 ﻿using Ametrin.Optional;
 using System.IO;
 
-namespace Ametrin.Utils.WPF.FileDialogs;
+namespace BallMusic.WPF.FileDialogs;
 
 public interface IFileDialog
 {

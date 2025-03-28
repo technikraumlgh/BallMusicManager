@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Ametrin.Utils.WPF.FileDialogs;
+using BallMusic.WPF.FileDialogs;
 using BallMusic.WPF;
 
 namespace BallMusicManager.Creator;

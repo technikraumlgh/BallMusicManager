@@ -2,9 +2,8 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Ametrin.Utils.WPF;
-using Ametrin.Utils.WPF.FileDialogs;
 using BallMusic.WPF;
+using BallMusic.WPF.FileDialogs;
 using BallMusicManager.Domain;
 using BallMusicManager.Infrastructure;
 
@@ -151,6 +150,5 @@ public sealed partial class MainWindow : Window, IHostProvider
     private void OpenMessageWindow(object sender, RoutedEventArgs e)
     {
         new MessageWindow(Server).Show();
-        //Task.Run(()=> );
     }
 }

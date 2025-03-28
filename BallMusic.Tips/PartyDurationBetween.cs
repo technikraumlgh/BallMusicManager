@@ -9,7 +9,7 @@ public sealed class PartyDurationBetween(TimeSpan min, TimeSpan max) : IRule
 
     public IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
     {
-        var duration = songs.Where(s => s.Dance == Dance.Party).Sum(s => s.Duration);
+        var duration = TimeSpan.FromTicks(songs.Where(s => s.Dance == Dance.Party).Sum(s => s.Duration.Ticks));
 
         if (duration > max)
         {

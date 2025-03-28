@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Ametrin.Utils.WPF.FileDialogs;
+namespace BallMusic.WPF.FileDialogs;
 
 public sealed class SaveFileDialog : IFileDialog
 {
