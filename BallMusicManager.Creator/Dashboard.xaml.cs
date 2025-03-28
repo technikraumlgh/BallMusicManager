@@ -8,12 +8,12 @@ namespace BallMusicManager.Creator;
 public partial class Dashboard : Window
 {
     private readonly IRule PlaylistRule = new CombinedRule([
-        new DurationBetween(TimeSpan.FromHours(4, 30), TimeSpan.FromHours(5, 30)),
-        new PartyDurationBetween(TimeSpan.FromMinutes(12), TimeSpan.FromMinutes(20)),
+        new DurationBetween(TimeSpan.FromHours(4), TimeSpan.FromHours(6)),
+        new PartyDurationBetween(TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(20)),
         new EndWithSong(new FakeSong("Can You Feel The Love Tonight", "Elton John", Dance.LangsamerWalzer), Severity.Error),
         
         // these limits should be very loose, just prevent something really stupid
-        // they should be configured very carefully under consideration of what people (especially Unterstufe) can dance
+        // they should be configured very carefully under consideration of what people can (especially Unterstufe) and like to dance
         new CountOfDance([                          // given 70 songs
             (Dance.ChaChaCha, 0.14f, 0.5f),         // 9 - 35
             (Dance.Discofox, 0.14f, 0.5f),          // 9 - 35
