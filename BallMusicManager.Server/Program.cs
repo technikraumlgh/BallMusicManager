@@ -7,7 +7,6 @@ using BallMusicManager.Server;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
 
-const string KEY = "WB2023LGH"; //TODO: proper api keys
 const string QR_CODE_FILE = "qr.png";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,11 +17,8 @@ builder.Host.UseDefaultServiceProvider((context, options) =>
     options.ValidateOnBuild = true;
 });
 
-//builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
-//builder.Services.AddCors();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<DisplayService>();
-builder.Services.AddAuthentication(); // TODO: proper auth
 
 var app = builder.Build();
 var logger = app.Services.GetService<ILogger<Program>>()!;
@@ -39,28 +35,28 @@ LocalIPAddress().Map(ip => $"http://{ip}").Consume(url =>
     logger.LogWarning("No public IP found!");
 });
 
-
-app.UseRouting();
-app.UseAuthorization();
-//app.UseCors();
+var useAuth = !args.Contains("--noauth");
+var activeApiKey = useAuth ? Guid.NewGuid().ToString()[..23] : string.Empty;
+if (useAuth)
+{
+    logger.LogInformation("API key for this session: {key}", activeApiKey);
+}
 
 var displayService = app.Services.GetService<DisplayService>()!;
 
 app.MapHub<SignalHub>("signal");
 
-app.MapPost("playing", ([FromBody] SongDTO song, string? key) =>
+app.MapPost("playing", ([FromBody] SongDTO song) =>
 {
-    if (key is null || key != KEY) return Results.NotFound();
     displayService.SetCurrent(song);
     return Results.Ok();
-});
+}).AddEndpointFilter(RequiresApiKey);
 
-app.MapPost("nextup", ([FromBody] SongDTO song, string? key) =>
+app.MapPost("nextup", ([FromBody] SongDTO song) =>
 {
-    if (key is null || key != KEY) return Results.NotFound();
     displayService.SetNext(song);
     return Results.Ok();
-});
+}).AddEndpointFilter(RequiresApiKey);
 
 app.MapGet("display", async (HttpResponse response, CancellationToken cancellationToken) =>
 {
@@ -68,23 +64,19 @@ app.MapGet("display", async (HttpResponse response, CancellationToken cancellati
 });
 
 
-app.MapPost("message", ([FromBody] MessageDTO msg, string? key) =>
+app.MapPost("message", ([FromBody] MessageDTO msg) =>
 {
-    if (key is null || key != KEY) return Results.NotFound();
-
     displayService.SendMessage(msg.text);
 
     return Results.Ok();
-});
+}).AddEndpointFilter(RequiresApiKey);
 
-app.MapPost("news", ([FromBody] MessageDTO msg, string? key) =>
+app.MapPost("news", ([FromBody] MessageDTO msg) =>
 {
-    if (key is null || key != KEY) return Results.NotFound();
-
     displayService.SendNews(msg.text);
 
     return Results.Ok();
-});
+}).AddEndpointFilter(RequiresApiKey);
 
 app.MapGet("snow.js", async (HttpResponse response, CancellationToken cancellationToken) =>
 {
@@ -98,6 +90,19 @@ app.MapGet("qr-code", async (HttpResponse response, CancellationToken cancellati
 app.MapGet("/", () => Results.Redirect("display"));
 
 app.Run();
+
+async ValueTask<object?> RequiresApiKey(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+{
+    var httpContext = context.HttpContext;
+    var requestApiKey = httpContext.Request.Headers.Authorization.FirstOrDefault();
+
+    if (useAuth && requestApiKey != activeApiKey)
+    {
+        return Results.Unauthorized();
+    }
+
+    return await next(context);
+}
 
 static void OutputQRCode(string url, int size = 20)
 {

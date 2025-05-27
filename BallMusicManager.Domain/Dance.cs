@@ -9,6 +9,7 @@ public static class Dance
     public const string LangsamerWalzer = "Langsamer Walzer";
     public const string RockNRoll = "Rock 'n' Roll";
     public const string Party = "Party";
+    public const string Pasodoble = "Pasodoble";
     public const string Rumba = "Rumba";
     public const string Salsa = "Salsa";
     public const string Samba = "Samba";
@@ -31,8 +32,9 @@ public static class Dance
         {"RNR", RockNRoll },
         {"PT", Party },
         {"FS", Party }, // legacy, was called Freestyle
+        {"PSDB", Pasodoble },
     }.ToFrozenDictionary();
 
     // when ever a dance string enters the program it checks whether it is a known slug and if so replaces it
-    public static string FromSlug(string key) => DanceSlugs.TryGetValue(key.ToUpper(), out var lol) ? lol : key;
+    public static string FromSlug(string key) => DanceSlugs.TryGetValue(key.ToUpper(), out var name) ? name : key;
 }

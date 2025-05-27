@@ -1,9 +1,10 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace BallMusicManager.Infrastructure;
 
-public sealed class ServerConnection
+public sealed class ServerConnection : IDisposable
 {
     public PlaylistPlayer? Playlist
     {
@@ -23,10 +24,15 @@ public sealed class ServerConnection
     }
     private readonly IHostProvider HostProvider;
     private PlaylistPlayer? playlistPlayer;
+    private HttpClient httpClient;
 
     public ServerConnection(IHostProvider hostProvider)
     {
         HostProvider = hostProvider;
+        httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromMilliseconds(500),
+        };
         _ = Ping($"http://{HostProvider.Host}/");
     }
 
@@ -44,49 +50,33 @@ public sealed class ServerConnection
 
     public void SendSongToServer(SongDTO song)
     {
-        _ = SendSong("playing", song);
+        _ = PostRequest("playing", song);
     }
 
     public void SendNextSongToServer(SongDTO song)
     {
-        _ = SendSong("nextup", song);
+        _ = PostRequest("nextup", song);
     }
 
-    private async Task SendSong(string endpoint, SongDTO song)
-    {
-        using var httpClient = new HttpClient();
-        try
-        {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/{endpoint}?key={HostProvider.Password}", song);
-            HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
-        }
-        catch
-        {
-            HostProvider.SetServerOnline(false);
-        }
-    }
+    public Task SendMessage(string msg) => PostRequest("message", new MessageDTO(msg));
+    public Task SendNews(string news) => PostRequest("news", new MessageDTO(news));
 
-    public async Task SendMessage(string msg)
+    private async Task PostRequest<T>(string endpoint, T data)
     {
-        using var httpClient = new HttpClient();
         try
         {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/message?key={HostProvider.Password}", new MessageDTO(msg));
-            HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
-        }
-        catch
-        {
-            HostProvider.SetServerOnline(false);
-        }
-    }
+            var request = new HttpRequestMessage(HttpMethod.Post, $"http://{HostProvider.Host}/{endpoint}")
+            {
+                Content = JsonContent.Create(data)
+            };
+            if (!string.IsNullOrEmpty(HostProvider.Password))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue(HostProvider.Password);
+            }
 
-    public async Task SendNews(string news)
-    {
-        using var httpClient = new HttpClient();
-        try
-        {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/news?key={HostProvider.Password}", new MessageDTO(news));
-            HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
+            var result = await httpClient.SendAsync(request);
+
+            HostProvider.SetServerOnline(result.StatusCode is HttpStatusCode.OK);
         }
         catch
         {
@@ -97,6 +87,7 @@ public sealed class ServerConnection
     private async Task Ping(string url)
     {
         using var httpClient = new HttpClient();
+        httpClient.Timeout = TimeSpan.FromMilliseconds(500);
         try
         {
             await httpClient.GetAsync(url);
@@ -108,6 +99,10 @@ public sealed class ServerConnection
         }
     }
 
+    public void Dispose()
+    {
+        httpClient.Dispose();
+    }
 }
 
 public interface IHostProvider

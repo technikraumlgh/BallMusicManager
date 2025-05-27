@@ -6,9 +6,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-	<PublishSingleFile>true</PublishSingleFile>
-	<SelfContained>true</SelfContained>
-	<LangVersion>preview</LangVersion>
+	  <PublishSingleFile>true</PublishSingleFile>
+	  <SelfContained>true</SelfContained>
+	  <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
