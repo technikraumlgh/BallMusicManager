@@ -1,0 +1,15 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="BallMusic.Tips/BallMusic.Tips.csproj" />
+  <Project Path="BallMusic.WPF/BallMusic.WPF.csproj" />
+  <Project Path="BallMusicManager.Creator/BallMusicManager.Creator.csproj" />
+  <Project Path="BallMusicManager.Domain/BallMusicManager.Domain.csproj" />
+  <Project Path="BallMusicManager.Infrastructure/BallMusicManager.Infrastructure.csproj" />
+  <Project Path="BallMusicManager.Player/BallMusicManager.Player.csproj" />
+  <Project Path="BallMusicManager.Server/BallMusicManager.Server.csproj" />
+  <Project Path="BallMusicManager.Test/BallMusicManager.Test.csproj" />
+</Solution>
