@@ -38,9 +38,9 @@ public static class PlaylistBuilder
     {
         var archive = OpenArchive(file);
 
-        var manifest = archive.Map(archive => archive.GetEntry(MANIFEST_ENTRY_NAME)!).Map(ReadManifest);
+        var manifest = archive.Map(static archive => archive.TryGetEntry(MANIFEST_ENTRY_NAME).ToResult(static () => new Exception("missing manifest"))).Map(ReadManifest);
 
-        var songs = archive.Map(archive => archive.GetEntry(SONG_LIST_ENTRY_NAME)!)
+        var songs = archive.Map(static archive => archive.TryGetEntry(SONG_LIST_ENTRY_NAME).ToResult(static () => new Exception("missing song list")))
             .Map(ParseSongList).Map(songs => songs.Select(song => song.Path switch
                 {
                     LegacyLocation legacy => song.SetLocation(new ArchiveLocation(legacy.Path, file)),
@@ -50,7 +50,7 @@ public static class PlaylistBuilder
 
         // just to support archives where the hash wasn't used yet (only existed during development)
         // remove in the future
-        (archive, songs).Consume((archive, songs) =>
+        (archive, songs).Consume(static (archive, songs) =>
         {
             foreach (var song in songs)
             {
@@ -91,18 +91,18 @@ public static class PlaylistBuilder
             .Map(file => new ZipArchive(file.OpenRead()));
     }
 
-    public static Option ToArchive(FileInfo file, IEnumerable<SongBuilder> songs)
+    public static ErrorState ToArchive(FileInfo file, IEnumerable<SongBuilder> songs)
     {
         if (!songs.Any())
         {
-            return false;
+            return new ArgumentNullException(nameof(songs), "playlist is empty");
         }
 
         return ToArchiveImpl(file, [.. songs.Select((song, index) => song.Copy().SetIndex(index))]);
     }
 
     private const int ARCHIVE_VERSION = 1;
-    private static Option ToArchiveImpl(FileInfo archiveFile, SongBuilder[] songs)
+    private static ErrorState ToArchiveImpl(FileInfo archiveFile, SongBuilder[] songs)
     {
         var usedEntries = new HashSet<string>();
         using var archive = archiveFile.Exists
@@ -115,7 +115,7 @@ public static class PlaylistBuilder
             if (usedEntries.Contains(song.FileHash)) //TODO: properly handle this case
             {
                 var other = songs.Where(other => song.FileHash == other.FileHash).FirstOrDefault();
-                throw new UnreachableException($"{song.Path} produced an already existing hash!");
+                return new UnreachableException($"{song.Path} produced an already existing hash!");
             }
             usedEntries.Add(song.FileHash);
 
@@ -140,7 +140,7 @@ public static class PlaylistBuilder
                         break;
 
                     default:
-                        throw new InvalidOperationException($"Location of {song} not defined properly");
+                        return new InvalidOperationException($"Location of {song} not defined properly");
                 }
             }
 
@@ -158,7 +158,7 @@ public static class PlaylistBuilder
 
         WriteManifest();
 
-        return true;
+        return default;
 
         void WriteSongList()
         {
@@ -187,7 +187,7 @@ public static class PlaylistBuilder
             {
                 yield return song.Path switch
                 {
-                    ArchiveLocation archive => new SongBuilder(song).SetLocation(FileLocation.Of(Path.Combine(file.DirectoryName!, archive.EntryName))),
+                    ArchiveLocation archive => song.Copy().SetLocation(FileLocation.Of(Path.Combine(file.DirectoryName!, archive.EntryName))),
                     FileLocation => song,
                     _ => throw new UnreachableException(),
                 };

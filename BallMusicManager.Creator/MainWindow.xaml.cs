@@ -77,7 +77,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void SavePlaylist(object sender, RoutedEventArgs e)
+    private async void SavePlaylist(object sender, RoutedEventArgs e)
     {
         if (_isSaving)
         {
@@ -86,7 +86,7 @@ public sealed partial class MainWindow : Window
         
         var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", "plz");
 
-        dialog.GetFileInfo().Consume(async file =>
+        await dialog.GetFileInfo().ConsumeAsync(async file =>
         {
 
             _isSaving = true;
@@ -98,21 +98,16 @@ public sealed partial class MainWindow : Window
             bar.Show();
 
 
-            (await Task.Run(() => PlaylistBuilder.ToArchive(file, Playlist))).Consume(
-                error: () =>
-                {
-                    MessageBoxHelper.ShowError($"Failed saving Playlist", owner: this);
-                }
-            );
+            (await Task.Run(() => PlaylistBuilder.ToArchive(file, Playlist))).Consume(error: e => MessageBoxHelper.ShowError($"Failed saving Playlist:\n{e.Message}", owner: this));
 
             bar.Close();
             _isSaving = false;
         });
     }
 
-    private void OpenPlaylist(object sender, RoutedEventArgs e)
+    private async void OpenPlaylist(object sender, RoutedEventArgs e)
     {
-        new OpenFileDialog().AddExtensionFilter("Playlist", "plz").GetFileInfo().Consume(async file =>
+        await new OpenFileDialog().AddExtensionFilter("Playlist", "plz").GetFileInfo().ConsumeAsync(async file =>
         {
             var bar = new LoadingBar(true)
             {
@@ -131,9 +126,8 @@ public sealed partial class MainWindow : Window
             {
                 _ = error switch
                 {
-                    FileNotFoundException => MessageBoxHelper.ShowError($"Could not find {file}", owner: this),
-                    InvalidDataException => MessageBoxHelper.ShowError($"{file} is not a valid playlist file", owner: this),
-                    _ => MessageBoxHelper.ShowError($"Failed opening Playlist ({error.Message})", owner: this),
+                    FileNotFoundException => MessageBoxHelper.ShowError($"Could not find\t{file}", owner: this),
+                    _ => MessageBoxHelper.ShowError($"Failed opening Playlist:\n{error.Message}", owner: this),
                 };
             });
 

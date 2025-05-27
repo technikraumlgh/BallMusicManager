@@ -47,8 +47,9 @@ public sealed class SongBuilder
         Artist = song.Artist;
         Dance = song.Dance;
         Duration = song.Duration;
+        hash = song.hash;
     }
-    
+
     public SongBuilder(Song song)
     {
         Path = song.Path;
@@ -143,16 +144,7 @@ public sealed class SongBuilder
         };
     }
 
-    public SongBuilder Copy() => new()
-    {
-        Path = Path,
-        Index = Index,
-        Title = Title,
-        Artist = Artist,
-        Dance = Dance,
-        Duration = Duration,
-        hash = hash,
-    };
+    public SongBuilder Copy() => new(this);
 
     public Song Build() => new(Path, Index, Title, Artist, Dance, Duration);
 }

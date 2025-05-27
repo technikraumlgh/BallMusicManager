@@ -144,7 +144,9 @@ public sealed partial class MainWindow : Window, IHostProvider
 
         dialog.GetFileInfo().ToResult()
             .Map(PlaylistBuilder.FromArchive)
-            .Consume(playlist => Playlist = playlist);
+            .Consume(
+                success: playlist => Playlist = playlist,
+                error: e => MessageBoxHelper.ShowError($"Playlist corrupted:\n{e.Message}", owner: this));
     }
 
     private void OpenMessageWindow(object sender, RoutedEventArgs e)

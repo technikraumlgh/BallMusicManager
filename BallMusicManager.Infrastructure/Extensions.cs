@@ -16,6 +16,11 @@ public static class ZipArchiveExtensions
         archive.GetEntry(entryName)?.Delete();
         return archive.CreateEntry(entryName);
     }
+
+    public static Option<ZipArchiveEntry> TryGetEntry(this ZipArchive archive, string entryName)
+    {
+        return archive.GetEntry(entryName);
+    }
 }
 
 public static class DirectoryInfoExtensions

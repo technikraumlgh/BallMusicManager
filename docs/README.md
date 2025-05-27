@@ -1,5 +1,5 @@
 # Dokumentation
-## Player
+## [Player](player.md)
 ## Creator
 ## Server
 ## Technisches
