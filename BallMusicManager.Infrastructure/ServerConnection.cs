@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace BallMusicManager.Infrastructure;
@@ -32,7 +33,6 @@ public sealed class ServerConnection : IDisposable
         {
             Timeout = TimeSpan.FromMilliseconds(500),
         };
-        httpClient.DefaultRequestHeaders.Add("X-API-KEY", HostProvider.Password);
         _ = Ping($"http://{HostProvider.Host}/");
     }
 
@@ -50,46 +50,33 @@ public sealed class ServerConnection : IDisposable
 
     public void SendSongToServer(SongDTO song)
     {
-        _ = SendSong("playing", song);
+        _ = PostRequest("playing", song);
     }
 
     public void SendNextSongToServer(SongDTO song)
     {
-        _ = SendSong("nextup", song);
+        _ = PostRequest("nextup", song);
     }
 
-    private async Task SendSong(string endpoint, SongDTO song)
+    public Task SendMessage(string msg) => PostRequest("message", new MessageDTO(msg));
+    public Task SendNews(string news) => PostRequest("news", new MessageDTO(news));
+
+    private async Task PostRequest<T>(string endpoint, T data)
     {
         try
         {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/{endpoint}", song);
-            HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
-        }
-        catch
-        {
-            HostProvider.SetServerOnline(false);
-        }
-    }
+            var request = new HttpRequestMessage(HttpMethod.Post, $"http://{HostProvider.Host}/{endpoint}")
+            {
+                Content = JsonContent.Create(data)
+            };
+            if (!string.IsNullOrEmpty(HostProvider.Password))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue(HostProvider.Password);
+            }
 
-    public async Task SendMessage(string msg)
-    {
-        try
-        {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/message", new MessageDTO(msg));
-            HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
-        }
-        catch
-        {
-            HostProvider.SetServerOnline(false);
-        }
-    }
+            var result = await httpClient.SendAsync(request);
 
-    public async Task SendNews(string news)
-    {
-        try
-        {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/news", new MessageDTO(news));
-            HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
+            HostProvider.SetServerOnline(result.StatusCode is HttpStatusCode.OK);
         }
         catch
         {

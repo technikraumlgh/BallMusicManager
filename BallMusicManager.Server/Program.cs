@@ -17,8 +17,6 @@ builder.Host.UseDefaultServiceProvider((context, options) =>
     options.ValidateOnBuild = true;
 });
 
-//builder.Services.AddCors(options => options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
-//builder.Services.AddCors();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<DisplayService>();
 
@@ -37,11 +35,12 @@ LocalIPAddress().Map(ip => $"http://{ip}").Consume(url =>
     logger.LogWarning("No public IP found!");
 });
 
-var apikey = Guid.NewGuid().ToString();
-logger.LogInformation("API key for this session: {key}", apikey);
-
-app.UseRouting();
-//app.UseCors();
+var useAuth = !args.Contains("--noauth");
+var activeApiKey = useAuth ? Guid.NewGuid().ToString()[..23] : string.Empty;
+if (useAuth)
+{
+    logger.LogInformation("API key for this session: {key}", activeApiKey);
+}
 
 var displayService = app.Services.GetService<DisplayService>()!;
 
@@ -95,13 +94,11 @@ app.Run();
 async ValueTask<object?> RequiresApiKey(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
 {
     var httpContext = context.HttpContext;
-    var apiKey = httpContext.Request.Headers["X-API-KEY"].FirstOrDefault();
+    var requestApiKey = httpContext.Request.Headers.Authorization.FirstOrDefault();
 
-    if (apiKey != apikey)
+    if (useAuth && requestApiKey != activeApiKey)
     {
-        httpContext.Response.StatusCode = 401;
-        await httpContext.Response.WriteAsync("Invalid API Key");
-        return null!;
+        return Results.Unauthorized();
     }
 
     return await next(context);
