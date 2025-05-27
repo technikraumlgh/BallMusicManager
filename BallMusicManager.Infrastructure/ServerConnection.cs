@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 
 namespace BallMusicManager.Infrastructure;
 
-public sealed class ServerConnection
+public sealed class ServerConnection : IDisposable
 {
     public PlaylistPlayer? Playlist
     {
@@ -23,10 +23,16 @@ public sealed class ServerConnection
     }
     private readonly IHostProvider HostProvider;
     private PlaylistPlayer? playlistPlayer;
+    private HttpClient httpClient;
 
     public ServerConnection(IHostProvider hostProvider)
     {
         HostProvider = hostProvider;
+        httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromMilliseconds(500),
+        };
+        httpClient.DefaultRequestHeaders.Add("X-API-KEY", HostProvider.Password);
         _ = Ping($"http://{HostProvider.Host}/");
     }
 
@@ -54,10 +60,9 @@ public sealed class ServerConnection
 
     private async Task SendSong(string endpoint, SongDTO song)
     {
-        using var httpClient = new HttpClient();
         try
         {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/{endpoint}?key={HostProvider.Password}", song);
+            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/{endpoint}", song);
             HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
         }
         catch
@@ -68,10 +73,9 @@ public sealed class ServerConnection
 
     public async Task SendMessage(string msg)
     {
-        using var httpClient = new HttpClient();
         try
         {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/message?key={HostProvider.Password}", new MessageDTO(msg));
+            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/message", new MessageDTO(msg));
             HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
         }
         catch
@@ -82,10 +86,9 @@ public sealed class ServerConnection
 
     public async Task SendNews(string news)
     {
-        using var httpClient = new HttpClient();
         try
         {
-            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/news?key={HostProvider.Password}", new MessageDTO(news));
+            var res = await httpClient.PostAsJsonAsync($"http://{HostProvider.Host}/news", new MessageDTO(news));
             HostProvider.SetServerOnline(res.StatusCode is HttpStatusCode.OK);
         }
         catch
@@ -97,6 +100,7 @@ public sealed class ServerConnection
     private async Task Ping(string url)
     {
         using var httpClient = new HttpClient();
+        httpClient.Timeout = TimeSpan.FromMilliseconds(500);
         try
         {
             await httpClient.GetAsync(url);
@@ -108,6 +112,10 @@ public sealed class ServerConnection
         }
     }
 
+    public void Dispose()
+    {
+        httpClient.Dispose();
+    }
 }
 
 public interface IHostProvider

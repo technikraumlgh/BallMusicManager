@@ -57,6 +57,12 @@ public sealed partial class MainWindow : Window, IHostProvider
         Timer.Interval = TimeSpan.FromMilliseconds(250);
         //Closing += MusicPlayer.OnExit;
         Timer.Tick += UpdateDuration;
+
+        Closed += (_, _) =>
+        {
+            _messageWindow?.Close();
+            Server.Dispose();
+        };
     }
 
     public void SetServerOnline(bool value)
@@ -149,8 +155,24 @@ public sealed partial class MainWindow : Window, IHostProvider
                 error: e => MessageBoxHelper.ShowError($"Playlist corrupted:\n{e.Message}", owner: this));
     }
 
+    private MessageWindow? _messageWindow;
     private void OpenMessageWindow(object sender, RoutedEventArgs e)
     {
-        new MessageWindow(Server).Show();
+        if (_messageWindow is not null)
+        {
+            if (!_messageWindow.Activate())
+            {
+                _messageWindow = null;
+            }
+        }
+
+        if (_messageWindow is null)
+        {
+            _messageWindow = new MessageWindow(Server)
+            {
+                Owner = this
+            };
+            _messageWindow.Show();
+        }
     }
 }

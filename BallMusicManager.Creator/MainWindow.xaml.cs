@@ -317,11 +317,11 @@ public sealed partial class MainWindow : Window
 
         if (dashboard is null)
         {
-            dashboard = new Dashboard(Playlist.Select(song => song.Build()).ToImmutableArray());
+            dashboard = new Dashboard([.. Playlist.Select(song => song.Build())]);
             dashboard.Show();
         }
     }
 
 
-    private void UpdateDashboard(object? sender = null, EventArgs? e = default) => dashboard?.Update(Playlist.Select(song => song.Build()).ToImmutableArray());
+    private void UpdateDashboard(object? sender = null, EventArgs? e = default) => dashboard?.Update([.. Playlist.Select(song => song.Build())]);
 }
