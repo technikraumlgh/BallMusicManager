@@ -6,25 +6,8 @@ namespace BallMusicManager.Infrastructure;
 
 public sealed class ServerConnection : IDisposable
 {
-    public PlaylistPlayer? Playlist
-    {
-        get => playlistPlayer;
-        set
-        {
-            if (playlistPlayer is not null)
-            {
-                playlistPlayer.Player.OnSongChanged -= Update;
-            }
-            playlistPlayer = value;
-
-            if (playlistPlayer is null) return;
-
-            playlistPlayer.Player.OnSongChanged += Update;
-        }
-    }
     private readonly IHostProvider HostProvider;
-    private PlaylistPlayer? playlistPlayer;
-    private HttpClient httpClient;
+    private readonly HttpClient httpClient;
 
     public ServerConnection(IHostProvider hostProvider)
     {
@@ -34,12 +17,6 @@ public sealed class ServerConnection : IDisposable
             Timeout = TimeSpan.FromMilliseconds(500),
         };
         _ = Ping($"http://{HostProvider.Host}/");
-    }
-
-    public void Update()
-    {
-        SendSongToServer(SongDTO.From(Playlist?.Current));
-        SendNextSongToServer(SongDTO.From(Playlist?.Peek));
     }
 
     public void SendNothing()

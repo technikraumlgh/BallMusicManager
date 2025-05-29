@@ -12,15 +12,18 @@ namespace BallMusicManager.Player;
 public sealed partial class MainWindow : Window, IHostProvider
 {
     private readonly DispatcherTimer Timer = new();
+    private MainViewModel ViewModel => (MainViewModel) DataContext;
     private PlaylistPlayer? Playlist
     {
         get => playlist;
         set
         {
+
             Timer.Stop();
             SongsGrid.ItemsSource = null;
             if (playlist is not null)
             {
+                playlist.Player.OnSongChanged -= SendCurrentSongsToServer;
                 playlist.Player.OnSongStarted -= Timer.Start;
                 playlist.Player.OnSongContinued -= Timer.Start;
                 playlist.Player.OnSongPaused -= Timer.Stop;
@@ -30,17 +33,17 @@ public sealed partial class MainWindow : Window, IHostProvider
             playlist = value;
 
             if (playlist is null) return;
+            playlist.Player.OnSongChanged += SendCurrentSongsToServer;
             playlist.Player.OnSongStarted += Timer.Start;
             playlist.Player.OnSongContinued += Timer.Start;
             playlist.Player.OnSongPaused += Timer.Stop;
             playlist.Player.OnSongChanged += UpdateInfo;
-            Server.Playlist = playlist;
             SongsGrid.ItemsSource = playlist.Songs;
             UpdatePlaylistInfo();
             UpdateInfo();
 
             if (playlist.IsEmpty) return;
-            MainViewModel.Instance.HasPlaylist = true;
+            ViewModel.HasPlaylist = true;
             SongsGrid.SelectedIndex = 0;
         }
     }
@@ -55,7 +58,6 @@ public sealed partial class MainWindow : Window, IHostProvider
         InitializeComponent();
         Server = new(this);
         Timer.Interval = TimeSpan.FromMilliseconds(250);
-        //Closing += MusicPlayer.OnExit;
         Timer.Tick += UpdateDuration;
 
         Closed += (_, _) =>
@@ -83,7 +85,7 @@ public sealed partial class MainWindow : Window, IHostProvider
         {
             Playlist.Play();
             PlayToggle.Content = "Pause";
-            Server.Update();
+            SendCurrentSongsToServer();
         }
     }
 
@@ -95,7 +97,7 @@ public sealed partial class MainWindow : Window, IHostProvider
 
     private void UpdateServer(object sender, RoutedEventArgs args)
     {
-        Server.Update();
+        SendCurrentSongsToServer();
     }
 
     private void UpdateInfo()
@@ -108,7 +110,7 @@ public sealed partial class MainWindow : Window, IHostProvider
         PlaybackBar.Maximum = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         PlaybackBar.Value = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         UpdateDuration();
-        Server.Update();
+        SendCurrentSongsToServer();
     }
 
     private void UpdatePlaylistInfo()
@@ -155,6 +157,12 @@ public sealed partial class MainWindow : Window, IHostProvider
                 error: e => MessageBoxHelper.ShowError($"Playlist corrupted:\n{e.Message}", owner: this));
     }
 
+    public void SendCurrentSongsToServer()
+    {
+        Server.SendSongToServer(SongDTO.From(Playlist?.Current));
+        Server.SendNextSongToServer(SongDTO.From(Playlist?.Peek));
+    }
+
     private MessageWindow? _messageWindow;
     private void OpenMessageWindow(object sender, RoutedEventArgs e)
     {
@@ -168,10 +176,7 @@ public sealed partial class MainWindow : Window, IHostProvider
 
         if (_messageWindow is null)
         {
-            _messageWindow = new MessageWindow(Server)
-            {
-                Owner = this
-            };
+            _messageWindow = new MessageWindow(Server);
             _messageWindow.Show();
         }
     }
