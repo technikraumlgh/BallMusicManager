@@ -1,14 +1,15 @@
-﻿using System.Collections.Immutable;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using BallMusic.WPF.FileDialogs;
 using BallMusic.WPF;
+using BallMusic.WPF.FileDialogs;
 
 namespace BallMusicManager.Creator;
 
@@ -57,7 +58,7 @@ public sealed partial class MainWindow : Window
     private bool shouldSaveBeforeClosing = true;
     private async void OnWindowClosingAsync(object? sender, CancelEventArgs e)
     {
-        if(_isSaving)
+        if (_isSaving)
         {
             e.Cancel = true;
             return;
@@ -83,7 +84,7 @@ public sealed partial class MainWindow : Window
         {
             return;
         }
-        
+
         var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", "plz");
 
         await dialog.GetFileInfo().ConsumeAsync(async file =>
@@ -322,6 +323,55 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private void ReplaceFile_Click(object sender, RoutedEventArgs e)
+    {
+
+    }
+
+    private void ExportFile_Click(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not DependencyObject source || source.FindParentOrSelf<DataGridRow>()?.Item is not SongBuilder song)
+        {
+            return;
+        }
+
+        var folderDialog = new SaveFileDialog();
+        var targetFile = folderDialog.GetPath();
+
+        targetFile.Consume(success: (targetFile) =>
+        {
+            if (Path.Exists(targetFile) && MessageBoxHelper.Ask("File already exists.\nDo you want to override?", "File already exists", owner: this) is not MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            switch (song.Path)
+            {
+                case ArchiveLocation archiveLocation:
+                    using (var archiveStream = archiveLocation.ArchiveFileInfo.OpenRead())
+                    using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read))
+                    {
+                        var entry = archive.GetEntry(archiveLocation.EntryName) ?? throw new Exception("File not found");
+                        entry.ExtractToFile(targetFile);
+                        using var songFile = TagLib.File.Create(targetFile);
+                        songFile.Tag.Performers = [song.Artist];
+                        songFile.Save();
+                    }
+                    return;
+
+                case FileLocation fileLocation:
+                    fileLocation.FileInfo.CopyTo(targetFile);
+                    using (var songFile = TagLib.File.Create(targetFile))
+                    {
+                        songFile.Tag.Performers = [song.Artist];
+                        songFile.Save();
+                    }
+                    return;
+                default:
+                    throw new UnreachableException($"Song with {song.Path.GetType().Name} cannot be exported");
+            }
+        });
+    }
 
     private void UpdateDashboard(object? sender = null, EventArgs? e = default) => dashboard?.Update([.. Playlist.Select(song => song.Build())]);
 }

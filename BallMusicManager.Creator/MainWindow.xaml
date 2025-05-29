@@ -66,6 +66,12 @@
                   MouseDoubleClick="SongsGrid_MouseDoubleClick"
                   PreviewKeyDown="LibraryGrid_PreviewKeyDown"
                   Grid.Row="2" Grid.Column="1" Margin="4 0 0 8">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Replace File" Click="ReplaceFile_Click"/>
+                    <MenuItem Header="Export" Click="ExportFile_Click"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}"/>
                 <DataGridTextColumn Header="Tanz" FontSize="15" Binding="{Binding Dance}"/>

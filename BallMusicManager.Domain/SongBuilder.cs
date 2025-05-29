@@ -137,7 +137,7 @@ public sealed class SongBuilder
         return split.Length switch
         {
             1 => SetIndex(-1).SetTitle(fileName),
-            2 => SetIndex(-1).SetTitle(split[1]).SetDanceFromSlug(split[0]), // is this the best?
+            2 => SetIndex(-1).SetTitle(split[1]).SetDanceFromSlug(split[0]), // the export file function follows this pattern to allow for quick reimports
             3 => SetIndex(int.TryParse(split[0], out var index) ? index : -1).SetDanceFromSlug(split[1]).SetTitle(split[2]),
             > 3 => SetIndex(int.TryParse(split[0], out var index) ? index : -1).SetDanceFromSlug(split[1]).SetTitle(string.Join(' ', split.Skip(2))),
             _ => throw new ArgumentException($"{fileName} does not match naming conventions")
