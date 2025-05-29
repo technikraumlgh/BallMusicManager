@@ -12,7 +12,7 @@ public static class SongBuilderExtensions
         return songBuilder.SetDuration(file.Properties.Duration).SetArtist(file.Tag.FirstPerformer);
     }
 
-    public static Option<Song> FromPath(FileInfo fileInfo)
+    public static Option<Song> FromFileInfo(FileInfo fileInfo)
     {
         var fileName = Path.GetFileNameWithoutExtension(fileInfo.FullName);
 

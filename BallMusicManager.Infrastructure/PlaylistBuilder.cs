@@ -11,7 +11,7 @@ public static class PlaylistBuilder
     public static PlaylistPlayer FromFolder(DirectoryInfo folder)
     {
         var files = folder.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly).Where(ValidFile);
-        return new(folder.FullName, files.Select(SongBuilderExtensions.FromPath).WhereSuccess());
+        return new(folder.FullName, files.Select(SongBuilderExtensions.FromFileInfo).WhereSuccess());
     }
 
     public static PlaylistPlayer FromFile(FileInfo file)

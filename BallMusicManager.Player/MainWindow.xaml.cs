@@ -150,11 +150,14 @@ public sealed partial class MainWindow : Window, IHostProvider
     {
         var dialog = new OpenFileDialog().AddExtensionFilter("Playlist", "plz");
 
-        dialog.GetFileInfo().ToResult()
-            .Map(PlaylistBuilder.FromArchive)
-            .Consume(
+        // we swallow error from GetFileInfo because it means the user canceled
+        dialog.GetFileInfo().Consume(
+            success: (file) => PlaylistBuilder.FromArchive(file).Consume(
                 success: playlist => Playlist = playlist,
-                error: e => MessageBoxHelper.ShowError($"Playlist corrupted:\n{e.Message}", owner: this));
+                error: e => MessageBoxHelper.ShowError($"Playlist corrupted:\n{e.Message}", owner: this)
+            )
+        );
+            
     }
 
     public void SendCurrentSongsToServer()
