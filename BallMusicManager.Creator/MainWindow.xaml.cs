@@ -330,47 +330,52 @@ public sealed partial class MainWindow : Window
 
     private void ExportFile_Click(object sender, RoutedEventArgs e)
     {
-        if (e.OriginalSource is not DependencyObject source || source.FindParentOrSelf<DataGridRow>()?.Item is not SongBuilder song)
-        {
-            return;
+        foreach (var song in LibraryGrid.SelectedItems.Cast<SongBuilder>())
+        {   
+            var extension = song.Path switch
+            {
+                ArchiveLocation archiveLocation => Path.GetExtension(archiveLocation.EntryName.AsSpan()),
+                FileLocation fileLocation => fileLocation.FileInfo.Extension,
+                _ => throw new UnreachableException($"Song with {song.Path.GetType().Name} cannot be exported"),
+            };
+
+            var folderDialog = new SaveFileDialog()
+            {
+                Title = $"Save {song.Title} by {song.Artist}",
+                DefaultFileName = $"{song.Title}_{song.Dance}{extension}", // this allows for a quick reimport (see SongBuilder.FromFileName) 
+            };
+            var targetFile = folderDialog.GetPath();
+
+            targetFile.Consume(success: (targetFile) =>
+            {
+                if (Path.Exists(targetFile) && MessageBoxHelper.Ask("File already exists.\nDo you want to override?", "File already exists", owner: this) is not MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                switch (song.Path)
+                {
+                    case ArchiveLocation archiveLocation:
+                        using (var archiveStream = archiveLocation.ArchiveFileInfo.OpenRead())
+                        using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read))
+                        {
+                            var entry = archive.GetEntry(archiveLocation.EntryName) ?? throw new Exception("File not found");
+                            entry.ExtractToFile(targetFile);
+                        }
+                        break;
+
+                    case FileLocation fileLocation:
+                        fileLocation.FileInfo.CopyTo(targetFile);
+                        break;
+                    default:
+                        throw new UnreachableException($"Song with {song.Path.GetType().Name} cannot be exported");
+                }
+
+                using var songFile = TagLib.File.Create(targetFile);
+                songFile.Tag.Performers = song.Artist.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                songFile.Save();
+            });
         }
-
-        var folderDialog = new SaveFileDialog();
-        var targetFile = folderDialog.GetPath();
-
-        targetFile.Consume(success: (targetFile) =>
-        {
-            if (Path.Exists(targetFile) && MessageBoxHelper.Ask("File already exists.\nDo you want to override?", "File already exists", owner: this) is not MessageBoxResult.Yes)
-            {
-                return;
-            }
-
-            switch (song.Path)
-            {
-                case ArchiveLocation archiveLocation:
-                    using (var archiveStream = archiveLocation.ArchiveFileInfo.OpenRead())
-                    using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read))
-                    {
-                        var entry = archive.GetEntry(archiveLocation.EntryName) ?? throw new Exception("File not found");
-                        entry.ExtractToFile(targetFile);
-                        using var songFile = TagLib.File.Create(targetFile);
-                        songFile.Tag.Performers = [song.Artist];
-                        songFile.Save();
-                    }
-                    return;
-
-                case FileLocation fileLocation:
-                    fileLocation.FileInfo.CopyTo(targetFile);
-                    using (var songFile = TagLib.File.Create(targetFile))
-                    {
-                        songFile.Tag.Performers = [song.Artist];
-                        songFile.Save();
-                    }
-                    return;
-                default:
-                    throw new UnreachableException($"Song with {song.Path.GetType().Name} cannot be exported");
-            }
-        });
     }
 
     private void UpdateDashboard(object? sender = null, EventArgs? e = default) => dashboard?.Update([.. Playlist.Select(song => song.Build())]);

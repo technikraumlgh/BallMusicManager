@@ -19,6 +19,12 @@ public sealed class SaveFileDialog : IFileDialog
         init => _dialog.Title = value;
     }
 
+    public string DefaultFileName
+    {
+        get => _dialog.FileName;
+        init => _dialog.FileName = value;
+    }
+
     public bool RestoreDirectory
     {
         get => _dialog.RestoreDirectory;

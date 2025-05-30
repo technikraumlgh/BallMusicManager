@@ -131,15 +131,15 @@ public sealed class SongBuilder
 
     public SongBuilder FromFileName(string fileName)
     {
-        // this complicated logic exists to support the old naming convention Index_Dance_SongName
-        // you might want to delete parts of this in the future to prevent wierd interpretations
+        // this complicated logic exists to support the old naming convention Index_Dance_Title
+        // you may want to change parts of this in the future to prevent wierd interpretations
         var split = fileName.Split("_");
-        return split.Length switch
+        return split switch
         {
-            1 => SetIndex(-1).SetTitle(fileName),
-            2 => SetIndex(-1).SetTitle(split[1]).SetDanceFromSlug(split[0]), // the export file function follows this pattern to allow for quick reimports
-            3 => SetIndex(int.TryParse(split[0], out var index) ? index : -1).SetDanceFromSlug(split[1]).SetTitle(split[2]),
-            > 3 => SetIndex(int.TryParse(split[0], out var index) ? index : -1).SetDanceFromSlug(split[1]).SetTitle(string.Join(' ', split.Skip(2))),
+            [var title] => SetIndex(-1).SetTitle(title),
+            [var title, var dance] => SetIndex(-1).SetTitle(title).SetDanceFromSlug(dance), // the export file function follows this pattern to allow for quick reimports
+            [var indexRaw, var dance, var title] => SetIndex(int.TryParse(indexRaw, out var index) ? index : -1).SetDanceFromSlug(dance).SetTitle(title),
+            [var indexRaw, var dance, ..] => SetIndex(int.TryParse(indexRaw, out var index) ? index : -1).SetDanceFromSlug(dance).SetTitle(string.Join(' ', split.AsSpan(2)!)),
             _ => throw new ArgumentException($"{fileName} does not match naming conventions")
         };
     }
