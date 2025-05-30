@@ -325,34 +325,47 @@ public sealed partial class MainWindow : Window
 
     private void ReplaceFile_Click(object sender, RoutedEventArgs e)
     {
+        if (LibraryGrid.SelectedItems.Count is 0)
+        {
+            return;
+        }
 
+        if (LibraryGrid.SelectedItems.Count is > 1)
+        {
+            MessageBoxHelper.ShowWaring("More than one Song selected.\nPlease select only one song to replace");
+            return;
+        }
+
+        var song = (SongBuilder)LibraryGrid.SelectedItems[0]!;
+
+        var fileDialog = new OpenFileDialog
+        {
+            Title = $"Select file to override {song.Title} ({song.Dance}) by {song.Artist} with",
+        };
+
+        var fileInfo = fileDialog.GetFileInfo();
+
+        fileInfo.Consume(fileInfo =>
+        {
+            song.Path = new FileLocation(fileInfo);
+        });
     }
 
     private void ExportFile_Click(object sender, RoutedEventArgs e)
     {
         foreach (var song in LibraryGrid.SelectedItems.Cast<SongBuilder>())
-        {   
-            var extension = song.Path switch
+        {
+            var fileDialog = new SaveFileDialog
             {
-                ArchiveLocation archiveLocation => Path.GetExtension(archiveLocation.EntryName.AsSpan()),
-                FileLocation fileLocation => fileLocation.FileInfo.Extension,
-                _ => throw new UnreachableException($"Song with {song.Path.GetType().Name} cannot be exported"),
+                Title = $"Save {song.Title} ({song.Dance}) by {song.Artist}",
+                DefaultFileName = $"{song.Title}_{song.Dance}", // this allows for a quick reimport (see SongBuilder.FromFileName) 
             };
+            var targetFile = fileDialog.GetPath();
 
-            var folderDialog = new SaveFileDialog()
-            {
-                Title = $"Save {song.Title} by {song.Artist}",
-                DefaultFileName = $"{song.Title}_{song.Dance}{extension}", // this allows for a quick reimport (see SongBuilder.FromFileName) 
-            };
-            var targetFile = folderDialog.GetPath();
+            // SaveFileDialog already asks the user whether they want to override the selected file
 
             targetFile.Consume(success: (targetFile) =>
             {
-                if (Path.Exists(targetFile) && MessageBoxHelper.Ask("File already exists.\nDo you want to override?", "File already exists", owner: this) is not MessageBoxResult.Yes)
-                {
-                    return;
-                }
-
                 switch (song.Path)
                 {
                     case ArchiveLocation archiveLocation:
@@ -360,21 +373,58 @@ public sealed partial class MainWindow : Window
                         using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read))
                         {
                             var entry = archive.GetEntry(archiveLocation.EntryName) ?? throw new Exception("File not found");
-                            entry.ExtractToFile(targetFile);
+                            entry.ExtractToFile(targetFile, overwrite: true);
                         }
                         break;
 
                     case FileLocation fileLocation:
-                        fileLocation.FileInfo.CopyTo(targetFile);
+                        fileLocation.FileInfo.CopyTo(targetFile, overwrite: true);
                         break;
                     default:
                         throw new UnreachableException($"Song with {song.Path.GetType().Name} cannot be exported");
                 }
 
+                // lets guess the file extension (gets lost in the libary archive)
+                Span<byte> buffer = stackalloc byte[16];
+                using (var stream = new FileStream(targetFile, FileMode.Open, FileAccess.Read))
+                {
+                    stream.ReadExactly(buffer);
+                }
+
+                var extension = buffer switch
+                {
+                    [0x49, 0x44, 0x33, ..] => ".mp3", // 'ID3'
+                    [0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11, 0xA6, 0xD9, 0x00, 0xAA, 0x00, 0x62, 0xCE, 0x6C, ..] => ".wma", // guid
+                    [0x52, 0x49, 0x46, 0x46, _, _, _, _, 0x57, 0x41, 0x56, 0x45, ..] => ".wav", // 'FIFF....WAVE'
+                    [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41, ..] => ".m4a", // '....ftypM4A....'
+                    [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x64, 0x61, 0x73, 0x68, ..] => ".mp4", // '....ftypdash....'
+                    _ => "",
+                };
+
+                if (!string.IsNullOrEmpty(extension))
+                {
+                    var newName = $"{targetFile}{extension}";
+                    File.Move(targetFile, newName, overwrite: true);
+                    targetFile = newName;
+                }
+
+                TryWriteMetadata(targetFile, song);
+            });
+        }
+
+        static void TryWriteMetadata(string targetFile, SongBuilder song)
+        {
+            try
+            {
                 using var songFile = TagLib.File.Create(targetFile);
+                songFile.Tag.Title = song.Title;
                 songFile.Tag.Performers = song.Artist.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 songFile.Save();
-            });
+            }
+            catch (Exception)
+            {
+                // failes when the target file has no extension
+            }
         }
     }
 
