@@ -73,7 +73,7 @@ public sealed class SongLocationJsonConverter : JsonConverter<SongLocation>
 
         if (reader.TokenType != JsonTokenType.StartObject)
         {
-            throw new JsonException();
+            throw new JsonException("Expected an object");
         }
 
         reader.Read();
