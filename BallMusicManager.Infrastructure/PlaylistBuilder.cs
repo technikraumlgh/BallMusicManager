@@ -6,7 +6,7 @@ namespace BallMusicManager.Infrastructure;
 
 public static class PlaylistBuilder
 {
-    private static readonly ImmutableHashSet<string> AllowedFileTypes = [".mp3", ".wav", ".mp4", ".acc", ".m4a"];
+    private static readonly ImmutableHashSet<string> AllowedFileTypes = [".mp3", ".wav", ".m4a"];
 
     public static PlaylistPlayer FromFolder(DirectoryInfo folder)
     {
