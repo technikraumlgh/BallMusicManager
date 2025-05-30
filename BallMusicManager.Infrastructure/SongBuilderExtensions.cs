@@ -9,23 +9,12 @@ public static class SongBuilderExtensions
             FileLocation location => location.FileInfo.FullName,
             _ => throw new ArgumentException("Cannot read metadata from a song without a file"),
         });
-        return songBuilder.SetDuration(file.Properties.Duration).SetArtist(string.Join(", ", file.Tag.Performers));
-    }
 
-    public static Option<Song> FromFileInfo(FileInfo fileInfo)
-    {
-        var fileName = Path.GetFileNameWithoutExtension(fileInfo.FullName);
+        if (file.Tag.Performers.Length > 0)
+        {
+            songBuilder.SetArtist(string.Join(", ", file.Tag.Performers));
+        }
 
-        try
-        {
-            return new SongBuilder()
-                .SetLocation(fileInfo)
-                .FromMetaData()
-                .FromFileName(fileName).Build();
-        }
-        catch
-        {
-            return default;
-        }
+        return songBuilder.SetDuration(file.Properties.Duration);
     }
 }

@@ -140,7 +140,7 @@ public sealed class SongBuilder
             [var title, var dance] => SetIndex(-1).SetTitle(title).SetDanceFromSlug(dance), // the export file function follows this pattern to allow for quick reimports
             [var indexRaw, var dance, var title] => SetIndex(int.TryParse(indexRaw, out var index) ? index : -1).SetDanceFromSlug(dance).SetTitle(title),
             [var indexRaw, var dance, ..] => SetIndex(int.TryParse(indexRaw, out var index) ? index : -1).SetDanceFromSlug(dance).SetTitle(string.Join(' ', split.AsSpan(2)!)),
-            _ => throw new ArgumentException($"{fileName} does not match naming conventions")
+            _ => this,
         };
     }
 

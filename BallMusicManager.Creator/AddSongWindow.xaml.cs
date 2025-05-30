@@ -7,6 +7,7 @@ namespace BallMusicManager.Creator;
 public sealed partial class AddSongWindow : Window
 {
     public SongBuilder Song { get; private set; }
+    
     public AddSongWindow(FileInfo fileInfo)
     {
         InitializeComponent();
@@ -15,17 +16,12 @@ public sealed partial class AddSongWindow : Window
         PathText.Text = fileInfo.FullName;
         Song = new SongBuilder()
             .SetLocation(fileInfo)
+            .FromFileName(Path.GetFileNameWithoutExtension(fileInfo.Name))
             .FromMetaData();
 
-
-        try
-        {
-            Song.FromFileName(Path.GetFileNameWithoutExtension(fileInfo.Name));
-            TitleField.Text = Song.Title;
-            ArtistField.Text = Song.Artist;
-            DanceField.Text = Song.Dance;
-        }
-        catch { }
+        TitleField.Text = Song.Title;
+        ArtistField.Text = Song.Artist;
+        DanceField.Text = Song.Dance;
     }
 
     private void AddSong(object sender, RoutedEventArgs? e = default)
