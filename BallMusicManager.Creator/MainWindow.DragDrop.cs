@@ -75,14 +75,21 @@ public partial class MainWindow
 
         var paths = e.Data.GetData(DataFormats.FileDrop) as string[] ?? [];
 
-        var files = paths.SelectMany(path => Directory.Exists(path)
-            ? Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
-            : [path]).Where(File.Exists)
+        var files = paths
+            .SelectMany(path => Directory.Exists(path) ? Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories) : [path])
+            .Where(File.Exists)
             .Select(file => new FileInfo(file));
 
+        var ignoredFiles = false;
 
-        foreach (var file in files.Where(file => file.Exists).Where(PlaylistBuilder.ValidFile))
+        foreach (var file in files)
         {
+            if (!PlaylistBuilder.ValidFile(file))
+            {
+                ignoredFiles = true;
+                continue;
+            }
+
             var window = new AddSongWindow(file)
             {
                 Owner = this,
@@ -93,7 +100,12 @@ public partial class MainWindow
                 continue;
             }
 
-            yield return Library.AddOrGetExisting(window.Song); //TODO: display duplicate waring? or just skip?
+            yield return Library.AddOrGetExisting(window.Song);
+        }
+
+        if (ignoredFiles)
+        {
+            MessageBoxHelper.ShowWaring("Some unsupported files where ignored.\nPlease use mp3 or m4a.", owner: this);
         }
     }
 
