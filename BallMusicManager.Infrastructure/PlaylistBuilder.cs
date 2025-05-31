@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Frozen;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.Json;
 
@@ -6,7 +7,7 @@ namespace BallMusicManager.Infrastructure;
 
 public static class PlaylistBuilder
 {
-    private static readonly ImmutableHashSet<string> AllowedFileTypes = [".mp3", ".wav", ".m4a"];
+    public static readonly FrozenSet<string> AllowedFileTypes = [".mp3", ".wav", ".m4a"];
 
     public static PlaylistPlayer FromFile(FileInfo file)
     {

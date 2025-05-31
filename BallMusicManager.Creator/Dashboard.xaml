@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Dashboard" Height="450" Width="800">
     <Window.Resources>
-        <local:SeverityToColorConverter x:Key="SeverityToColor" />
+        <local:SeverityToBrushConverter x:Key="SeverityToBrush" />
     </Window.Resources>
 
 
@@ -39,7 +39,7 @@
         <ListView x:Name="RecommendationsView" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Label FontSize="14" Content="{Binding Description}" Foreground="{Binding Severity, Converter={StaticResource SeverityToColor}}"/>
+                    <Label FontSize="14" Content="{Binding Description}" Foreground="{Binding Severity, Converter={StaticResource SeverityToBrush}}"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

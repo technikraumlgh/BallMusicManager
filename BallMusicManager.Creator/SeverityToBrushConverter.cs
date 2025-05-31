@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace BallMusicManager.Creator;
 
-internal sealed class SeverityToColorConverter : IValueConverter
+internal sealed class SeverityToBrushConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value switch
     {
