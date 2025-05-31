@@ -1,0 +1,37 @@
+# Playlist Creator
+Mit dem Playlist Creator können Playlisten für den [Player](player.md) erstellt werden. 
+
+## Library
+Auf der rechten Seite des Creators ist eine ausführliche Library mit vorbereiten Songs die du für deine Playlist benutzen kannst. Du kannst die Songs sortieren in dem du auf den Titel der entsprechenden Spalte klickst (z.B. klicke auf `Länge` um die Library nach Songlänge zu sortieten. Ein weiterer klick kehrt die Reihenfolge um). Mit der `Search` Leiste kann die Library nach Song Titel oder Künstler durchsucht werden.   
+
+## Playlist erstellen
+Auf der linken Seite ist eine noch leere Tabelle für deine Playlist. Um diese zu erstellen ziehe einfach Songs aus der Library an die gewünschte Stelle in der Playlist. Wenn du einen Song in der Playlist bzw. Library auswählst, syncronisiert sich die Auswahl mit der Library bzw. der Playlist. So kannst du schnell einen Song in der Library wieder finden bzw. schauen ob du einen Song bereits in der Playlist verwendest.
+
+## Dashboard
+Durch klicken auf `Dashboard` oben links im Fenster öffnet sich ein zweites Fenster, welches einen Überblick über die Playlist bietet und Anmerkungen zur Gestaltung gibt. 
+
+## Hinzufügen oder Ersetzen von Audiodateien
+Empfohlenes Format: `.m4a` oder `.mp3`<br>
+Es können jeder Zeit neue Songs hinzugefügt werden. Dazu den Song im entsprechenden Format aus dem Internet in möglichst hoher Qualität herrunterladen und per Drag & Drop in die Library hinzufügen (Wenn die Datei in die Playlist gedropped wird, wird diese sowohl zur Library als auch zur Playlist hinzugefügt). Danach erscheint ein Fenster in das der Titel, Künstler und entprechende Tanz eingetragen werden muss. Für den Tanz kann das Dropdown-Menu verwerndet werden. Diese Informationen bitte möglichst genau ausfüllen, da sie für alle sichtbar sein werden. (Bei Remixes bitte den originalen Author und Remix-Author angeben). Details von Songs können durch Doppelklick auf das entprechende Feld in der Library bearbeitet werden. Es können mehrere Dateien gleichzeitig oder sogar ganze Ordner hinzugefügt werden.
+
+Soll später das Audio eines Songs ersetzt werden, kann durch `Rechtsklick>Replace File` auf dem entsprechenden Song eine neue Datei ausgewählt werden.
+
+**Wichtig: Neue Audiodateien können erst von dir gelöscht werden, wenn sie in der Library gespeichert sind. Dazu `Library>Save` auswählen oder das Programm schließen.**
+
+## Tipps
+- Achte auf eine abwechslungsreiche Tanz und Song folge. Vermeide den gleichen Tanz zweimal hintereinander oder mehrere schnelle bzw. langsame Songs hintereinder. Erstelle eine Gute Mischung aus schnell und langsam sowie der Tanzarten.
+- Verwende überwiegend einfache standart Tänze die alle Tanzen können (Walzer, Discofox, ChaChaCha, Rumba, etc.). Die anderen Tänze (Jive, Salsa, Tango, Foxtrott, etc.) dürfen auch nicht fehlen, sollten aber nicht überwiegen. Dies ist besonders beim Mittelstufenball wichtig.
+- Der aller letze Song ist **immer** `Can You Feel The Love Tonight (Langsamer Walzer) von Elton John`.
+### Party Tipps
+- Davor wird aber noch ein bisschen Party gemacht. Realitisch gesehen ist jedoch nach 20-25 min die Stimmung weg. Dieser sollte also auf keinen Fall zu lange gehen, auch wenn es viele Songwünsche gibt.
+- Vor dem Party Teil am besten eine kurze Ansage, dass der Ball demnächst Vorbei ist und jetzt noch Party gemacht wird.  
+- Songs wie `Macarena` oder `YMCA` sind gute Starter für den Party teil.
+- `I Want It That Way (Backstreet Boys)` darf auch nicht fehlen.
+#### Typischer Party Teil:
+- I Want It That Way *(Leute in die Aula ziehen)*
+- YMCA *(Stimmung ankurbeln)*
+- Poker Face
+- I Love It
+- Gimme! Gimme! Gimme! (Remix)
+- And We Danced
+- Can You Feel The Love Tonight
