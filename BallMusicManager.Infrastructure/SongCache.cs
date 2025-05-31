@@ -26,15 +26,15 @@ public static class SongCache
         }
     }
 
-    public static FileInfo Cache(Stream stream, string name)
+    public static FileInfo Cache(Stream sourceStream, string name)
     {
         EnsureCacheExists();
 
         var file = CacheDirectory.File(name);
         if (!file.Exists)
         {
-            using var fileStream = file.Create();
-            stream.CopyTo(fileStream);
+            using var targetStream = file.Create();
+            sourceStream.CopyTo(targetStream);
         }
         return file;
     }
@@ -50,6 +50,7 @@ public static class SongCache
         if (CacheDirectory.Exists)
         {
             CacheDirectory.Delete(true);
+            CacheDirectory.Refresh();
         }
     }
 
@@ -59,6 +60,7 @@ public static class SongCache
         {
             CacheDirectory.Create();
             File.SetAttributes(CacheDirectory.FullName, FileAttributes.Hidden);
+            CacheDirectory.Refresh();
         }
     }
 }
