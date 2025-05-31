@@ -90,14 +90,14 @@ public static class PlaylistBuilder
     {
         if (!songs.Any())
         {
-            return new ArgumentNullException(nameof(songs), "playlist is empty");
+            return new ArgumentException("playlist is empty", nameof(songs));
         }
 
         return ToArchiveImpl(file, [.. songs.Select((song, index) => song.Copy().SetIndex(index))]);
     }
 
     private const int ARCHIVE_VERSION = 1;
-    private static ErrorState ToArchiveImpl(FileInfo archiveFile, SongBuilder[] songs)
+    private static ErrorState ToArchiveImpl(FileInfo archiveFile, ImmutableArray<SongBuilder> songs)
     {
         var usedEntries = new HashSet<string>();
         using var archive = archiveFile.Exists
@@ -107,7 +107,7 @@ public static class PlaylistBuilder
 
         foreach (var song in songs)
         {
-            if (usedEntries.Contains(song.FileHash)) //TODO: properly handle this case
+            if (usedEntries.Contains(song.FileHash)) // TODO: properly handle this case
             {
                 var other = songs.Where(other => song.FileHash == other.FileHash).FirstOrDefault();
                 return new UnreachableException($"{song.Path} produced an already existing hash!");
