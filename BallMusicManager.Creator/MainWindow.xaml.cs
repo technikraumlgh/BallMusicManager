@@ -343,7 +343,7 @@ public sealed partial class MainWindow : Window
             Title = $"Select file to override {song.Title} ({song.Dance}) by {song.Artist}",
         };
 
-        fileDialog.AddExtensionFilter("Audio Files", string.Join(';', PlaylistBuilder.AllowedFileTypes));
+        fileDialog.AddExtensionFilter("Audio Files", string.Join(";*", PlaylistBuilder.AllowedFileTypes));
         fileDialog.AddFilter(FileFilter.AllFiles);
 
         var fileInfo = fileDialog.GetFileInfo();
