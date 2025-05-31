@@ -85,7 +85,7 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", "plz");
+        var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", ".plz");
 
         await dialog.GetFileInfo().ConsumeAsync(async file =>
         {
@@ -108,7 +108,7 @@ public sealed partial class MainWindow : Window
 
     private async void OpenPlaylist(object sender, RoutedEventArgs e)
     {
-        await new OpenFileDialog().AddExtensionFilter("Playlist", "plz").GetFileInfo().ConsumeAsync(async file =>
+        await new OpenFileDialog().AddExtensionFilter("Playlist", ".plz").GetFileInfo().ConsumeAsync(async file =>
         {
             var bar = new LoadingBar(true)
             {
@@ -363,10 +363,14 @@ public sealed partial class MainWindow : Window
     {
         foreach (var song in LibraryGrid.SelectedItems.Cast<SongBuilder>())
         {
+            using var sourceStream = SongCache.CacheFromArchive(song).OpenRead();
+
+            var fileExtension = TryGetFileExtension(sourceStream).Or("");
+
             var fileDialog = new SaveFileDialog
             {
                 Title = $"Save {song.Title} ({song.Dance}) by {song.Artist}",
-                DefaultFileName = $"{song.Title}_{song.Dance}", // this allows for a quick reimport (see SongBuilder.FromFileName) 
+                DefaultFileName = $"{song.Title}_{song.Dance}{fileExtension}", // this allows for a quick reimport (see SongBuilder.FromFileName) 
             };
             var targetFile = fileDialog.GetPath();
 
@@ -374,59 +378,31 @@ public sealed partial class MainWindow : Window
 
             targetFile.Consume(success: (targetFile) =>
             {
-                switch (song.Path)
+                using (var targetStream = File.Create(targetFile))
                 {
-                    case ArchiveLocation archiveLocation:
-                        using (var archiveStream = archiveLocation.ArchiveFileInfo.OpenRead())
-                        using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read))
-                        {
-                            var entry = archive.GetEntry(archiveLocation.EntryName) ?? throw new Exception("File not found");
-                            entry.ExtractToFile(targetFile, overwrite: true);
-                        }
-                        break;
-
-                    case FileLocation fileLocation:
-                        fileLocation.FileInfo.CopyTo(targetFile, overwrite: true);
-                        break;
-
-                    default:
-                        throw new UnreachableException($"Song with {song.Path.GetType().Name} cannot be exported");
+                    sourceStream.CopyTo(targetStream);
                 }
 
-                // lets guess the file extension (gets lost in the libary archive)
-                targetFile = TryRestoreFileExtension(targetFile);
-
                 TryWriteMetadata(targetFile, song);
-
             });
         }
 
-        static string TryRestoreFileExtension(string targetFile)
+        static Option<string> TryGetFileExtension(Stream stream)
         {
-            Span<byte> buffer = stackalloc byte[16];
-            using (var stream = new FileStream(targetFile, FileMode.Open, FileAccess.Read))
-            {
-                stream.ReadExactly(buffer);
-            }
+            const int HEADER_SIZE = 16;
+            Span<byte> buffer = stackalloc byte[HEADER_SIZE];
+            stream.ReadExactly(buffer);
+            stream.Seek(-HEADER_SIZE, SeekOrigin.Current);
 
-            var extension = buffer switch
+            return buffer switch
             {
                 [0x49, 0x44, 0x33, ..] => ".mp3", // 'ID3'
                 [0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11, 0xA6, 0xD9, 0x00, 0xAA, 0x00, 0x62, 0xCE, 0x6C, ..] => ".wma", // guid
                 [0x52, 0x49, 0x46, 0x46, _, _, _, _, 0x57, 0x41, 0x56, 0x45, ..] => ".wav", // 'FIFF....WAVE'
                 [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41, ..] => ".m4a", // '....ftypM4A....'
                 [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x64, 0x61, 0x73, 0x68, ..] => ".mp4", // '....ftypdash....'
-                _ => "",
+                _ => Option.Error<string>(),
             };
-
-            if (!string.IsNullOrEmpty(extension))
-            {
-                var newName = $"{targetFile}{extension}";
-                File.Move(targetFile, newName, overwrite: true);
-                targetFile = newName;
-            }
-
-            return targetFile;
         }
 
         static void TryWriteMetadata(string targetFile, SongBuilder song)
