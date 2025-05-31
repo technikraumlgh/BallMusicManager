@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace BallMusicManager.Creator;
+namespace BallMusic.Creator;
 
 public partial class MainWindow
 {

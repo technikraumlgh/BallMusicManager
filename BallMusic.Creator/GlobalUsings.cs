@@ -1,3 +1,3 @@
 ﻿global using Ametrin.Optional;
-global using BallMusicManager.Domain;
-global using BallMusicManager.Infrastructure;
+global using BallMusic.Domain;
+global using BallMusic.Infrastructure;

@@ -1,7 +1,7 @@
-﻿using BallMusicManager.Domain;
+﻿using BallMusic.Domain;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BallMusicManager.Server;
+namespace BallMusic.Server;
 
 internal sealed class DisplayService(IHubContext<SignalHub> _hubContext)
 {

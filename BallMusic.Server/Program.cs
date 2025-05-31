@@ -2,8 +2,8 @@
 using System.Net;
 using System.Net.Sockets;
 using Ametrin.Optional;
-using BallMusicManager.Domain;
-using BallMusicManager.Server;
+using BallMusic.Domain;
+using BallMusic.Server;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
 

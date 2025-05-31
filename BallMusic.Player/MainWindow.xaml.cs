@@ -4,10 +4,10 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using BallMusic.WPF;
 using BallMusic.WPF.FileDialogs;
-using BallMusicManager.Domain;
-using BallMusicManager.Infrastructure;
+using BallMusic.Domain;
+using BallMusic.Infrastructure;
 
-namespace BallMusicManager.Player;
+namespace BallMusic.Player;
 
 public sealed partial class MainWindow : Window, IHostProvider
 {

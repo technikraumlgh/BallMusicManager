@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 
-namespace BallMusicManager.Server;
+namespace BallMusic.Server;
 
 internal sealed class SignalHub(DisplayService _displayService) : Hub
 {

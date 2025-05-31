@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace BallMusicManager.Creator;
+namespace BallMusic.Creator;
 
 internal sealed class SeverityToBrushConverter : IValueConverter
 {

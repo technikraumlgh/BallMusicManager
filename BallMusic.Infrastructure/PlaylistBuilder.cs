@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.Json;
 
-namespace BallMusicManager.Infrastructure;
+namespace BallMusic.Infrastructure;
 
 public static class PlaylistBuilder
 {

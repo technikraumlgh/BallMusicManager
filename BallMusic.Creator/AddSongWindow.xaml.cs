@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace BallMusicManager.Creator;
+namespace BallMusic.Creator;
 
 public sealed partial class AddSongWindow : Window
 {

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace BallMusicManager.Domain;
+namespace BallMusic.Domain;
 
 public sealed class SongEqualityComparer : IEqualityComparer<Song>, IEqualityComparer<SongBuilder>
 {

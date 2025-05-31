@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace BallMusicManager.Creator;
+namespace BallMusic.Creator;
 
 public partial class App : Application
 {

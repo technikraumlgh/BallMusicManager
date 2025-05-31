@@ -1,3 +1,3 @@
-﻿namespace BallMusicManager.Domain;
+﻿namespace BallMusic.Domain;
 
 public record MessageDTO(string text);

@@ -1,6 +1,6 @@
 ﻿using NAudio.Wave;
 
-namespace BallMusicManager.Infrastructure;
+namespace BallMusic.Infrastructure;
 
 public sealed class MusicPlayer
 {

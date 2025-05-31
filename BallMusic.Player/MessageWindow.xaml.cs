@@ -1,7 +1,7 @@
-﻿using BallMusicManager.Infrastructure;
+﻿using BallMusic.Infrastructure;
 using System.Windows;
 
-namespace BallMusicManager.Player;
+namespace BallMusic.Player;
 public partial class MessageWindow : Window
 {
     private readonly ServerConnection _server;

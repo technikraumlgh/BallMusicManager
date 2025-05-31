@@ -1,7 +1,7 @@
-﻿<Application x:Class="BallMusicManager.Creator.App"
+﻿<Application x:Class="BallMusic.Creator.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:BallMusicManager.Creator"
+             xmlns:local="clr-namespace:BallMusic.Creator"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>

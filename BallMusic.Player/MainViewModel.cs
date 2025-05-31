@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Windows;
 
-namespace BallMusicManager.Player;
+namespace BallMusic.Player;
 
 internal sealed class MainViewModel : INotifyPropertyChanged
 {

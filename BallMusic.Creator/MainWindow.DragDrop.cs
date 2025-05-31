@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Windows;
 using BallMusic.WPF;
 
-namespace BallMusicManager.Creator;
+namespace BallMusic.Creator;
 
 public partial class MainWindow
 {

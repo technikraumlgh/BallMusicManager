@@ -1,4 +1,4 @@
-﻿namespace BallMusicManager.Infrastructure;
+﻿namespace BallMusic.Infrastructure;
 
 public static class SongCache
 {

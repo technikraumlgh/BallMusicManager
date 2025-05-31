@@ -1,4 +1,4 @@
-﻿namespace BallMusicManager.Domain;
+﻿namespace BallMusic.Domain;
 
 public record Song(SongLocation Path, int Index, string Title, string Artist, string Dance, TimeSpan Duration)
 {

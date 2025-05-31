@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
-namespace BallMusicManager.Infrastructure;
+namespace BallMusic.Infrastructure;
 
 public sealed class ServerConnection : IDisposable
 {

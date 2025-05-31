@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace BallMusicManager.Creator;
+namespace BallMusic.Creator;
 
 public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCollection(songs)
 {

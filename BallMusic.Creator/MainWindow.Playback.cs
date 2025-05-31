@@ -4,7 +4,7 @@ using System.Windows.Threading;
 using System.Windows.Controls;
 using BallMusic.WPF;
 
-namespace BallMusicManager.Creator;
+namespace BallMusic.Creator;
 
 public partial class MainWindow
 {

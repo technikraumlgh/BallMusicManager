@@ -4,7 +4,7 @@ using SearchOption = System.IO.SearchOption;
 
 
 
-namespace BallMusicManager.Infrastructure;
+namespace BallMusic.Infrastructure;
 
 public static class ZipArchiveExtensions
 {

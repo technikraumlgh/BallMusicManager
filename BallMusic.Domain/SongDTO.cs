@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace BallMusicManager.Domain;
+namespace BallMusic.Domain;
 
 public record SongDTO(string title, string artist, string dance)
 {

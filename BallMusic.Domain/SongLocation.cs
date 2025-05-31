@@ -3,7 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace BallMusicManager.Domain;
+namespace BallMusic.Domain;
 
 /// <summary>
 /// this is a type union.<br/>

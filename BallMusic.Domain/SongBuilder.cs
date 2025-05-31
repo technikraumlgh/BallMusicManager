@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace BallMusicManager.Domain;
+namespace BallMusic.Domain;
 
 public sealed class SongBuilder
 {

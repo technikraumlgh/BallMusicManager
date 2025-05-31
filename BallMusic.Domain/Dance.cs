@@ -1,4 +1,4 @@
-﻿namespace BallMusicManager.Domain;
+﻿namespace BallMusic.Domain;
 
 public static class Dance
 {

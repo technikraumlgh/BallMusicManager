@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace BallMusicManager.Creator;
+namespace BallMusic.Creator;
 
 public class SongBuilderCollection(IEnumerable<SongBuilder> songs) : ObservableCollection<SongBuilder>(songs)
 {
