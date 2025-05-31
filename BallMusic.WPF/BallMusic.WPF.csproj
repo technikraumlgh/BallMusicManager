@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BallMusicManager.Infrastructure\BallMusicManager.Infrastructure.csproj" />
+    <ProjectReference Include="..\BallMusic.Infrastructure\BallMusic.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

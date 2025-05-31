@@ -13,8 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BallMusic.WPF\BallMusic.WPF.csproj" />
-    <ProjectReference Include="..\BallMusicManager.Domain\BallMusicManager.Domain.csproj" />
-    <ProjectReference Include="..\BallMusicManager.Infrastructure\BallMusicManager.Infrastructure.csproj" />
+    <ProjectReference Include="..\BallMusic.Domain\BallMusic.Domain.csproj" />
+    <ProjectReference Include="..\BallMusic.Infrastructure\BallMusic.Infrastructure.csproj" />
     <ProjectReference Include="..\BallMusic.Tips\BallMusic.Tips.csproj" />
   </ItemGroup>
 
