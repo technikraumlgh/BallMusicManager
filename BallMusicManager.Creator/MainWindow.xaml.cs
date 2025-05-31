@@ -1,14 +1,15 @@
-﻿using System.Collections.Immutable;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using BallMusic.WPF.FileDialogs;
 using BallMusic.WPF;
+using BallMusic.WPF.FileDialogs;
 
 namespace BallMusicManager.Creator;
 
@@ -57,7 +58,7 @@ public sealed partial class MainWindow : Window
     private bool shouldSaveBeforeClosing = true;
     private async void OnWindowClosingAsync(object? sender, CancelEventArgs e)
     {
-        if(_isSaving)
+        if (_isSaving)
         {
             e.Cancel = true;
             return;
@@ -83,8 +84,8 @@ public sealed partial class MainWindow : Window
         {
             return;
         }
-        
-        var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", "plz");
+
+        var dialog = new SaveFileDialog().AddExtensionFilter("Playlist", ".plz");
 
         await dialog.GetFileInfo().ConsumeAsync(async file =>
         {
@@ -107,7 +108,7 @@ public sealed partial class MainWindow : Window
 
     private async void OpenPlaylist(object sender, RoutedEventArgs e)
     {
-        await new OpenFileDialog().AddExtensionFilter("Playlist", "plz").GetFileInfo().ConsumeAsync(async file =>
+        await new OpenFileDialog().AddExtensionFilter("Playlist", ".plz").GetFileInfo().ConsumeAsync(async file =>
         {
             var bar = new LoadingBar(true)
             {
@@ -322,6 +323,103 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private void ReplaceFile_Click(object sender, RoutedEventArgs e)
+    {
+        if (LibraryGrid.SelectedItems.Count is 0)
+        {
+            return;
+        }
+
+        if (LibraryGrid.SelectedItems.Count is > 1)
+        {
+            MessageBoxHelper.ShowWaring("More than one Song selected.\nPlease select only one song to replace");
+            return;
+        }
+
+        var song = (SongBuilder)LibraryGrid.SelectedItems[0]!;
+
+        var fileDialog = new OpenFileDialog
+        {
+            Title = $"Select file to override {song.Title} ({song.Dance}) by {song.Artist}",
+        };
+
+        fileDialog.AddExtensionFilter("Audio Files", string.Join(";*", PlaylistBuilder.AllowedFileTypes));
+        fileDialog.AddFilter(FileFilter.AllFiles);
+
+        var fileInfo = fileDialog.GetFileInfo();
+
+        fileInfo.Consume(fileInfo =>
+        {
+            if (!PlaylistBuilder.ValidFile(fileInfo))
+            {
+                MessageBoxHelper.ShowError("Invalid file extension", owner: this);
+                return;
+            }
+            song.Path = new FileLocation(fileInfo);
+        });
+    }
+
+    private void ExportFile_Click(object sender, RoutedEventArgs e)
+    {
+        foreach (var song in LibraryGrid.SelectedItems.Cast<SongBuilder>())
+        {
+            using var sourceStream = SongCache.CacheFromArchive(song).OpenRead();
+
+            var fileExtension = TryGetFileExtension(sourceStream).Or("");
+
+            var fileDialog = new SaveFileDialog
+            {
+                Title = $"Save {song.Title} ({song.Dance}) by {song.Artist}",
+                DefaultFileName = $"{song.Title}_{song.Dance}{fileExtension}", // this allows for a quick reimport (see SongBuilder.FromFileName) 
+            };
+            var targetFile = fileDialog.GetPath();
+
+            // SaveFileDialog already asks the user whether they want to override the selected file
+
+            targetFile.Consume(success: (targetFile) =>
+            {
+                using (var targetStream = File.Create(targetFile))
+                {
+                    sourceStream.CopyTo(targetStream);
+                }
+
+                TryWriteMetadata(targetFile, song);
+            });
+        }
+
+        static Option<string> TryGetFileExtension(Stream stream)
+        {
+            const int HEADER_SIZE = 16;
+            Span<byte> buffer = stackalloc byte[HEADER_SIZE];
+            stream.ReadExactly(buffer);
+            stream.Seek(-HEADER_SIZE, SeekOrigin.Current);
+
+            return buffer switch
+            {
+                [0x49, 0x44, 0x33, ..] => ".mp3", // 'ID3'
+                [0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11, 0xA6, 0xD9, 0x00, 0xAA, 0x00, 0x62, 0xCE, 0x6C, ..] => ".wma", // guid
+                [0x52, 0x49, 0x46, 0x46, _, _, _, _, 0x57, 0x41, 0x56, 0x45, ..] => ".wav", // 'FIFF....WAVE'
+                [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41, ..] => ".m4a", // '....ftypM4A....'
+                [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x64, 0x61, 0x73, 0x68, ..] => ".mp4", // '....ftypdash....'
+                _ => Option.Error<string>(),
+            };
+        }
+
+        static void TryWriteMetadata(string targetFile, SongBuilder song)
+        {
+            try
+            {
+                using var songFile = TagLib.File.Create(targetFile);
+                songFile.Tag.Title = song.Title;
+                songFile.Tag.Performers = song.Artist.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                songFile.Save();
+            }
+            catch (Exception)
+            {
+                // fails when the target file has no extension
+            }
+        }
+    }
 
     private void UpdateDashboard(object? sender = null, EventArgs? e = default) => dashboard?.Update([.. Playlist.Select(song => song.Build())]);
 }

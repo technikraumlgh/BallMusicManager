@@ -8,6 +8,8 @@ namespace BallMusicManager.Creator;
 
 public partial class MainWindow
 {
+    private const string PauseIcon = "\uE769";
+    private const string PlayIcon = "\uE768";
     private SongBuilder? _lastPlayed;
     private readonly MusicPlayer _player = new();
     private readonly DispatcherTimer _playbackProgressUpdater = new()
@@ -55,38 +57,40 @@ public partial class MainWindow
         }
 
         UpdatePlayback(song);
-        song.SetDuration(_player.CurrentSongLength);
+        song.SetDuration(_player.CurrentSongLength); // some files somehow have wrong metadata for their duration so we overwrite it here
+        _player.CurrentTime = TimeSpan.Zero;
         _player.Play();
         _playbackProgressUpdater.Start();
-        PlayButton.Content = "\uE769";
+        PlayButton.Content = PauseIcon;
     }
 
     private void PausePlayback()
     {
         _player.Pause();
         _playbackProgressUpdater.Stop();
-        PlayButton.Content = "\uE768";
+        PlayButton.Content = PlayIcon;
     }
 
     private void UpdatePlayback(SongBuilder song)
     {
-
-        if (song != _lastPlayed)
+        if (song == _lastPlayed)
         {
-            if (song.Path is ArchiveLocation)
-            {
-                SongCache.CacheFromArchive(song);
-            }
-            if (song.Path is not FileLocation)
-            {
-                MessageBoxHelper.ShowError($"{song.Title} has no linked file");
-                return;
-            }
-
-            _player.SetSong(song.Build());
-            _lastPlayed = song;
-            PlaybackSlider.Maximum = _player.CurrentSongLength.TotalSeconds;
+            return;
         }
+        
+        if (song.Path is ArchiveLocation)
+        {
+            SongCache.CacheFromArchive(song);
+        }
+        if (song.Path is not FileLocation)
+        {
+            MessageBoxHelper.ShowError($"{song.Title} has no linked file");
+            return;
+        }
+
+        _player.SetSong(song.Build());
+        _lastPlayed = song;
+        PlaybackSlider.Maximum = _player.CurrentSongLength.TotalSeconds;
     }
 
     private void UpdatePlaybackSliderValue(object? sender, EventArgs e)

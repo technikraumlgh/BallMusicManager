@@ -42,6 +42,8 @@ if (useAuth)
     logger.LogInformation("API key for this session: {key}", activeApiKey);
 }
 
+logger.LogInformation("Press Ctrl-C or close the console to shutdown");
+
 var displayService = app.Services.GetService<DisplayService>()!;
 
 app.MapHub<SignalHub>("signal");

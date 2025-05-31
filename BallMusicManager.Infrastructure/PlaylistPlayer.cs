@@ -19,7 +19,7 @@ public sealed class PlaylistPlayer
     public PlaylistPlayer(string path, IEnumerable<Song> songs)
     {
         Path = path;
-        Songs = songs.ToImmutableArray();
+        Songs = [.. songs];
         SetCurrent(0);
         Player.OnSongFinished += AutoPlayNext;
     }

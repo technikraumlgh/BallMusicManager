@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BallMusicManager.Player"
         mc:Ignorable="d"
-        Title="Music Manager" Height="450" Width="800">
+        Title="Music Player" Height="720" Width="1280">
 
     <Window.DataContext>
         <local:MainViewModel/>
@@ -59,7 +59,6 @@
                 <PasswordBox x:Name="HostPW" HorizontalContentAlignment="Center" Margin="0 0 0 8"></PasswordBox>
                 <Button IsEnabled="{Binding HasPlaylist}" HorizontalAlignment="Stretch" Click="UpdateServer">Update Server</Button>
                 <Label x:Name="ServerOffline" HorizontalAlignment="Center" Foreground="OrangeRed" Visibility="Collapsed">Server Fail</Label>
-                <!-- <Button Visibility="{Binding ShowFixIndicesButton}" Click="FixIndices">Fix Indices</Button> -->
             </StackPanel>
         </DockPanel>
 
