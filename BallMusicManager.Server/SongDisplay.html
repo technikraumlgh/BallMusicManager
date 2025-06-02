@@ -1,238 +1,699 @@
 <!DOCTYPE html>
 <html data-theme="spring">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ballplaylist</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" id="theme-color-meta" content="#bde5c6" />
+  <!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
+  <!-- <meta name="apple-mobile-web-app-status-bar-style" content="#bde5c6"> -->
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"
-        integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
-        </script>
 
-    <style>
-        * {
-            margin: 0;
+  <title>Ballplaylist</title>
+
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"
+    integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer">
+  </script>
+
+  <!-- Google Fonts Import für Schriftarten-->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+
+        /* default colors aka "Spring"-Theme */
+        :root {
+          --card-bg: rgba(255, 255, 255, 0.95);
+          --card-border: 2px solid rgba(255, 255, 255, 0.3);
+          --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+          --card-header-color: #388e3c;
+          --card-section-bg: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
+          --card-section-border: 2px solid #c8e6c9;
+          --card-nowplaying-dance: #1b5e20;
+          --card-nowplaying-title: #2e7d32;
+          --card-nowplaying-artist: #4caf50;
+          --card-nextup-dance: #2e7d32;
+          --card-nextup-title: #388e3c;
+          --card-nextup-artist: #558b2f;
+          --card-welcome-header-color: #2d5016;
+          --background-color: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 50%, #ffd3a5 100%);
+          --news-background-color: rgba(0, 0, 0, 0.5);
+          --news-text-color: rgba(255, 255, 255, 0.7);
+        }
+        /* Colors for Winter Theme */
+        :root[data-theme="winter"] {
+          --background-color: #1a263e;
+          --card-bg: rgba(40, 50, 70, 0.9);
+          --card-border: 2px solid rgba(100, 120, 150, 0.3);
+          --card-header-color: #b0c4de;
+          --card-welcome-header-color: #ffb870; 
+          --card-section-bg: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+          --card-section-border: 2px solid #4a627a;
+          --card-nowplaying-dance: #e0e0e0;
+          --card-nowplaying-title: #e0e0e0;
+          --card-nowplaying-artist: #87cefa;
+          --card-nextup-dance: #e0e0e0;
+          --card-nextup-title: #e0e0e0;
+          --card-nextup-artist: #87cefa;
+          --news-text-color: aliceblue;
+          --news-background-color: rgba(0, 0, 0, 0.5);
+          --news-text-color: rgba(255, 255, 255, 0.7);
         }
 
+        
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        
         @media screen and (max-width: 620px) {
             :root {
-                font-size: 8px;
+                font-size: 10px; 
             }
         }
 
-        @media screen and (max-width: 1024px) and (min-width: 620px) {
+        @media screen and (min-width: 621px) and (max-width: 1024px) {
             :root {
-                font-size: 14px;
+                font-size: 16px; 
             }
         }
 
-        body {
-            font-family: Helvetica;
-            color: aliceblue;
-            /* cursor: none; */
-            height: 100vh;
-            width: 100vw;
-            padding: 0;
+        @media screen and (min-width: 1025px) {
+            :root {
+                font-size: 18px; 
+            }
+        }
+    
+        html, body {
+          height: 100%;
+          width: 100%;
+          font-family: 'Lora', serif;
+          color: var(--card-welcome-header-color);
+          overflow-x: hidden;
+          
         }
 
-        h1 {
-            font-size: 7rem;
-            font-weight: normal;
+        /* Theme-specific backgrounds */
+        :root[data-theme="spring"] body {
+          background: var(--background-color);
+        }
+        :root[data-theme="winter"] body {
+            background: var(--background-color);
+        }
+        :root[data-theme="winter"] .card {
+            background: var(--card-bg); 
+            border: var(--card-border);
+        }
+        :root[data-theme="winter"] .section-header { color: var(--card-header-color); }
+        :root[data-theme="winter"] .now-playing h1, 
+        :root[data-theme="winter"] .now-playing h2,
+        :root[data-theme="winter"] .next-up h2,
+        :root[data-theme="winter"] .next-up h3 { color: var(--card-nextup-title); }
+        :root[data-theme="winter"] .now-playing .artist,
+        :root[data-theme="winter"] .next-up .artist { color: var(--card-nextup-artist); }
+        :root[data-theme="winter"] .welcome-header h2 { color: var(--card-welcome-header-color); }
+
+
+        .welcome-header { 
+          font-family: 'Playfair Display', serif;
+          font-size: 1.7rem; 
+          font-weight: 900;
+          color: var(--card-welcome-header-color);
+          text-align: center;
+          margin: 1.5rem 0;
+        }
+    
+        .card {
+          background: var(--card-bg);
+          border: var(--card-border);
+          box-shadow: var(--card-shadow);
+          border-radius: 2rem;
+          max-width: 700px;      
+          width: 90%;            
+          min-width: 320px;      
+          margin: 1rem auto;
+          padding: 2rem;
+          position: relative;
+          z-index: 15;
+        }
+    
+        .section-header {
+          font-size: 2rem; 
+          text-transform: uppercase;
+          color: var(--card-header-color);
+          margin-bottom: 0.8rem;
+          font-weight: 700;
+          letter-spacing: 2px;
         }
 
-        h2 {
-            font-size: 5rem;
-            font-weight: 400;
+        
+        h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; }
+    
+        .now-playing #dance { 
+          font-size: 4.5rem; 
+          margin: 0.5rem 0;
+          font-weight: 900;
+          color: var(--card-nowplaying-dance);
+          line-height: 1.1;
+        }
+        .now-playing #title { 
+          font-size: 3rem; 
+          margin: 0.5rem 0;
+          font-weight: 700;
+          color: var(--card-nowplaying-title);
+        }
+        .now-playing #artist {
+          font-size: 2.5rem;
+          margin: 0.5rem 0 1.5rem;
+          color: var(--card-nowplaying-artist);
+          font-weight: 600;
+          font-family: 'Lora', serif;
+        }
+    
+        .next-up {
+          background: var(--card-section-bg);
+          border: var(--card-section-border);
+          border-radius: 1.5rem;
+          padding: 1.5rem;
+          margin-top: 1.5rem;
+        }
+        :root[data-theme="winter"] .next-up {
+            background: var(--card-section-bg);
+            border: var(--card-section-border);
         }
 
-        h3 {
-            font-size: 3rem;
-            font-weight: normal;
+    
+        .next-up #next-dance {
+          font-size: 3rem;
+          margin: 0.5rem 0;
+          color: var(--card-nextup-dance);
+          font-weight: 700;
         }
-
-        h4 {
-            font-size: 2.25rem;
-            font-weight: normal;
+        .next-up #next-title {
+          font-size: 2.2rem;
+          margin: 0.5rem 0;
+          font-weight: 600;
+          color: var(--card-nextup-title);
         }
-
-        h5 {
-            font-size: 1.5rem;
-            font-weight: normal;
-        }
-
-        .ta-center {
-            text-align: center;
-        }
-
-        .mt-05 {
-            margin-top: 0.5rem;
-        }
-
-        .mt-1 {
-            margin-top: 1rem;
-        }
-
-        .mb-4 {
-            margin-bottom: 4rem;
-        }
-
-        .text-container {
-            margin: 3em;
-            position: fixed;
-            width: calc(100vw - 6em);
-        }
-
-        .small-text {
-            font-size: 2rem;
-        }
-
-        #qr-code {
-            position: absolute;
-            bottom: 1vh;
-            right: 1vw;
-        }
-
-        #qr-code_image {
-            height: 20vh;
-        }
-
-        #news {
-            position: absolute;
-            bottom: 1vh;
-            left: 1vw;
+        .next-up #next-artist {
+          font-size: 1.8rem;
+          margin: 0.5rem 0;
+          color: var(--card-nextup-artist);
+          font-weight: 600;
+          font-family: 'Lora', serif;
         }
 
         .italic {
             font-style: italic;
-            font-weight: bold;
-        }
-    </style>
-
-    <!-- Winter-Theme -->
-    <style>
-        :root[data-theme="winter"] {
-            background: #1a263e;
         }
 
+        
+        #qr-code {
+            position: fixed;
+            bottom: 1vh;
+            right: 1vw;
+            z-index: 100;
+        }
+
+        #qr-code_image {
+            height: 15vh;
+            max-height: 100px;
+        }
+
+        :root[data-theme="spring"] #news {
+            position: fixed;
+            bottom: 1vh;
+            left: 1vw;
+            font-size: 1.5rem;
+            color: #2d5016;
+            background-color: var(--news-text-color); 
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            z-index: 100;
+        }
+        :root[data-theme="winter"] #news {
+            color: var(--news-text-color);
+            background-color: var(--news-background-color);
+        }
+
+
+        /* Snow animation for Winter Theme */
         .snow {
             position: fixed;
+            top: 0; 
+            left: 0;
             height: 100%;
             width: 100%;
-            z-index: -1;
+            z-index: -1; 
         }
-    </style>
 
-    <!-- Spring-Theme -->
-    <style>
-        :root[data-theme="spring"] {
-            background: linear-gradient(to bottom, #4b92db, #ffb870);
+        /* Bottom element for grass and flowers */
+        #bottom-element {
+            position: fixed;
+            bottom: -20px;
+            left: 0;                
+            width: 100vw;           
+            background-color: transparent;
+            padding: 0;
+            z-index: 0;
+            scale: 1;
         }
-    </style>
+
+        /* if theme is winter, make bottom element transparent */
+        :root[data-theme="winter"] #bottom-element {
+            background-color: transparent;
+        }
+        
+        #flowers {
+            position: relative;
+            scale: 0.3;
+            width: 100%;
+        }
+        /* Hide flowers in winter theme */
+        :root[data-theme="winter"] #flowers {
+            display: none;
+        }
+
+        /* Hide grass in winter theme */
+        :root[data-theme="winter"] .grass-strip {
+            display: none !important;
+        }
+
+        /* Added for positioning flower groups */
+        .flower-instance {
+            position: absolute;
+            width: 250px; 
+        }
+
+        .container.flower {
+          position: bottom;
+          width: 10px;
+          height: 10px;
+          margin: -360px auto 0px; 
+        }
+
+        .container.flower div {
+          box-sizing: border-box;
+          position: absolute;
+          border-top-right-radius: 300px;
+          border-bottom-left-radius: 300px;
+        }
+
+        .container.flower div:nth-child(1) {
+          width: 100px; height: 100px;
+          z-index: 5;
+          transform-origin: 0% 0%;
+          transform: rotate(0deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(2) {
+          width: 100px; height: 100px;
+          z-index: 10;
+          transform-origin: 0% 0%;
+          transform: rotate(30deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(3) {
+          width: 100px; height: 100px;
+          z-index: 10;
+          transform-origin: 0% 0%;
+          transform: rotate(60deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(4) {
+          width: 100px; height: 100px;
+          z-index: 8;
+          transform-origin: 0% 0%;
+          transform: rotate(90deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(5) {
+          width: 100px; height: 100px;
+          z-index: 7;
+          transform-origin: 0% 0%;
+          transform: rotate(120deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(6) {
+          width: 100px; height: 100px;
+          z-index: 6;
+          transform-origin: 0% 0%;
+          transform: rotate(150deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(7) {
+          width: 100px; height: 100px;
+          z-index: 5;
+          transform-origin: 0% 0%;
+          transform: rotate(180deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(8) {
+          width: 100px; height: 100px;
+          z-index: 4;
+          transform-origin: 0% 0%;
+          transform: rotate(210deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(9) {
+          width: 100px; height: 100px;
+          z-index: 3;
+          transform-origin: 0% 0%;
+          transform: rotate(240deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(10) {
+          width: 100px; height: 100px;
+          z-index: 2;
+          transform-origin: 0% 0%;
+          transform: rotate(270deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(11) {
+          width: 100px; height: 100px;
+          z-index: 1;
+          transform-origin: 0% 0%;
+          transform: rotate(300deg);
+          background: rgba(212, 10, 53, 0.7);
+        }
+        .container.flower div:nth-child(12) {
+          width: 100px; height: 100px;
+          z-index: 0;
+          transform-origin: 0% 0%;
+          transform: rotate(330deg);
+          background: rgba(212, 10, 53, 0.7); 
+        }
+
+        /* Flower Color Variants */
+        .container.flower.flower-color-pink div { background: rgba(255, 105, 180, 0.7); } /* Hot pink */
+        .container.flower.flower-color-pink div:nth-child(even) { background: rgba(255, 182, 193, 0.7); } /* Light pink */
+
+        .container.flower.flower-color-blue div { background: rgba(100, 149, 237, 0.7); } /* Cornflower blue */
+        .container.flower.flower-color-blue div:nth-child(even) { background: rgba(173, 216, 230, 0.7); } /* Light blue */
+        
+        .container.flower.flower-color-yellow div { background: rgba(255, 215, 0, 0.7); } /* Gold */
+        .container.flower.flower-color-yellow div:nth-child(even) { background: rgba(255, 255, 102, 0.7); } /* Pale Yellow */
+
+        /* Flower Orientation Variants */
+        .container.flower.flower-rotated-15 { transform: rotate(15deg); }
+        .container.flower.flower-rotated-minus-15 { transform: rotate(-15deg); }
+        .container.flower.flower-scaled-small { transform: scale(0.8); }
+        .container.flower.flower-scaled-large { transform: scale(1.2); }
+
+
+        .container.leaf {
+          position: relative;
+          z-index: -1;
+          width: 10px;
+          height: 10px;
+          left: 30px;
+          top: 160px;
+          margin: 0px auto;
+          transform: rotate(-110deg);
+        }
+
+        .container.leaf div {
+          box-sizing: border-box;
+          position: absolute;
+          border-top-right-radius: 300px;
+          border-bottom-left-radius: 300px;
+        }
+
+        .container.leaf div:nth-child(1) {
+          width: 4px; height: 4px;
+          background: rgba(1, 7, 5, 1);
+          z-index: 11;
+          transform-origin: 0% 0%;
+          transform: rotate(0deg);
+        }
+        .container.leaf div:nth-child(2) {
+          width: 6px; height: 6px;
+          background: rgba(2, 14, 10, 1);
+          z-index: 10;
+          transform-origin: 0% 0%;
+          transform: rotate(3deg);
+        }
+        .container.leaf div:nth-child(3) {
+          width: 10px; height: 10px;
+          background: rgba(3, 21, 15, 1);
+          z-index: 9;
+          transform-origin: 0% 0%;
+          transform: rotate(6deg);
+        }
+        .container.leaf div:nth-child(4) {
+          width: 16px; height: 16px;
+          background: rgba(4, 28, 20, 1);
+          z-index: 8;
+          transform-origin: 0% 0%;
+          transform: rotate(9deg);
+        }
+        .container.leaf div:nth-child(5) {
+          width: 26px; height: 26px;
+          background: rgba(5, 35, 25, 1);
+          z-index: 7;
+          transform-origin: 0% 0%;
+          transform: rotate(12deg);
+        }
+        .container.leaf div:nth-child(6) {
+          width: 42px; height: 42px;
+          background: rgba(6, 42, 30, 1);
+          z-index: 6;
+          transform-origin: 0% 0%;
+          transform: rotate(15deg);
+        }
+        .container.leaf div:nth-child(7) {
+          width: 68px; height: 68px;
+          background: rgba(7, 49, 35, 1);
+          z-index: 5;
+          transform-origin: 0% 0%;
+          transform: rotate(18deg);
+        }
+        .container.leaf div:nth-child(8) {
+          width: 110px; height: 110px;
+          background: rgba(8, 56, 40, 1);
+          z-index: 4;
+          transform-origin: 0% 0%;
+          transform: rotate(21deg);
+        }
+        .container.leaf div:nth-child(9) {
+          width: 178px; height: 178px;
+          background: rgba(9, 63, 45, 1);
+          z-index: 3;
+          transform-origin: 0% 0%;
+          transform: rotate(24deg);
+        }
+
+        .container.stem {
+          position: relative;
+          z-index: -1;
+          margin: 0px auto;
+          width: 5px;
+          height: 0;
+          border-left: 5px solid transparent;
+          border-right: 5px solid transparent;
+          border-bottom: 360px solid rgba(48, 32, 19, 0.9);
+          border-radius: 2px;
+          transform-origin: 0% 0%;
+          transform: rotate(-10deg);
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{min-height:100vh;display:flex;flex-direction:column;}
+        main{flex:1 0 auto;padding:2rem;text-align:center;}
+        footer{flex-shrink:0;}          
+
+        /* grass svg scales full-width */
+        .grass-strip {
+            display: block;
+            width: 100vw;           
+            height: 250px;
+        }
+      </style>
+
 </head>
 
 <body>
+  <!-- Snow canvas for Winter Theme -->
+  <canvas class="snow" id="snow_canvas"></canvas>
+
+
+  <div class="card">
     <!-- Welcome/Goodbye Screen -->
-    <div class="text-container ta-center">
-        <h2 id="welcome-message">Herzlich Willkommen zum Fr�hlingsball</h2>
+    <div class="welcome-header"> 
+      <h2 id="welcome-message">Herzlich Willkommen zum Frühlingsball</h2>
     </div>
+
     <!-- Song Display Screen -->
-    <div id="song-container" class="text-container">
-        <p class="small-text">Now Playing</p>
-        <h1 id="dance" class="mt-1">Loading dance failed</h1>
-        <h2 id="title" class="mt-1 italic">Loading title failed</h2>
-        <h3 id="artist" class="mb-4">by Loading artist failed</h3>
+    <div id="song-display-content"> 
+        <div class="now-playing">
+          <div class="section-header">Jetzt läuft</div>
+          <h1 id="dance">Loading Dance…</h1>
+          <h2 id="title" class="italic">Loading Title…</h2>
+          <p id="artist">von Loading Artist…</p>
+        </div>
 
-        <p class="small-text">Next Up</p>
-        <h2 id="next-dance" class="mt-05">Loading next dance failed</h2>
-        <h3 id="next-title" class="mt-1 italic">Loading next title failed</h3>
-        <h4 id="next-artist" class="mt-1">Loading next artist failed</h4>
+        <div class="next-up">
+          <div class="section-header">Nächster Titel</div>
+          <h2 id="next-dance">Loading Next Dance…</h2>
+          <h3 id="next-title" class="italic">Loading Next Title…</h3>
+          <p id="next-artist">von Loading Next Artist…</p> 
+        </div>
     </div>
+  </div>
 
-    <div id="qr-code">
-        <img src="qr-code" id="qr-code_image" />
+  <div id="qr-code">
+    <img src="qr-code" id="qr-code_image" alt="QR Code" />
+  </div>
+
+  <p id="news">Loading news…</p>
+
+
+  <div id="bottom-element">
+    <svg class="grass-strip" viewBox="0 0 1440 120"
+         xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <rect width="1440" height="120" fill="#8BD97E"/>
+    </svg>
+    <div id='flowers'>
+      <!-- Flower 1: Left, Blue, Scaled Small -->
+      <div class="flower-instance" style="left: -80%; transform: translateX(-50%); top: -500px;">
+        <div class='container flower flower-color-blue flower-scaled-small'>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class='container leaf'>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class='container stem'></div>
+      </div>
+
+      <!-- Flower 2: Center, Pink, Rotated (Original appearance) -->
+      <div class="flower-instance" style="left: -0.01%; transform: translateX(-50%); top: -600px;">
+        <div class='container flower flower-color-pink flower-rotated-15'>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class='container leaf'>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class='container stem'></div>
+      </div>
+
+      <!-- Flower 3: Right, Yellow, Rotated Minus 15 -->
+      <div class="flower-instance" style="left: 70%; transform: translateX(-50%); top: -150px;">
+        <div class='container flower flower-color-yellow flower-rotated-minus-15'>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class='container leaf'>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class='container stem'></div>
+      </div>
+
+      <!-- Flower 4: Left, Blue, Rotated Minus 15 -->
+      <div class="flower-instance" style="left: 150%; transform: translateX(-50%); top: -500px;">
+        <div class='container flower flower-color-blue flower-rotated-minus-15'>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class='container leaf'>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class='container stem'></div>
+      </div>
     </div>
+  </div>
 
-    <p id="news" class="small-text">Failed loading news</p>
+  <script defer>
+        
+        const songDisplayContent = document.getElementById("song-display-content");
+        const titleEl = document.getElementById("title"); 
+        const danceEl = document.getElementById("dance"); 
+        const artistEl = document.getElementById("artist");
+        const nextTitleEl = document.getElementById("next-title"); 
+        const nextDanceEl = document.getElementById("next-dance"); 
+        const nextArtistEl = document.getElementById("next-artist");
+        const welcomeMessageEl = document.getElementById("welcome-message");
+        const newsEl = document.getElementById("news");
+    
+        // Initial state: show welcome message, hide song display
+        if (songDisplayContent) songDisplayContent.style.display = 'none';
+        if (welcomeMessageEl) welcomeMessageEl.style.display = 'block';
 
-    <!-- Show track -->
-    <script defer>
-        const songContainer = document.getElementById("song-container");
-        const title = document.getElementById("title");
-        const dance = document.getElementById("dance");
-        const artist = document.getElementById("artist");
-        const nextTitle = document.getElementById("next-title");
-        const nextDance = document.getElementById("next-dance");
-        const nextArtist = document.getElementById("next-artist");
-        const message = document.getElementById("welcome-message");
-        const news = document.getElementById("news");
+        (function() {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(window.location.origin + "/signal")
+                .withAutomaticReconnect()
+                .build();
 
-        (async function readFromServer() {
-            // try {
-            //   const [currentData, nextData] = await Promise.all([
-            //     fetch("playing").then((res) => res.json()),
-            //     fetch("nextup").then((res) => res.json()),
-            //   ]);
-            //   setCurrent(currentData);
-            //   setNext(nextData);
-            // } catch (error) {
-            //   console.warn("Error fetching data:", error);
-            // }
+            connection.on("current", (message) => setCurrent(JSON.parse(message)));
+    
+            connection.on("next", (message) => setNext(JSON.parse(message)));
+
+            connection.on("message", (message) => displayMessage(message));
+            connection.on("news", (message) => displayNews(message));
+    
+            connection.start().catch(err => console.error("SignalR Connection Error: ", err.toString()));
+
+            function setCurrent(data) {
+                if (danceEl) danceEl.textContent = data.dance; 
+                if (titleEl) titleEl.textContent = data.title; 
+                if (artistEl) artistEl.textContent = data.artist ? `von ${data.artist}` : `von `; 
+                
+                if (songDisplayContent) songDisplayContent.style.display = 'block';
+                if (welcomeMessageEl) welcomeMessageEl.style.display = 'none';
+            }
+
+            function setNext(data) {
+                if (nextDanceEl) nextDanceEl.textContent = data.dance; 
+                if (nextTitleEl) nextTitleEl.textContent = data.title; 
+                if (nextArtistEl) nextArtistEl.textContent = data.artist ? `von ${data.artist}` : `von `; 
+            }
+
+            function displayMessage(msg) {
+                if (welcomeMessageEl) welcomeMessageEl.innerHTML = msg;
+                if (songDisplayContent) songDisplayContent.style.display = 'none';
+                if (welcomeMessageEl) welcomeMessageEl.style.display = 'block';
+            }
+
+            function displayNews(msg) {
+              if (newsEl) {
+                  if (msg && msg.trim() !== "") {
+                      newsEl.textContent = msg;
+                      newsEl.style.display = "block";
+                  } else {
+                      newsEl.textContent = "";
+                      newsEl.style.display = "none";
+                  }
+              }
+          }
         })();
 
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("signal")
-            .withAutomaticReconnect()
-            .build();
-
-        connection.on("current", (message) => setCurrent(JSON.parse(message)));
-        connection.on("next", (message) => setNext(JSON.parse(message)));
-        connection.on("message", (message) => displayMessage(message));
-        connection.on("news", (message) => displayNews(message));
-
-        connection.start();
-
-        function setCurrent(data) {
-            title.innerText = data.title;
-            dance.innerText = data.dance;
-            artist.innerText = `by ${data.artist}`;
-            songContainer.style.display = 'block';
-            message.style.display = 'none';
-        }
-
-        function setNext(data) {
-            nextDance.innerText = data.dance;
-            nextTitle.innerText = data.title;
-            nextArtist.innerText = `by ${data.artist}`;
-        }
-
-        function displayMessage(msg) {
-            message.innerHTML = msg;
-            songContainer.style.display = 'none';
-            message.style.display = 'block';
-            //message.style.textAlign = 'center';
-        }
-
-        function displayNews(msg) {
-            news.innerText = msg;
-        }
     </script>
-
     <!-- Show Snow -->
     <script src="snow.js"></script>
     <script>
-        if (document.documentElement?.dataset.theme === "winter") {
-            _snowCanvas({
-                snowColor: "#a6a6a6",
-                maxSpeed: 4,
-                minSpeed: 1,
-                amount: 150,
-                rMax: 4,
-                rMin: 1,
-            });
-        }
+      // Immediately apply snow if theme is winter
+      (function() {
+          const theme = document.documentElement.getAttribute('data-theme');
+          const snowCanvas = document.getElementById('snow_canvas');
+          if (theme === "winter" && typeof _snowCanvas === 'function') {
+              _snowCanvas({
+                  canvas: snowCanvas,
+                  snowColor: "#a6a6a6",
+                  maxSpeed: 4,
+                  minSpeed: 1,
+                  amount: 150,
+                  rMax: 4,
+                  rMin: 1,
+              });
+              if (snowCanvas) snowCanvas.style.display = 'block';
+          } else if (snowCanvas) {
+              snowCanvas.style.display = 'none';
+          }
+      })();
     </script>
 </body>
-
 </html>

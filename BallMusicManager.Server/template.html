@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Dance Player</title>
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* RESET & LAYOUT */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html,
+    body {
+      height: 100%;
+      font-family: 'Lora', serif;
+      /* background color + flower image */
+      background-color: #d8ecd4;
+      background-image: url('background.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* CARD */
+    .card {
+      background: #f5f3ec;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 360px;
+      padding: 30px;
+      color: #375a2b;
+    }
+
+    /* HEADER */
+    .card h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      color: #f2745b;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    /* SECTIONS */
+    .section {
+      margin-bottom: 30px;
+    }
+    .section .label {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .section .track {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    .section .artist {
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    /* CONTROLS ROW */
+    .controls {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    /* PLAY & NEXT BUTTONS */
+    .controls button {
+      background: none;
+      border: 3px solid #f2745b;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .controls button svg {
+      display: block;
+      width: 20px;
+      height: 20px;
+    }
+    .controls .next-btn {
+      margin-left: 12px;
+    }
+
+    /* PROGRESS BAR */
+    .progress {
+      flex: 1;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-left: 12px;
+    }
+    .progress .filled {
+      width: 45%; /* adjust to match “played” portion */
+      height: 100%;
+      background: #375a2b;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Dance</h1>
+
+    <div class="section now-playing">
+      <div class="label">Now Playing</div>
+      <div class="track">Dancing in the Moonlight</div>
+      <div class="artist">Toploader</div>
+
+      <div class="controls">
+        <!-- Play Button -->
+        <button class="play-btn" aria-label="Play">
+          <svg viewBox="0 0 24 24">
+            <polygon points="5,3 19,12 5,21" fill="#375a2b" />
+          </svg>
+        </button>
+
+        <!-- Next Button -->
+        <button class="next-btn" aria-label="Next">
+          <svg viewBox="0 0 24 24">
+            <polygon points="4,3 16,12 4,21" fill="#375a2b" />
+            <polygon points="12,3 24,12 12,21" fill="#375a2b" />
+          </svg>
+        </button>
+
+        <!-- Progress Bar -->
+        <div class="progress">
+          <div class="filled"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section up-next">
+      <div class="label">Next</div>
+      <div class="track">April Come She Will</div>
+      <div class="artist">Simon &amp; Garfunkel</div>
+    </div>
+  </div>
+</body>
+</html>
