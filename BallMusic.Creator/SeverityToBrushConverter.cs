@@ -17,6 +17,6 @@ internal sealed class SeverityToBrushConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException("Cannot convert from Brush to Severity");
     }
 }

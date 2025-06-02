@@ -25,16 +25,6 @@ public static class ZipArchiveExtensions
 
 public static class DirectoryInfoExtensions
 {
-    public static DirectoryInfo GetCopyOfPathIfExists(this DirectoryInfo directoryInfo)
-    {
-        return directoryInfo.Exists ? directoryInfo.GetCopyOfPath().GetCopyOfPathIfExists() : directoryInfo;
-    }
-
-    public static DirectoryInfo GetCopyOfPath(this DirectoryInfo directoryInfo)
-    {
-        return new(directoryInfo.FullName + " - Copy");
-    }
-
     public static void CreateIfNotExists(this DirectoryInfo directoryInfo)
     {
         if (!directoryInfo.Exists)

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ballplaylist</title>
 
-    <!-- Update from: https://cdnjs.com/libraries/microsoft-signalr -->
+    <!-- Update from: https://cdnjs.com/libraries/microsoft-signalr (min version) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"
         integrity="sha512-7SRCYIJtR6F8ocwW7UxW6wGKqbSyqREDbfCORCbGLatU0iugBLwyOXpzhkPyHIFdBO0K2VCu57fvP2Twgx1o2A=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -136,7 +136,7 @@
 <body>
     <!-- Welcome/Goodbye Screen -->
     <div class="text-container ta-center">
-        <h2 id="welcome-message">Herzlich Willkommen zum Fr�hlingsball</h2>
+        <h2 id="welcome-message">Herzlich Willkommen zum Frühlingsball</h2>
     </div>
     <!-- Song Display Screen -->
     <div id="song-container" class="text-container">
@@ -169,19 +169,6 @@
         const message = document.getElementById("welcome-message");
         const news = document.getElementById("news");
 
-        (async function readFromServer() {
-            // try {
-            //   const [currentData, nextData] = await Promise.all([
-            //     fetch("playing").then((res) => res.json()),
-            //     fetch("nextup").then((res) => res.json()),
-            //   ]);
-            //   setCurrent(currentData);
-            //   setNext(nextData);
-            // } catch (error) {
-            //   console.warn("Error fetching data:", error);
-            // }
-        })();
-
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("signal")
             .withAutomaticReconnect()
@@ -212,7 +199,6 @@
             message.innerHTML = msg;
             songContainer.style.display = 'none';
             message.style.display = 'block';
-            //message.style.textAlign = 'center';
         }
 
         function displayNews(msg) {
@@ -221,17 +207,21 @@
     </script>
 
     <!-- Show Snow -->
-    <script src="snow.js"></script>
     <script>
         if (document.documentElement?.dataset.theme === "winter") {
-            _snowCanvas({
-                snowColor: "#a6a6a6",
-                maxSpeed: 4,
-                minSpeed: 1,
-                amount: 150,
-                rMax: 4,
-                rMin: 1,
-            });
+            const script = document.createElement('script');
+            script.src = "snow.js";
+            script.onload = () => {
+                _snowCanvas({
+                    snowColor: "#a6a6a6",
+                    maxSpeed: 4,
+                    minSpeed: 1,
+                    amount: 150,
+                    rMax: 4,
+                    rMin: 1,
+                });
+            };
+            document.body.appendChild(script);
         }
     </script>
 </body>

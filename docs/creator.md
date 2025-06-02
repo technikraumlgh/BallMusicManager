@@ -23,8 +23,8 @@ Soll später das Audio eines Songs ersetzt werden, kann durch `Rechtsklick>Repla
 - Verwende überwiegend einfache standart Tänze die alle Tanzen können (Walzer, Discofox, ChaChaCha, Rumba, etc.). Die anderen Tänze (Jive, Salsa, Tango, Foxtrott, etc.) dürfen auch nicht fehlen, sollten aber nicht überwiegen. Dies ist besonders beim Mittelstufenball wichtig.
 - Der aller letze Song ist **immer** `Can You Feel The Love Tonight (Langsamer Walzer) von Elton John`.
 ### Party Tipps
-- Davor wird aber noch ein bisschen Party gemacht. Realitisch gesehen ist jedoch nach 20-25 min die Stimmung weg. Dieser sollte also auf keinen Fall zu lange gehen, auch wenn es viele Songwünsche gibt.
-- Vor dem Party Teil am besten eine kurze Ansage, dass der Ball demnächst Vorbei ist und jetzt noch Party gemacht wird.  
+- Davor wird aber noch ein bisschen Party gemacht. Realitisch gesehen ist jedoch nach 25-30 min die Stimmung weg. Dieser sollte also auf keinen Fall zu lange gehen, auch wenn es viele Songwünsche gibt.
+- Vor dem Party Teil am besten eine kurze Ansage, dass der Ball demnächst vorbei ist und jetzt noch Party gemacht wird.  
 - Songs wie `Macarena` oder `YMCA` sind gute Starter für den Party teil.
 - `I Want It That Way (Backstreet Boys)` darf auch nicht fehlen.
 #### Typischer Party Teil:
@@ -35,3 +35,7 @@ Soll später das Audio eines Songs ersetzt werden, kann durch `Rechtsklick>Repla
 - Gimme! Gimme! Gimme! (Remix)
 - And We Danced
 - Can You Feel The Love Tonight
+
+## Crash Protection
+Sollte es tatsächlich passieren das der Creator crashed erhälst du einen Nachricht welche dir den Fehler mitteilt. Melde den Crash unbedingt mit der Fehlermeldung bei einem Techniker.<br>
+Wenn du den Creator nun neu startes solltest du gefragt werden ob du deine Playlist wiederherstellen möchtest. Deine Arbeit ist also nicht verloren.

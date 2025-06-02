@@ -10,7 +10,6 @@ public sealed class MusicPlayer
     public event Action? OnSongStopped;
     public event Action? OnSongStarted;
     public event Action? OnSongFinished;
-    //public event Action? OnStateChanged;
 
     public TimeSpan CurrentSongLength => _currentAudioWave?.TotalTime ?? TimeSpan.Zero;
     public TimeSpan CurrentTime
@@ -55,7 +54,6 @@ public sealed class MusicPlayer
     {
         if (_player.PlaybackState is not PlaybackState.Playing || _currentAudioWave is null) return;
         _player.Pause();
-        //OnStateChanged?.Invoke();
         OnSongPaused?.Invoke();
     }
 
@@ -70,7 +68,6 @@ public sealed class MusicPlayer
     {
         if (_player.PlaybackState is PlaybackState.Playing || _currentAudioWave is null) return;
         _player.Play();
-        //OnStateChanged?.Invoke();
         if (CurrentTime == TimeSpan.Zero)
         {
             OnSongStarted?.Invoke();
@@ -90,7 +87,6 @@ public sealed class MusicPlayer
 
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
     {
-        //OnStateChanged?.Invoke();
         if (_wasStoppedManually)
         {
             OnSongStopped?.Invoke();

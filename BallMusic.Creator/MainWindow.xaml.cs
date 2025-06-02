@@ -35,9 +35,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        PlaylistGrid.ItemsSource = Playlist;
         Playlist = [];
-        //Playlist.CollectionChanged += UpdateLengthDisplay;
         _playbackProgressUpdater.Tick += UpdatePlaybackSliderValue;
 
         Loaded += async (sender, e) =>
@@ -139,7 +137,10 @@ public sealed partial class MainWindow : Window
                 };
             });
 
+            QuickSavePlaylist();
+
             bar.Close();
+
         });
     }
 
@@ -149,6 +150,7 @@ public sealed partial class MainWindow : Window
         {
             var songs = Library.AddAllOrReplaceWithExisting(PlaylistBuilder.EnumeratePlaylistFile(file));
             Playlist = new(songs);
+            QuickSavePlaylist();
         });
     }
 
@@ -359,6 +361,7 @@ public sealed partial class MainWindow : Window
                 return;
             }
             song.Path = new FileLocation(fileInfo);
+            song.SetHash(song.ComputeHash());
         });
     }
 

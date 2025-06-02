@@ -8,8 +8,8 @@ namespace BallMusic.Creator;
 public partial class Dashboard : Window
 {
     private readonly IRule PlaylistRule = new CombinedRule([
-        new DurationBetween(TimeSpan.FromHours(4), TimeSpan.FromHours(6)),
-        new PartyDurationBetween(TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(20)),
+        new DurationBetween(TimeSpan.FromHours(4), TimeSpan.FromHours(5)),
+        new PartyDurationBetween(TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(25)),
         new EndWithSong(new FakeSong("Can You Feel The Love Tonight", "Elton John", Dance.LangsamerWalzer), Severity.Error),
         
         // these limits should be very loose, just prevent something really stupid

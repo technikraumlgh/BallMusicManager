@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
     <DotNetVersion>net9.0</DotNetVersion>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 </Project>

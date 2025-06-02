@@ -99,6 +99,7 @@ public static class PlaylistBuilder
     private const int ARCHIVE_VERSION = 2;
     private static ErrorState ToArchiveImpl(FileInfo archiveFile, ImmutableArray<SongBuilder> songs)
     {
+        archiveFile.Directory?.CreateIfNotExists();
         var usedEntries = new HashSet<string>();
         using var archive = archiveFile.Exists
             ? new ZipArchive(archiveFile.Open(FileMode.Open), ZipArchiveMode.Update)

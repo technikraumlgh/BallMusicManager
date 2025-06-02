@@ -7,6 +7,6 @@ public record Song(SongLocation Path, int Index, string Title, string Artist, st
 
 /// <summary>
 /// Allows to define a song by its properties<br/>
-/// used to define tips in BallMusic.Tips
+/// This is used to define tips in BallMusic.Tips
 /// </summary>
 public record FakeSong(string Title, string Artist, string Dance);

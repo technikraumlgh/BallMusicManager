@@ -4,6 +4,8 @@ using System.Net.Http.Json;
 
 namespace BallMusic.Infrastructure;
 
+// this simplifies sending information the BallMusic.Server
+
 public sealed class ServerConnection : IDisposable
 {
     private readonly IHostProvider HostProvider;

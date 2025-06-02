@@ -1,12 +1,14 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace BallMusic.Domain;
 
+/// <summary>
+/// This is a mutable version of <see cref="Song"/>.<br/>
+/// additionally it contains information required by the Creator to manage the songs (e.g. the file hash)  
+/// </summary>
 public sealed class SongBuilder
 {
     // do not rename these properties (json serialization)

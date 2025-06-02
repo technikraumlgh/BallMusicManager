@@ -5,10 +5,12 @@ using System.Text.Json.Serialization;
 
 namespace BallMusic.Domain;
 
+// If you make any changes here do not forget to adjust the SongLocationJsonConverter. Keep backwards compatibiliy in mind.
+
 /// <summary>
 /// this is a type union.<br/>
 /// The song file location can either be a file, an archive entry or undefined.<br/>
-/// undefined is an error state.
+/// <see cref="UndefinedLocation"/> is an error state.
 /// </summary>
 public abstract record SongLocation;
 
@@ -73,7 +75,7 @@ public sealed class SongLocationJsonConverter : JsonConverter<SongLocation>
 
         if (reader.TokenType != JsonTokenType.StartObject)
         {
-            throw new JsonException("Expected an object");
+            throw new JsonException("Invalid Song Location. Expected an object");
         }
 
         reader.Read();
@@ -111,8 +113,8 @@ public sealed class SongLocationJsonConverter : JsonConverter<SongLocation>
 
         return type switch
         {
-            "file" when path != null => new FileLocation(new FileInfo(path)),
-            "archive" when path != null && entry != null => new ArchiveLocation(entry, new FileInfo(path)),
+            "file" when path is not null => new FileLocation(new FileInfo(path)),
+            "archive" when path is not null && entry is not null => new ArchiveLocation(entry, new FileInfo(path)),
             "hash_embedded" => new HashEmbeddedLocation(),
             "null" => new UndefinedLocation(),
             _ => throw new JsonException("Invalid file location")

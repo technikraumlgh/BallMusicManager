@@ -19,6 +19,7 @@ public partial class MessageWindow : Window
 
     private void SendMessage_Click(object sender, RoutedEventArgs e)
     {
+        // TODO: refine replacement logic
         _ = _server.SendMessage(MessageBox.Text.Replace("\n", "<br>"));
     }
 }

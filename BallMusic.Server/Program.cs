@@ -111,8 +111,8 @@ static void OutputQRCode(string url, int size = 20)
     using var qrGenerator = new QRCodeGenerator();
     using var qrDataData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
     using var qrCode = new PngByteQRCode(qrDataData);
-    using var ms = File.Create(QR_CODE_FILE);
-    ms.Write(qrCode.GetGraphic(size, Color.Black, Color.White));
+    using var stream = File.Create(QR_CODE_FILE);
+    stream.Write(qrCode.GetGraphic(size, Color.Black, Color.White));
 }
 
 static Option<IPAddress> LocalIPAddress()

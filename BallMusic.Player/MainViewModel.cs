@@ -1,19 +1,17 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
 
 namespace BallMusic.Player;
 
+// this class got a bit unnecessay over time. feel free to refactor it away
 internal sealed class MainViewModel : INotifyPropertyChanged
 {
-
-    private bool _HasPlaylist = false;
     public bool HasPlaylist
     {
-        get => _HasPlaylist;
+        get;
         set
         {
-            _HasPlaylist = value;
+            field = value;
             OnPropertyChanged();
         }
     }
