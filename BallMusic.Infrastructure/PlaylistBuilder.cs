@@ -11,7 +11,7 @@ public static class PlaylistBuilder
 
     public static PlaylistPlayer FromFile(FileInfo file)
     {
-        return new(file.DirectoryName!, EnumerateFile(file).Select(b => b.Build()));
+        return new(file.DirectoryName!, EnumeratePlaylistFile(file).Select(b => b.Build()));
     }
 
     const string SONG_LIST_ENTRY_NAME = "song_list.json";
@@ -96,7 +96,7 @@ public static class PlaylistBuilder
         return ToArchiveImpl(file, [.. songs.Select((song, index) => song.Copy().SetIndex(index))]);
     }
 
-    private const int ARCHIVE_VERSION = 1;
+    private const int ARCHIVE_VERSION = 2;
     private static ErrorState ToArchiveImpl(FileInfo archiveFile, ImmutableArray<SongBuilder> songs)
     {
         var usedEntries = new HashSet<string>();
@@ -171,23 +171,12 @@ public static class PlaylistBuilder
         }
     }
 
-    public static IEnumerable<SongBuilder> EnumerateFile(FileInfo file)
+
+    public static IEnumerable<SongBuilder> EnumeratePlaylistFile(FileInfo file)
     {
         using var stream = file.OpenRead();
-        return MapFrom(JsonSerializer.Deserialize<List<SongBuilder>>(stream)!);
+        return JsonSerializer.Deserialize<List<SongBuilder>>(stream)!;
 
-        IEnumerable<SongBuilder> MapFrom(IEnumerable<SongBuilder> songs)
-        {
-            foreach (var song in songs)
-            {
-                yield return song.Path switch
-                {
-                    ArchiveLocation archive => song.Copy().SetLocation(FileLocation.Of(Path.Combine(file.DirectoryName!, archive.EntryName))),
-                    FileLocation => song,
-                    _ => throw new UnreachableException(),
-                };
-            }
-        }
     }
 
     public static bool ValidFile(FileInfo path) => AllowedFileTypes.Contains(path.Extension);

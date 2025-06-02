@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -39,10 +40,18 @@ public sealed partial class MainWindow : Window
         //Playlist.CollectionChanged += UpdateLengthDisplay;
         _playbackProgressUpdater.Tick += UpdatePlaybackSliderValue;
 
-        Loaded += (sender, e) =>
+        Loaded += async (sender, e) =>
         {
             UpdateLengthDisplay();
-            _ = LoadLibrary();
+            await LoadLibrary();
+
+            SongCache.EnsureCacheExists();
+
+            if (playlistBackup.Exists && MessageBoxHelper.Ask("Looks like the program crashed.\nDo you want to restore the playlist?") is MessageBoxResult.Yes)
+            {
+                var songs = Library.AddAllOrReplaceWithExisting(PlaylistBuilder.EnumeratePlaylistFile(playlistBackup));
+                Playlist = new(songs);
+            }
         };
 
         Closing += OnWindowClosingAsync;
@@ -136,14 +145,10 @@ public sealed partial class MainWindow : Window
 
     private void OpenPlaylistLegacy(object sender, RoutedEventArgs e)
     {
-        new OpenFileDialog().AddExtensionFilter("Playlist", "playlist").GetFileInfo().Consume(file =>
+        new OpenFileDialog().AddExtensionFilter("Playlist", ".playlist").GetFileInfo().Consume(file =>
         {
-            var songs = Library.AddAllOrReplaceWithExisting(PlaylistBuilder.EnumerateFile(file));
-            Playlist.CollectionChanged -= UpdateLengthDisplay;
+            var songs = Library.AddAllOrReplaceWithExisting(PlaylistBuilder.EnumeratePlaylistFile(file));
             Playlist = new(songs);
-            PlaylistGrid.ItemsSource = Playlist;
-            Playlist.CollectionChanged += UpdateLengthDisplay;
-            UpdateLengthDisplay();
         });
     }
 
@@ -417,6 +422,13 @@ public sealed partial class MainWindow : Window
                 // fails when the target file has no extension
             }
         }
+    }
+
+    private static readonly FileInfo playlistBackup = SongCache.CacheDirectory.File("$quicksave.json");
+    private void QuickSavePlaylist()
+    {
+        using var stream = playlistBackup.Create();
+        JsonSerializer.Serialize(stream, Playlist);
     }
 
     private void UpdateDashboard(object? sender = null, EventArgs? e = default) => dashboard?.Update([.. Playlist.Select(song => song.Build())]);

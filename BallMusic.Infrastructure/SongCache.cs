@@ -54,7 +54,7 @@ public static class SongCache
         }
     }
 
-    private static void EnsureCacheExists()
+    public static void EnsureCacheExists()
     {
         if (!CacheDirectory.Exists)
         {

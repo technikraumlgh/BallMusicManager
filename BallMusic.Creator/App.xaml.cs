@@ -21,7 +21,8 @@ public partial class App : Application
 
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        PerformCleanup();
+        // lets not clean-up after a crash to keep all data including the playlist quicksave
+        // PerformCleanup();
     }
 
     private static void PerformCleanup()
