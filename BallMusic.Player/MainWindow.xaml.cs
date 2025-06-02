@@ -162,7 +162,7 @@ public sealed partial class MainWindow : Window, IHostProvider
 
     private void AutoUpdateCurrentSongsToServer()
     {
-        if (AutoSyncServerCheckBox.IsChecked is true)
+        if (AutoUpdateServerCheckBox.IsChecked is true)
         {
             SendCurrentSongsToServer();
         }
