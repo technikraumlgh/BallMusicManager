@@ -41,6 +41,8 @@ public partial class MainWindow
             Playlist.Remove(draggedSong);
             Playlist.Insert(index, draggedSong);
         }
+
+        QuickSavePlaylist();
     }
 
     private void PlaylistGrid_PreviewMouseMove(object sender, MouseEventArgs e)

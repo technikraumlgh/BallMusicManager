@@ -23,7 +23,7 @@ public sealed partial class MainWindow : Window, IHostProvider
             SongsGrid.ItemsSource = null;
             if (playlist is not null)
             {
-                playlist.Player.OnSongChanged -= SendCurrentSongsToServer;
+                playlist.Player.OnSongChanged -= AutoUpdateCurrentSongsToServer;
                 playlist.Player.OnSongStarted -= Timer.Start;
                 playlist.Player.OnSongContinued -= Timer.Start;
                 playlist.Player.OnSongPaused -= Timer.Stop;
@@ -33,7 +33,7 @@ public sealed partial class MainWindow : Window, IHostProvider
             playlist = value;
 
             if (playlist is null) return;
-            playlist.Player.OnSongChanged += SendCurrentSongsToServer;
+            playlist.Player.OnSongChanged += AutoUpdateCurrentSongsToServer;
             playlist.Player.OnSongStarted += Timer.Start;
             playlist.Player.OnSongContinued += Timer.Start;
             playlist.Player.OnSongPaused += Timer.Stop;
@@ -85,7 +85,7 @@ public sealed partial class MainWindow : Window, IHostProvider
         {
             Playlist.Play();
             PlayToggle.Content = "Pause";
-            SendCurrentSongsToServer();
+            AutoUpdateCurrentSongsToServer();
         }
     }
 
@@ -110,7 +110,7 @@ public sealed partial class MainWindow : Window, IHostProvider
         PlaybackBar.Maximum = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         PlaybackBar.Value = Playlist?.Player.CurrentSongLength.TotalSeconds ?? 0;
         UpdateDuration();
-        SendCurrentSongsToServer();
+        AutoUpdateCurrentSongsToServer();
     }
 
     private void UpdatePlaylistInfo()
@@ -158,6 +158,14 @@ public sealed partial class MainWindow : Window, IHostProvider
             )
         );
             
+    }
+
+    private void AutoUpdateCurrentSongsToServer()
+    {
+        if (AutoSyncServerCheckBox.IsChecked is true)
+        {
+            SendCurrentSongsToServer();
+        }
     }
 
     public void SendCurrentSongsToServer()
