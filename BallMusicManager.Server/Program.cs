@@ -23,9 +23,9 @@ builder.Services.AddSingleton<DisplayService>();
 var app = builder.Build();
 var logger = app.Services.GetService<ILogger<Program>>()!;
 
-app.Urls.Add("http://localhost:5000");
+app.Urls.Add("http://localhost");
 
-LocalIPAddress().Map(ip => $"http://{ip}:5000").Consume(url =>
+LocalIPAddress().Map(ip => $"http://{ip}").Consume(url =>
 {
     app.Urls.Add(url);
     OutputQRCode(url);
