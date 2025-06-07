@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace BallMusic.Tips;
+﻿namespace BallMusic.Tips;
 
 public sealed class CombinedRule(ImmutableArray<IRule> rules) : IRule
 {

@@ -1,0 +1,86 @@
+﻿<Window x:Class="BallMusic.Creator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BallMusic.Creator"
+        mc:Ignorable="d"
+        Title="Playlist Creator" Height="900" Width="1600">
+    <Grid Margin="16 0 16 8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Menu Grid.ColumnSpan="2">
+            <MenuItem Header="Playlist" FontSize="16">
+                <MenuItem Header="Save" Click="SavePlaylist"/>
+                <MenuItem Header="Open" Click="OpenPlaylist"/>
+                <MenuItem Header="Close" Click="ClosePlaylist"/>
+                <Separator/>
+                <MenuItem Header="Open Legacy" Click="OpenPlaylistLegacy"/>
+            </MenuItem>
+
+            <MenuItem Header="Dashboard" FontSize="16" Click="OpenDashboard_Click"/>
+            
+            <MenuItem Header="Library" FontSize="16">
+                <MenuItem Header="Reload" Click="LibraryReloadClick"/>
+                <MenuItem Header="Save" Click="LibrarySaveClick"/>
+            </MenuItem>
+        </Menu>
+
+        <Label x:Name="LengthDisplay" Grid.Row="1" FontSize="14" FontWeight="Bold">Playlist</Label>
+        <DataGrid x:Name="PlaylistGrid" AutoGenerateColumns="False"
+                  CanUserAddRows="False" CanUserSortColumns="False" CanUserDeleteRows="False"
+                  AllowDrop="True" Drop="PlaylistGrid_Drop" SelectionMode="Extended"
+                  SelectionChanged="PlaylistGrid_SelectionChanged"
+                  PreviewMouseLeftButtonDown="Song_MouseLeftButtonDown"
+                  PreviewMouseMove="PlaylistGrid_PreviewMouseMove"
+                  MouseDoubleClick="SongsGrid_MouseDoubleClick"
+                  PreviewKeyDown="PlaylistGrid_PreviewKeyDown"
+                  Grid.Row="2" Margin="0 0 4 8">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Tanz" FontSize="15" Binding="{Binding Dance}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Artist" FontSize="15" Binding="{Binding Artist}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Länge" FontSize="15" Width="*" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Label x:Name="SearchLabel" Grid.Column="1" FontSize="16" VerticalAlignment="Center" Margin="16 8 0 4">Search</Label>
+        <TextBox x:Name="SearchBox" Grid.Column="1" Margin="4 8 0 4" TextChanged="Search_TextChanged"/>
+        <Label Grid.Row="1" Grid.Column="1" Margin="4 0" FontSize="14" FontWeight="Bold">Library</Label>
+        <DataGrid x:Name="LibraryGrid" AutoGenerateColumns="False"
+                  AllowDrop="True" Drop="LibraryDrop" CanUserDeleteRows="False" SelectionMode="Extended"
+                  CanUserAddRows="False" CanUserSortColumns="True"
+                  SelectionChanged="LibraryGrid_SelectionChanged"
+                  PreviewMouseLeftButtonDown="Song_MouseLeftButtonDown"
+                  PreviewMouseMove="LibraryGrid_PreviewMouseMove"
+                  MouseDoubleClick="SongsGrid_MouseDoubleClick"
+                  PreviewKeyDown="LibraryGrid_PreviewKeyDown"
+                  Grid.Row="2" Grid.Column="1" Margin="4 0 0 8">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Replace File" Click="ReplaceFile_Click"/>
+                    <MenuItem Header="Export" Click="ExportFile_Click"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}"/>
+                <DataGridTextColumn Header="Tanz" FontSize="15" Binding="{Binding Dance}"/>
+                <DataGridTextColumn Header="Artist" FontSize="15" Binding="{Binding Artist}"/>
+                <DataGridTextColumn Header="Länge" FontSize="15" Width="*" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Button x:Name="PlayButton" Click="Play_Click" Grid.Row="3" FontFamily="Segoe MDL2 Assets" Content="&#xE768;" FontSize="20"/>
+        <Slider x:Name="PlaybackSlider" Grid.ColumnSpan="2" Grid.Row="3" Margin="52 2 2 2" ValueChanged="PlaybackSlider_ValueChanged"/>
+    </Grid>
+</Window>

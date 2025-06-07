@@ -6,10 +6,9 @@
   </Configurations>
   <Project Path="BallMusic.Tips/BallMusic.Tips.csproj" />
   <Project Path="BallMusic.WPF/BallMusic.WPF.csproj" />
-  <Project Path="BallMusicManager.Creator/BallMusicManager.Creator.csproj" />
-  <Project Path="BallMusicManager.Domain/BallMusicManager.Domain.csproj" />
-  <Project Path="BallMusicManager.Infrastructure/BallMusicManager.Infrastructure.csproj" />
-  <Project Path="BallMusicManager.Player/BallMusicManager.Player.csproj" />
-  <Project Path="BallMusicManager.Server/BallMusicManager.Server.csproj" />
-  <Project Path="BallMusicManager.Test/BallMusicManager.Test.csproj" />
+  <Project Path="BallMusic.Creator/BallMusic.Creator.csproj" />
+  <Project Path="BallMusic.Domain/BallMusic.Domain.csproj" />
+  <Project Path="BallMusic.Infrastructure/BallMusic.Infrastructure.csproj" />
+  <Project Path="BallMusic.Player/BallMusic.Player.csproj" />
+  <Project Path="BallMusic.Server/BallMusic.Server.csproj" />
 </Solution>

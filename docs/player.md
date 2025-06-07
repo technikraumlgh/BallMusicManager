@@ -1,9 +1,12 @@
 # Playlist Player
 
 ## Verbindung zum Server
-der Server gibt beim starten ein Token aus. Dieses in das Passwortfeld kopieren.
-der Server kann auf einem anderen Gerät ausgeführt werden. dazu den host von `localhost` zur entsprechenden IP ändern 
+der Server gibt beim starten ein Token aus, dieses in das Passwortfeld kopieren.<br>
+der Server kann auf einem anderen Gerät ausgeführt werden. Dazu den Host von `localhost` zur entsprechenden IP ändern.
+
+## Auto Update Server
+Wann immer sich der Song ändert wird dies automatisch auf den Server syncronisiert. Dies überschreibt jedoch die aktuelle Messages. Um das zu verhindern kann Auto Update deaktiviert werden.
 
 ## Messages
-- News werden unten auf den Tablets angezeigt
-- Message überschreibt das Display. Sobald ein neuer Song abegspielt wird überschreibt dieser jedoch Message. Wenn das nicht geschehen soll einfach das passwort 
+- News werden unten auf den Tablets angezeigt.
+- Message überschreibt das Display.

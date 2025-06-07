@@ -9,7 +9,7 @@ public sealed class DurationBetween(TimeSpan min, TimeSpan max) : IRule
 
     public IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
     {
-        var duration = TimeSpan.FromTicks(songs.Sum(s => s.Duration.Ticks));
+        var duration = TimeSpan.FromTicks(songs.Sum(static s => s.Duration.Ticks));
         if (duration > max)
         {
             yield return new (Severity.Tip, $"Playlist könnte zu lang sein. Empfehlung: {min:hh\\:mm} - {max:hh\\:mm} Stunden für einen normalen Ball");

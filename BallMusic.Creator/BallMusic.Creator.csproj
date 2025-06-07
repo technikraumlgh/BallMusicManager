@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(DotNetVersion)-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+	  <PublishSingleFile>true</PublishSingleFile>
+	  <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BallMusic.WPF\BallMusic.WPF.csproj" />
+    <ProjectReference Include="..\BallMusic.Domain\BallMusic.Domain.csproj" />
+    <ProjectReference Include="..\BallMusic.Infrastructure\BallMusic.Infrastructure.csproj" />
+    <ProjectReference Include="..\BallMusic.Tips\BallMusic.Tips.csproj" />
+  </ItemGroup>
+
+</Project>
