@@ -606,71 +606,53 @@
     </div>
   </div>
 
-  <script defer>
-        
-        const songDisplayContent = document.getElementById("song-display-content");
-        const titleEl = document.getElementById("title"); 
-        const danceEl = document.getElementById("dance"); 
-        const artistEl = document.getElementById("artist");
-        const nextTitleEl = document.getElementById("next-title"); 
-        const nextDanceEl = document.getElementById("next-dance"); 
-        const nextArtistEl = document.getElementById("next-artist");
-        const welcomeMessageEl = document.getElementById("welcome-message");
-        const newsEl = document.getElementById("news");
-    
-        // Initial state: show welcome message, hide song display
-        if (songDisplayContent) songDisplayContent.style.display = 'none';
-        if (welcomeMessageEl) welcomeMessageEl.style.display = 'block';
+  <!-- Show track -->
+    <script defer>
+        const songContainer = document.getElementById("song-container");
+        const title = document.getElementById("title");
+        const dance = document.getElementById("dance");
+        const artist = document.getElementById("artist");
+        const nextTitle = document.getElementById("next-title");
+        const nextDance = document.getElementById("next-dance");
+        const nextArtist = document.getElementById("next-artist");
+        const message = document.getElementById("welcome-message");
+        const news = document.getElementById("news");
 
-        (function() {
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl(window.location.origin + "/signal")
-                .withAutomaticReconnect()
-                .build();
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("signal")
+            .withAutomaticReconnect()
+            .build();
 
-            connection.on("current", (message) => setCurrent(JSON.parse(message)));
-    
-            connection.on("next", (message) => setNext(JSON.parse(message)));
+        connection.on("current", (message) => setCurrent(JSON.parse(message)));
+        connection.on("next", (message) => setNext(JSON.parse(message)));
+        connection.on("message", (message) => displayMessage(message));
+        connection.on("news", (message) => displayNews(message));
 
-            connection.on("message", (message) => displayMessage(message));
-            connection.on("news", (message) => displayNews(message));
-    
-            connection.start().catch(err => console.error("SignalR Connection Error: ", err.toString()));
+        connection.start();
 
-            function setCurrent(data) {
-                if (danceEl) danceEl.textContent = data.dance; 
-                if (titleEl) titleEl.textContent = data.title; 
-                if (artistEl) artistEl.textContent = data.artist ? `von ${data.artist}` : `von `; 
-                
-                if (songDisplayContent) songDisplayContent.style.display = 'block';
-                if (welcomeMessageEl) welcomeMessageEl.style.display = 'none';
-            }
+        function setCurrent(data) {
+            title.innerText = data.title;
+            dance.innerText = data.dance;
+            artist.innerText = `by ${data.artist}`;
+            songContainer.style.display = 'block';
+            message.style.display = 'none';
+        }
 
-            function setNext(data) {
-                if (nextDanceEl) nextDanceEl.textContent = data.dance; 
-                if (nextTitleEl) nextTitleEl.textContent = data.title; 
-                if (nextArtistEl) nextArtistEl.textContent = data.artist ? `von ${data.artist}` : `von `; 
-            }
+        function setNext(data) {
+            nextDance.innerText = data.dance;
+            nextTitle.innerText = data.title;
+            nextArtist.innerText = `by ${data.artist}`;
+        }
 
-            function displayMessage(msg) {
-                if (welcomeMessageEl) welcomeMessageEl.innerHTML = msg;
-                if (songDisplayContent) songDisplayContent.style.display = 'none';
-                if (welcomeMessageEl) welcomeMessageEl.style.display = 'block';
-            }
+        function displayMessage(msg) {
+            message.innerHTML = msg;
+            songContainer.style.display = 'none';
+            message.style.display = 'block';
+        }
 
-            function displayNews(msg) {
-              if (newsEl) {
-                  if (msg && msg.trim() !== "") {
-                      newsEl.textContent = msg;
-                      newsEl.style.display = "block";
-                  } else {
-                      newsEl.textContent = "";
-                      newsEl.style.display = "none";
-                  }
-              }
-          }
-        })();
-
+        function displayNews(msg) {
+            news.innerText = msg;
+        }
     </script>
     <!-- Show Snow -->
     <script src="snow.js"></script>
