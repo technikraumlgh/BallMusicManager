@@ -5,6 +5,7 @@ using Ametrin.Optional;
 using BallMusic.Domain;
 using BallMusic.Server;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using QRCoder;
 
 const string QR_CODE_FILE = "qr.png";
@@ -19,6 +20,7 @@ builder.Host.UseDefaultServiceProvider((context, options) =>
 
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<DisplayService>();
+builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
 
 var app = builder.Build();
 var logger = app.Services.GetService<ILogger<Program>>()!;
@@ -62,7 +64,7 @@ app.MapPost("nextup", ([FromBody] SongDTO song) =>
 
 app.MapGet("display", async (HttpResponse response, CancellationToken cancellationToken) =>
 {
-    await response.SendFileAsync("SongDisplay.html", cancellationToken);
+    await response.SendFileAsync("src/SongDisplay.html", cancellationToken);
 });
 
 
@@ -80,16 +82,34 @@ app.MapPost("news", ([FromBody] MessageDTO msg) =>
     return Results.Ok();
 }).AddEndpointFilter(RequiresApiKey);
 
-app.MapGet("snow.js", async (HttpResponse response, CancellationToken cancellationToken) =>
-{
-    await response.SendFileAsync("snow.js", cancellationToken);
-});
+// app.MapGet("snow.js", async (HttpResponse response, CancellationToken cancellationToken) =>
+// {
+//     await response.SendFileAsync("snow.js", cancellationToken);
+// });
 
 app.MapGet("qr-code", async (HttpResponse response, CancellationToken cancellationToken) =>
 {
     await response.SendFileAsync(QR_CODE_FILE, cancellationToken);
 });
 app.MapGet("/", () => Results.Redirect("display"));
+
+string resourcePath = Path.GetFullPath("src/");
+app.MapGet("src/{file}", async (HttpResponse response, [FromRoute] string file, FileExtensionContentTypeProvider contentTypeProvider, CancellationToken cancellationToken) =>
+{
+    var fullPath = Path.GetFullPath(file, resourcePath);
+    if (!fullPath.StartsWith(resourcePath)) return Results.NotFound();
+    if (!Path.Exists(fullPath)) return Results.NotFound();
+
+    if (!contentTypeProvider.TryGetContentType(fullPath, out var contentType))
+    {
+        contentType = "application/octet-stream"; // fallback
+    }
+
+    response.ContentType = contentType;
+
+    await response.SendFileAsync(fullPath, cancellationToken);
+    return Results.Empty;
+});
 
 app.Run();
 

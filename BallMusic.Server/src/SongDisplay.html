@@ -7,7 +7,7 @@
   <!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
   <!-- <meta name="apple-mobile-web-app-status-bar-style" content="#bde5c6"> -->
 
-    <!-- Update from: https://cdnjs.com/libraries/microsoft-signalr (min version) -->
+    <!-- Update from: https://cdnjs.com/libraries/microsoft-signalr (signalr.min version) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"
         integrity="sha512-7SRCYIJtR6F8ocwW7UxW6wGKqbSyqREDbfCORCbGLatU0iugBLwyOXpzhkPyHIFdBO0K2VCu57fvP2Twgx1o2A=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -23,7 +23,7 @@
 
   <style>
 
-        /* default colors aka "Spring"-Theme */
+        /* Spring Theme */
         :root {
           --card-bg: rgba(255, 255, 255, 0.95);
           --card-border: 2px solid rgba(255, 255, 255, 0.3);
@@ -42,7 +42,7 @@
           --news-background-color: rgba(0, 0, 0, 0.5);
           --news-text-color: rgba(255, 255, 255, 0.7);
         }
-        /* Colors for Winter Theme */
+        /* Winter Theme */
         :root[data-theme="winter"] {
           --background-color: #1a263e;
           --card-bg: rgba(40, 50, 70, 0.9);
@@ -656,7 +656,7 @@
     <script>
         if (document.documentElement?.dataset.theme === "winter") {
             const script = document.createElement('script');
-            script.src = "snow.js";
+            script.src = "src/snow.js";
             script.onload = () => {
                 _snowCanvas({
                     snowColor: "#a6a6a6",

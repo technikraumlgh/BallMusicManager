@@ -18,10 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="snow.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SongDisplay.html">
+    <Content Include="src/*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
