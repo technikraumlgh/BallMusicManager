@@ -25,6 +25,23 @@ builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
 var app = builder.Build();
 var logger = app.Services.GetService<ILogger<Program>>()!;
 
+var themeIndex = args.IndexOf("--theme");
+if (themeIndex == -1)
+{
+    logger.LogError("No Theme specified. Use '--theme (spring|winter)'");
+    return;
+}
+var theme = args[themeIndex + 1];
+if (!Path.Exists($"src/{theme}.css"))
+{
+    logger.LogError("Theme {theme} not found", theme);
+    return;
+}
+
+logger.LogInformation("Theme: {theme}", theme);
+
+var displayHtml = File.ReadAllText("src/display.html").Replace("${theme}", theme);
+
 app.Urls.Add("http://localhost");
 
 LocalIPAddress().Map(ip => $"http://{ip}").Consume(url =>
@@ -62,9 +79,9 @@ app.MapPost("nextup", ([FromBody] SongDTO song) =>
     return Results.Ok();
 }).AddEndpointFilter(RequiresApiKey);
 
-app.MapGet("display", async (HttpResponse response, CancellationToken cancellationToken) =>
+app.MapGet("display", (HttpResponse response, CancellationToken cancellationToken) =>
 {
-    await response.SendFileAsync("src/SongDisplay.html", cancellationToken);
+    return Results.Content(displayHtml, "text/html");
 });
 
 
@@ -81,11 +98,6 @@ app.MapPost("news", ([FromBody] MessageDTO msg) =>
 
     return Results.Ok();
 }).AddEndpointFilter(RequiresApiKey);
-
-// app.MapGet("snow.js", async (HttpResponse response, CancellationToken cancellationToken) =>
-// {
-//     await response.SendFileAsync("snow.js", cancellationToken);
-// });
 
 app.MapGet("qr-code", async (HttpResponse response, CancellationToken cancellationToken) =>
 {

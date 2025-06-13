@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" id="theme-color-meta" content="#bde5c6" />
+
+    <!-- Update from: https://cdnjs.com/libraries/microsoft-signalr (signalr.min version) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"
+        integrity="sha512-7SRCYIJtR6F8ocwW7UxW6wGKqbSyqREDbfCORCbGLatU0iugBLwyOXpzhkPyHIFdBO0K2VCu57fvP2Twgx1o2A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
+
+    <title>Ballplaylist</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;600;700&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="src/all.css">
+    <link rel="stylesheet" href="src/${theme}.css">
+</head>
+
+<body>
+    <div class="card">
+        <div class="welcome-header">
+            <h2 id="welcome-message">Herzlich Willkommen zum Frühlingsball</h2>
+        </div>
+
+        <div id="song-container">
+            <div class="now-playing">
+                <div class="section-header">Jetzt läuft</div>
+                <h1 id="dance">Loading Dance Failed</h1>
+                <h2 id="title" class="italic">Loading Title Failed</h2>
+                <p id="artist">Loading Artist Failed</p>
+            </div>
+
+            <div class="next-up">
+                <div class="section-header">Nächster Titel</div>
+                <h2 id="next-dance">Loading Next Dance Failed</h2>
+                <h3 id="next-title" class="italic">Loading Next Title Failed</h3>
+                <p id="next-artist">Loading Next Artist Failed</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="qr-code">
+        <img src="qr-code" id="qr-code_image" alt="QR Code" />
+    </div>
+
+    <p id="news">Loading news…</p>
+
+    <script>
+        // inject theme specific html
+        fetch('src/${theme}.html')
+            .then(response => response.text())
+            .then(html => document.body.innerHTML += html)
+            .catch(console.error)
+            .finally(init);
+
+        // initialize AFTER html injection 
+        function init() {
+            const themejs = document.createElement("script");
+            themejs.src = "src/${theme}.js";
+            document.body.appendChild(themejs);
+
+            const songContainer = document.getElementById("song-container");
+            const title = document.getElementById("title");
+            const dance = document.getElementById("dance");
+            const artist = document.getElementById("artist");
+            const nextTitle = document.getElementById("next-title");
+            const nextDance = document.getElementById("next-dance");
+            const nextArtist = document.getElementById("next-artist");
+            const message = document.getElementById("welcome-message");
+            const news = document.getElementById("news");
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("signal")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("current", (message) => setCurrent(JSON.parse(message)));
+            connection.on("next", (message) => setNext(JSON.parse(message)));
+            connection.on("message", (message) => displayMessage(message));
+            connection.on("news", (message) => displayNews(message));
+
+            connection.start();
+
+            function setCurrent(data) {
+                title.innerText = data.title;
+                dance.innerText = data.dance;
+                artist.innerText = `von ${data.artist}`;
+                songContainer.style.display = 'block';
+                message.style.display = 'none';
+            }
+
+            function setNext(data) {
+                nextDance.innerText = data.dance;
+                nextTitle.innerText = data.title;
+                nextArtist.innerText = `von ${data.artist}`;
+            }
+
+            function displayMessage(msg) {
+                message.innerHTML = msg;
+                songContainer.style.display = 'none';
+                message.style.display = 'block';
+            }
+
+            function displayNews(msg) {
+                news.innerText = msg;
+            }
+        }
+    </script>
+
+</body>
+
+</html>
