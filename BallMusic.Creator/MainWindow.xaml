@@ -74,7 +74,18 @@
             </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}"/>
-                <DataGridTextColumn Header="Tanz" FontSize="15" Binding="{Binding Dance}"/>
+                <DataGridTemplateColumn Header="Tanz">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock FontSize="15" Text="{Binding Dance}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox Text="{Binding Dance}" ItemsSource="{Binding DataContext.Dances, RelativeSource={RelativeSource AncestorType=DataGrid}}" IsEditable="True"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Artist" FontSize="15" Binding="{Binding Artist}"/>
                 <DataGridTextColumn Header="Länge" FontSize="15" Width="*" Binding="{Binding Duration,StringFormat=mm\\:ss}" IsReadOnly="True"/>
             </DataGrid.Columns>

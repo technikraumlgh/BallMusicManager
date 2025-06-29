@@ -30,10 +30,12 @@ public sealed partial class MainWindow : Window
         }
     } = [];
     private SongLibrary Library = [];
+    public IEnumerable<string> Dances => Dance.DanceSlugs.Values.Distinct();
     private volatile bool _isSaving = false;
 
     public MainWindow()
     {
+        DataContext = this;
         InitializeComponent();
         Playlist = [];
         _playbackProgressUpdater.Tick += UpdatePlaybackSliderValue;
