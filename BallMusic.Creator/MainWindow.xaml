@@ -74,7 +74,7 @@
             </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" FontSize="15" Binding="{Binding Title}"/>
-                <DataGridTemplateColumn Header="Tanz">
+                <DataGridTemplateColumn Header="Tanz" SortMemberPath="Dance">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock FontSize="15" Text="{Binding Dance}"/>
