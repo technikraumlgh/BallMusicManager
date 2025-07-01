@@ -271,7 +271,7 @@ public sealed partial class MainWindow : Window
         };
         bar.LabelProgress.Report("Saving Library...");
         bar.Show();
-        await Task.Run(Library!.Save);
+        (await Task.Run(Library!.Save)).Consume(error: e => MessageBoxHelper.ShowError($"Failed saving Libary:\n{e.Message}", owner: this));
         bar.Close();
         _isSaving = false;
         IsEnabled = true;

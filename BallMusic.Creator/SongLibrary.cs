@@ -6,9 +6,9 @@ public sealed class SongLibrary(IEnumerable<SongBuilder> songs) : SongBuilderCol
 {
     public SongLibrary() : this([]) { }
 
-    public void Save()
+    public ErrorState Save()
     {
-        PlaylistBuilder.ToArchive(LibFile, this);
+        return PlaylistBuilder.ToArchive(LibFile, this);
     }
 
     public static readonly FileInfo LibFile = new("Library/lib.plibz");
