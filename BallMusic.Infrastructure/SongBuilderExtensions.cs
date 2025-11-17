@@ -2,19 +2,22 @@
 
 public static class SongBuilderExtensions
 {
-    public static SongBuilder FromMetaData(this SongBuilder songBuilder)
+    extension(SongBuilder songBuilder)
     {
-        using var file = TagLib.File.Create(songBuilder.Path switch
+        public SongBuilder FromMetaData()
         {
-            FileLocation location => location.FileInfo.FullName,
-            _ => throw new ArgumentException("Cannot read metadata from a song without a file"),
-        });
+            using var file = TagLib.File.Create(songBuilder.Path switch
+            {
+                FileLocation location => location.FileInfo.FullName,
+                _ => throw new ArgumentException("Cannot read metadata from a song without a file"),
+            });
 
-        if (file.Tag.Performers.Length > 0)
-        {
-            songBuilder.SetArtist(string.Join(", ", file.Tag.Performers));
+            if (file.Tag.Performers.Length > 0)
+            {
+                songBuilder.SetArtist(string.Join(", ", file.Tag.Performers));
+            }
+
+            return songBuilder.SetDuration(file.Properties.Duration);
         }
-
-        return songBuilder.SetDuration(file.Properties.Duration);
     }
 }
