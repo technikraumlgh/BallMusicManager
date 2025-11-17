@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\BallMusic.Domain\BallMusic.Domain.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>$(DotNetVersion)</TargetFramework>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ametrin.Optional" Version="0.2.4" />
+  </ItemGroup>
 
 </Project>

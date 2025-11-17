@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace BallMusic.Tips;
+﻿namespace BallMusic.Tips;
 
 public sealed class EndWithSong(FakeSong song, Severity severity) : IRule
 {

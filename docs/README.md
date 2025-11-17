@@ -1,10 +1,12 @@
 # Dokumentation
 
 der Player und Server sind getrennt, damit die Musik weiter laufen kann auch wenn der Server crashed.<br>
-der Creator und Player sind getrennt, um den Benutzer vor versehentlichen Veränderungen zu schützen und jede Live Änderung ein Risiko zum Ausfall hat.
+der Creator und Player sind getrennt, um den Benutzer vor versehentlichen Veränderungen zu schützen und jede Live Änderung ein Risiko zum Ausfall hat.<br>
+Alle Programme sind nur für Windows vorgesehen.
 
+## [Creator](creator.md)
 ## [Player](player.md)
 ## [Server](server.md)
-## Creator
 ## Technisches
-- [Playlist/Libary File](playlistfile.md)
+- [Playlist/Libary File Format](playlistfile.md)
+- [Song Cache](songcache.md)

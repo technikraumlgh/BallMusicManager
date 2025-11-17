@@ -1,0 +1,27 @@
+:root {
+    --background-color: #1a263e;
+    --card-bg: rgba(40, 50, 70, 0.9);
+    --card-border: 2px solid rgba(100, 120, 150, 0.3);
+    --card-header-color: #b0c4de;
+    --card-welcome-header-color: #ffb870;
+    --card-section-bg: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --card-section-border: 2px solid #4a627a;
+    --card-nowplaying-dance: #e0e0e0;
+    --card-nowplaying-title: #e0e0e0;
+    --card-nowplaying-artist: #87cefa;
+    --card-nextup-dance: #e0e0e0;
+    --card-nextup-title: #e0e0e0;
+    --card-nextup-artist: #87cefa;
+    --news-text-color: aliceblue;
+    --news-background-color: rgba(0, 0, 0, 0.5);
+    --news-text-color: rgba(255, 255, 255, 0.7);
+}
+
+.snow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}

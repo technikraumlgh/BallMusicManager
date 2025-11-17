@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace BallMusic.Tips;
+﻿namespace BallMusic.Tips;
 
 public sealed class PartyDurationBetween(TimeSpan min, TimeSpan max) : IRule
 {
@@ -9,7 +7,7 @@ public sealed class PartyDurationBetween(TimeSpan min, TimeSpan max) : IRule
 
     public IEnumerable<Tip> GetTips(ImmutableArray<Song> songs)
     {
-        var duration = TimeSpan.FromTicks(songs.Where(s => s.Dance == Dance.Party).Sum(s => s.Duration.Ticks));
+        var duration = TimeSpan.FromTicks(songs.Where(static s => s.Dance is Dance.Party).Sum(static s => s.Duration.Ticks));
 
         if (duration > max)
         {

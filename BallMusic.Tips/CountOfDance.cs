@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 namespace BallMusic.Tips;
 
 public sealed class CountOfDance(ImmutableArray<(string dance, float minPercentage, float maxPercentage)> requiredDances) : IRule
