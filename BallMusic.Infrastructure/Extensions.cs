@@ -1,43 +1,57 @@
 using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
-using SearchOption = System.IO.SearchOption;
-
-
 
 namespace BallMusic.Infrastructure;
 
 public static class ZipArchiveExtensions
 {
-    public static ZipArchiveEntry GetOrCreateEntry(this ZipArchive archive, string entryName)
-        => archive.GetEntry(entryName) ?? archive.CreateEntry(entryName);
-
-    public static ZipArchiveEntry OverwriteEntry(this ZipArchive archive, string entryName)
+    extension(ZipArchive archive)
     {
-        archive.GetEntry(entryName)?.Delete();
-        return archive.CreateEntry(entryName);
-    }
+        public ZipArchiveEntry GetOrCreateEntry(string entryName)
+            => archive.GetEntry(entryName) ?? archive.CreateEntry(entryName);
 
-    public static Option<ZipArchiveEntry> TryGetEntry(this ZipArchive archive, string entryName)
-    {
-        return archive.GetEntry(entryName);
+        public ZipArchiveEntry OverwriteEntry(string entryName)
+        {
+            archive.GetEntry(entryName)?.Delete();
+            return archive.CreateEntry(entryName);
+        }
+
+        public Option<ZipArchiveEntry> TryGetEntry(string entryName)
+            => archive.GetEntry(entryName);
     }
 }
 
 public static class DirectoryInfoExtensions
 {
-    public static void CreateIfNotExists(this DirectoryInfo directoryInfo)
+    extension(DirectoryInfo directoryInfo)
     {
-        if (!directoryInfo.Exists)
+        public void CreateIfNotExists()
         {
-            directoryInfo.Create();
+            if (!directoryInfo.Exists)
+            {
+                directoryInfo.Create();
+            }
+        }
+
+        public FileInfo File(string fileName) => new(Path.Combine(directoryInfo.FullName, fileName));
+
+        public DirectoryInfo Directory(string directoryName) => new(Path.Combine(directoryInfo.FullName, directoryName));
+
+        public void Trash(UIOption options = UIOption.OnlyErrorDialogs)
+        {
+            FileSystem.DeleteDirectory(directoryInfo.FullName, options, RecycleOption.SendToRecycleBin);
         }
     }
 
-    public static FileInfo File(this DirectoryInfo directoryInfo, string fileName) => new(Path.Combine(directoryInfo.FullName, fileName));
-    public static DirectoryInfo Directory(this DirectoryInfo directoryInfo, string directoryName) => new(Path.Combine(directoryInfo.FullName, directoryName));
-
-    public static void Trash(this DirectoryInfo info, UIOption options = UIOption.OnlyErrorDialogs)
+    extension(DirectoryNotFoundException)
     {
-        FileSystem.DeleteDirectory(info.FullName, options, RecycleOption.SendToRecycleBin);
+        public static DirectoryInfo Exists(DirectoryInfo directoryInfo)
+            => directoryInfo.Exists ? directoryInfo : throw new DirectoryNotFoundException(directoryInfo.FullName);
+    }
+
+    extension(FileNotFoundException)
+    {
+        public static FileInfo Exists(FileInfo fileInfo)
+            => fileInfo.Exists ? fileInfo : throw new FileNotFoundException(fileInfo.FullName);
     }
 }
