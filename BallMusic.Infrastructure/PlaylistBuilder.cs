@@ -64,7 +64,7 @@ public static class PlaylistBuilder
         static IEnumerable<SongBuilder> ParseSongList(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
-            return JsonSerializer.Deserialize<SongBuilder[]>(stream).ToOption().Map<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
+            return Option.Of(JsonSerializer.Deserialize<SongBuilder[]>(stream)).Map<IEnumerable<SongBuilder>>(songs => songs.OrderBy(s => s.Index)).Or([]);
         }
 
         static byte[] GetFileHash(ZipArchiveEntry entry)
@@ -82,7 +82,7 @@ public static class PlaylistBuilder
 
     public static Result<ZipArchive> OpenArchive(FileInfo file)
     {
-        return file.ToResult().RequireExists()
+        return Result.Of(file).RequireExists()
             .Map(file => new ZipArchive(file.OpenRead()));
     }
 
