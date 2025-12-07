@@ -40,9 +40,9 @@ public partial class Dashboard : Window
         RecommendationsView.Items.Clear();
         SongCountView.Children.Clear();
 
-        DurationLabel.Content = $"Länge:\t{TimeSpan.FromTicks(songs.Sum(s => s.Duration.Ticks)):hh\\:mm\\:ss}";
-        DancesDurationLabel.Content = $" - Tänze:\t{TimeSpan.FromTicks(songs.Where(s => s.Dance != Dance.Party).Sum(s => s.Duration.Ticks)):hh\\:mm\\:ss}";
-        PartyDurationLabel.Content = $" - Party:\t{TimeSpan.FromTicks(songs.Where(s => s.Dance == Dance.Party).Sum(s => s.Duration.Ticks)):hh\\:mm\\:ss}";
+        DurationLabel.Content = $"Länge:\t{TimeSpan.FromTicks(songs.Sum(static s => s.Duration.Ticks)):hh\\:mm\\:ss}";
+        DancesDurationLabel.Content = $" - Tänze:\t{TimeSpan.FromTicks(songs.Where(static s => s.Dance is not Dance.Party).Sum(s => s.Duration.Ticks)):hh\\:mm\\:ss}";
+        PartyDurationLabel.Content = $" - Party:\t{TimeSpan.FromTicks(songs.Where(static s => s.Dance is Dance.Party).Sum(s => s.Duration.Ticks)):hh\\:mm\\:ss}";
 
         SongCountView.Children.Add(new Label
         {
@@ -62,7 +62,7 @@ public partial class Dashboard : Window
 
         if (songs.IsEmpty)
         {
-            RecommendationsView.Items.Add(new Tip(Severity.Warning, "Playlist is Empty"));
+            RecommendationsView.Items.Add(new Tip(Severity.Warning, "Playlist ist leer"));
             return;
         }
 

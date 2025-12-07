@@ -2,7 +2,7 @@
 
 namespace BallMusic.Creator;
 
-public partial class LoadingBar : Window
+public sealed partial class LoadingBar : Window
 {
     public IProgress<float> Progress { get; }
     public IProgress<string> LabelProgress { get; }

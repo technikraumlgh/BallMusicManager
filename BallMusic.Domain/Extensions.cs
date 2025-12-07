@@ -1,7 +1,8 @@
+using System.IO;
 using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
 
-namespace BallMusic.Infrastructure;
+namespace BallMusic.Domain;
 
 public static class ZipArchiveExtensions
 {
@@ -15,9 +16,6 @@ public static class ZipArchiveExtensions
             archive.GetEntry(entryName)?.Delete();
             return archive.CreateEntry(entryName);
         }
-
-        public Option<ZipArchiveEntry> TryGetEntry(string entryName)
-            => archive.GetEntry(entryName);
     }
 }
 
@@ -45,13 +43,13 @@ public static class DirectoryInfoExtensions
 
     extension(DirectoryNotFoundException)
     {
-        public static DirectoryInfo Exists(DirectoryInfo directoryInfo)
+        public static DirectoryInfo ExistsOrThrow(DirectoryInfo directoryInfo)
             => directoryInfo.Exists ? directoryInfo : throw new DirectoryNotFoundException(directoryInfo.FullName);
     }
 
     extension(FileNotFoundException)
     {
-        public static FileInfo Exists(FileInfo fileInfo)
-            => fileInfo.Exists ? fileInfo : throw new FileNotFoundException(fileInfo.FullName);
+        public static FileInfo ExistsOrThrow(FileInfo fileInfo)
+            => fileInfo.Exists ? fileInfo : throw new FileNotFoundException(null, fileInfo.FullName);
     }
 }

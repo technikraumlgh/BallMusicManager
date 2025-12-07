@@ -3,7 +3,7 @@ using BallMusic.WPF;
 
 namespace BallMusic.Creator;
 
-public partial class App : Application
+public sealed partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -20,7 +20,7 @@ public partial class App : Application
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         var exception = (Exception)e.ExceptionObject;
-        MessageBoxHelper.ShowError($"Woops, looks like we crashed!\nKeine Sorge deine Playlist wurde gespeichert. Starte die App einfach neu.\nGib folgenden Fehler bitte an einen Techniker weiter:\n{exception.Message}");
+        MessageBoxHelper.ShowError($"Woops, looks like we crashed!\nKeine Sorge deine Playlist wurde gespeichert. Starte die App einfach neu.\nGib folgenden Fehler bitte an einen Techniker weiter:\n{exception.GetType().Name}: {exception.Message}");
         // don't clean-up after crash to keep all data including the playlist quicksave in cache
     }
 

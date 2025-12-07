@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ametrin.Optional" Version="0.3.0" />
+    <PackageReference Include="Ametrin.Optional" Version="0.3.1" />
   </ItemGroup>
 
 </Project>

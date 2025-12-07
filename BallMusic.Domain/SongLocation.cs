@@ -20,7 +20,7 @@ public abstract record SongLocation;
 /// </summary>
 public sealed record FileLocation(FileInfo FileInfo) : SongLocation
 {
-    public FileInfo FileInfo { get; init; } = FileInfo.Exists ? FileInfo : throw new FileNotFoundException(null, FileInfo.FullName);
+    public FileInfo FileInfo { get; init; } = FileNotFoundException.ExistsOrThrow(FileInfo);
     public static FileLocation Of(string path) => new(new FileInfo(path));
 }
 
@@ -30,7 +30,7 @@ public sealed record FileLocation(FileInfo FileInfo) : SongLocation
 /// </summary>
 public sealed record ArchiveLocation(string EntryName, FileInfo ArchiveFileInfo) : SongLocation
 {
-    public FileInfo ArchiveFileInfo { get; init; } = ArchiveFileInfo.Exists ? ArchiveFileInfo : throw new FileNotFoundException(null, ArchiveFileInfo.FullName);
+    public FileInfo ArchiveFileInfo { get; init; } = FileNotFoundException.ExistsOrThrow(ArchiveFileInfo);
 }
 
 /// <summary>
