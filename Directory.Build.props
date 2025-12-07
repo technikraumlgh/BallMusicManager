@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
     <DotNetVersion>net10.0</DotNetVersion>
-    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 </Project>
