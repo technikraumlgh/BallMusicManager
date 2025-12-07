@@ -24,7 +24,7 @@ Durch klicken auf `Dashboard` oben links im Fenster öffnet sich ein zweites Fen
 
 
 ## Tipps
-- Achte auf eine abwechslungsreiche Tanz und Song folge. Vermeide den gleichen Tanz zweimal hintereinander oder mehrere schnelle bzw. langsame Songs hintereinder. Erstelle eine gute Mischung aus schnell und langsam sowie der Tanzarten. Du kannst gerne bei ehemaligen Playlist-Erstellern order Frau Harbinger um Rat fragen oder dir alte Playlisten anschauen. 
+- Achte auf eine abwechslungsreiche Tanz und Song folge. Vermeide den gleichen Tanz zweimal hintereinander oder mehrere schnelle bzw. langsame Songs hintereinder. Erstelle eine gute Mischung aus schnell und langsam sowie der Tanzarten. Du kannst gerne bei ehemaligen Playlist-Erstellern oder Frau Harbinger um Rat fragen oder dir alte Playlisten anschauen. 
 - Verwende überwiegend einfache Standart-Tänze die alle tanzen können (z.B. Walzer, Discofox, ChaChaCha, Rumba, etc.). Andere Tänze (z.B. Jive, Salsa, Tango, Foxtrott, etc.) dürfen auch nicht fehlen, sollten aber nicht überwiegen. Dies ist besonders beim Mittelstufenball wichtig. Achte auf die Empfehlungen im Dashboard.
 - Der aller letze Song ist **immer** `Can You Feel The Love Tonight (Langsamer Walzer) von Elton John`.
 ### Party Tipps
@@ -34,7 +34,7 @@ Durch klicken auf `Dashboard` oben links im Fenster öffnet sich ein zweites Fen
 - `I Want It That Way (Backstreet Boys)` darf auch nicht fehlen.
 #### Typischer Party Teil:
 - I Want It That Way *(Leute in die Aula ziehen)*
-- YMCA *(Stimmung ankurbeln)*
+- YMCA *(Stimmung aufbauen)*
 - Poker Face
 - I Love It
 - Gimme! Gimme! Gimme! (Remix)
